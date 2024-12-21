@@ -174,5 +174,7 @@ export const chromeBackground = {
   backgroundRepeat: 'no-repeat', // Prevents the image from repeating
 };
 
-export const isChromeExt = secrets.appEnvironment === 'chrome';
-// export const isChromeExt = true;
+const params = new URLSearchParams(window.location.search);
+
+export const isChromeExt = Boolean(params.get('chrome')) || secrets.appEnvironment === 'chrome';
+export const isMock = Boolean(params.get('mock')) || false;

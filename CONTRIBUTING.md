@@ -41,6 +41,8 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 ### Installation [chrome-extension]
 
+To test the chrome view without bundling the extension files, is by simply using the query param `chrome=true` in the url, ie - `localhost:3000?chrome=true`
+
 1. Copy the `.env.example` file as `.env.chrome` file in the `/client` dir and fill the required keys as mentioned earlier.
 2. Run `npm run build:chrome`
 3. Go to Chrome extensions and load the `client/build_chrome` folder. Note the extension id.
