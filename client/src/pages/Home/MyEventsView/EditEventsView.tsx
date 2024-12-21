@@ -27,7 +27,6 @@ import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import AdvancedOptionsView from '@pages/Home/AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
-import { useAppState } from '@/context/AppContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -66,7 +65,6 @@ interface EditEventsViewProps {
 export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditEventsViewProps) {
   // Context or global state
   const { preferences } = usePreferences();
-  const { appState } = useAppState();
 
   // Dropdown options state
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
@@ -175,7 +173,9 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     const eventTime = new Date(event.start!);
     const currentTime = new Date(new Date().toUTCString());
 
-    const capacities = populateRoomCapacity(appState.maxSeatCap);
+    const res = await api.getMaxSeatCount();
+
+    const capacities = populateRoomCapacity(res?.data || 0);
     const durations = populateDurationOptions();
 
     const minTime = eventTime < currentTime ? eventTime : currentTime;

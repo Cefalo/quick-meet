@@ -19,37 +19,44 @@ interface PreferencesProviderProps {
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
 
+const defaultPreferences = {
+  duration: 30,
+  seats: 1,
+};
+
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const [preferences, setPreferences] = useState<Preferences>({
-    duration: 30,
-    seats: 1
+    duration: defaultPreferences.duration,
+    seats: defaultPreferences.seats,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadPreferences = async () => {
       const savedPreferences = await cacheService.get('preferences');
       if (savedPreferences) {
         const parsedPref = JSON.parse(savedPreferences);
-        if (parsedPref.duration !== preferences.duration && parsedPref.seats !== preferences.seats) {
-          setPreferences(parsedPref);
-        }
+        setPreferences(parsedPref);
       }
+
+      setLoading(false);
     };
 
     loadPreferences();
   }, []);
 
-
   useEffect(() => {
-    cacheService.save('preferences', JSON.stringify(preferences));
+    if (!(preferences.duration === defaultPreferences.duration && preferences.seats === defaultPreferences.seats)) {
+      cacheService.save('preferences', JSON.stringify(preferences));
+    }
   }, [preferences]);
 
-  return (
-    <PreferencesContext.Provider value={{ preferences, setPreferences }}>
-      {children}
-    </PreferencesContext.Provider>
-  );
+  if (loading) {
+    return <></>;
+  }
+
+  return <PreferencesContext.Provider value={{ preferences, setPreferences }}>{children}</PreferencesContext.Provider>;
 };
 
 export const usePreferences = () => useContext(PreferencesContext)!;

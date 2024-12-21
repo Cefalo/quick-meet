@@ -13,7 +13,6 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import TitleIcon from '@mui/icons-material/Title';
-import { useAppState } from '@/context/AppContext';
 
 export default function PreferenceView() {
   // Form state
@@ -36,25 +35,21 @@ export default function PreferenceView() {
 
   // Context or global state
   const { preferences, setPreferences } = usePreferences();
-  const { appState } = useAppState();
 
   // Derived data
-  const capacities = populateRoomCapacity(appState.maxSeatCap);
   const durations = populateDurationOptions();
 
   useEffect(() => {
-    const init = async (floors: string[]) => {
+    const init = (floors: string[], capacities: string[]) => {
       const floorOptions = createDropdownOptions(floors);
       floorOptions.unshift({ text: 'No preference', value: '' });
 
-      setRoomCapacityOptions(createDropdownOptions(capacities));
       setFloorOptions(floorOptions);
+      setRoomCapacityOptions(createDropdownOptions(capacities));
       setDurationOptions(createDropdownOptions(durations, 'time'));
 
       const { floor, duration, title, seats } = preferences;
-
       setFormData({
-        ...formData,
         floor: floor || '',
         title: title || '',
         duration: String(duration) || durations[0],
@@ -62,26 +57,37 @@ export default function PreferenceView() {
       });
     };
 
-    cacheService.get('floors').then(async (floors) => {
-      if (floors) {
-        init(JSON.parse(floors));
-        return;
+    const loadInitialData = async () => {
+      try {
+        let floors = [];
+        const cachedFloors = await cacheService.get('floors');
+
+        if (cachedFloors) {
+          floors = JSON.parse(cachedFloors);
+        } else {
+          const res = await api.getFloors();
+          const { data, status } = res || {};
+
+          if (status !== 'success' || !data) {
+            renderError(res, navigate);
+            return;
+          }
+
+          floors = data;
+          await cacheService.save('floors', JSON.stringify(data));
+        }
+
+        const res = await api.getMaxSeatCount();
+        const capacities = populateRoomCapacity(res?.data || 0);
+
+        init(floors, capacities);
+      } catch (error: any) {
+        console.error('Error loading initial data', error);
+        renderError(error, navigate);
       }
+    };
 
-      const res = await api.getFloors();
-      const { data, status } = res!;
-
-      if (status !== 'success') {
-        return renderError(res, navigate);
-      }
-
-      if (data) {
-        await cacheService.save('floors', JSON.stringify(data));
-        init(data);
-      }
-    });
-
-    setRoomCapacityOptions(createDropdownOptions(capacities));
+    loadInitialData();
   }, []);
 
   const handleInputChange = (id: string, value: string | number) => {

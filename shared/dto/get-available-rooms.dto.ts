@@ -1,12 +1,5 @@
 import { Transform } from 'class-transformer';
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsDateString,
-  IsTimeZone,
-  Min,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsDateString, IsTimeZone, Min } from 'class-validator';
 
 export class GetAvailableRoomsQueryDto {
   @IsDateString()
@@ -25,7 +18,9 @@ export class GetAvailableRoomsQueryDto {
   seats: number;
 
   @IsOptional()
-  @Transform(({ value }) => (value?.trim() === '' ? undefined : value))
+  @Transform(({ value }) => {
+    return value.trim() === '' ? undefined : value;
+  })
   @IsString()
   floor?: string;
 

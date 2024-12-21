@@ -25,7 +25,6 @@ import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRound
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import AdvancedOptionsView from '../AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
-import { useAppState } from '@/context/AppContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -38,7 +37,6 @@ interface BookRoomViewProps {
 export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   // Context or global state
   const { preferences } = usePreferences();
-  const { appState } = useAppState();
 
   // loading states
   const [loading, setLoading] = useState(false);
@@ -63,6 +61,10 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const navigate = useNavigate();
   const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    console.log('preferences', preferences);
+  }, [preferences]);
 
   useEffect(() => {
     initializeDropdowns();
@@ -90,7 +92,9 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   };
 
   async function initializeDropdowns() {
-    const capacities = populateRoomCapacity(appState.maxSeatCap);
+    const res = await api.getMaxSeatCount();
+
+    const capacities = populateRoomCapacity(res?.data || 0);
     const durations = populateDurationOptions();
     const timeOptions = populateTimeOptions();
 
@@ -98,20 +102,16 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setDurationOptions(createDropdownOptions(durations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(capacities));
 
-    const initializeFormData = async () => {
-      const { duration, seats } = preferences;
+    const { duration, seats } = preferences;
 
-      setFormData((p) => ({
-        ...p,
-        startTime: timeOptions[0],
-        seats: seats || Number(capacities[0]),
-        duration: duration || Number(durations[0]),
-      }));
-    };
+    setFormData((p) => ({
+      ...p,
+      startTime: timeOptions[0],
+      seats: seats || Number(capacities[0]),
+      duration: duration || Number(durations[0]),
+    }));
 
-    initializeFormData().then(() => {
-      setInitialPageLoad(true);
-    });
+    setInitialPageLoad(true);
   }
 
   async function setAvailableRooms() {

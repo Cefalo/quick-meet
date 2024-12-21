@@ -261,16 +261,11 @@ export default class Api {
     }
   }
 
-  async getMaxSeatCount() {
+  async getMaxSeatCount(): Promise<ApiResponse<number>> {
     try {
       const headers = await this.getHeaders();
-      const res = await this.client.get(
-        '/highest-seat-count',
-        { headers }
-      );
+      const res = await this.client.get('/highest-seat-count', { headers });
 
-      console.log(res);
-      
       return res.data as ApiResponse<number>;
     } catch (error: any) {
       return this.handleError(error);

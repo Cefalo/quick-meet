@@ -129,7 +129,7 @@ export class CalenderService {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getDirectoryResources(domain);
     for (const room of rooms) {
-      if (room.seats >= Number(minSeats) && (floor === undefined || room.floor === floor)) {
+      if (room.seats >= Number(minSeats) && (floor === undefined || floor === '' || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
       }
     }
