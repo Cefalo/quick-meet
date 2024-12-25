@@ -1,7 +1,7 @@
-import { LoginResponse } from '@quickmeet/shared';
+import { LoginResponse, type IConferenceRoom } from '@quickmeet/shared';
 import { ApiResponse } from '@quickmeet/shared';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Auth, ConferenceRoom, User } from './entities';
+import { Auth, User } from './entities';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
@@ -12,6 +12,8 @@ import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { createResponse } from '../helpers/payload.util';
 import { GoogleApiService } from 'src/google-api/google-api.service';
+import type { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -20,10 +22,9 @@ export class AuthService {
     private authRepository: Repository<Auth>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @InjectRepository(ConferenceRoom)
-    private conferenceRoomsRepository: Repository<ConferenceRoom>,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
     private logger: Logger,
   ) {}
@@ -42,6 +43,12 @@ export class AuthService {
       refreshToken: tokens.refresh_token,
     };
 
+    const domain = userInfo.email.split('@')[1];
+    const resources = await this.getDirectoryResources(domain);
+    if (!resources) {
+      await this.createCalenderResources(oauth2Client, domain);
+    }
+
     const existingUser = await this.getUser(userInfo.id);
     if (existingUser) {
       const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
@@ -49,11 +56,6 @@ export class AuthService {
 
       const res: LoginResponse = { accessToken: jwt };
       return createResponse(res);
-    }
-
-    const domain = userInfo.email.split('@')[1];
-    if (!(await this.isCalenderResourceExist(domain))) {
-      await this.createCalenderResources(oauth2Client, domain);
     }
 
     const auth = await this.authRepository.save(authPayload);
@@ -104,49 +106,37 @@ export class AuthService {
     return createResponse(true);
   }
 
-  async logout(oauth2Client: OAuth2Client): Promise<ApiResponse<boolean>> {
+  async logout(): Promise<ApiResponse<boolean>> {
     try {
-      // const res = await oauth2Client.revokeToken(oauth2Client.credentials.access_token);
-      // this.logger.log(`[logout]: revoke token success: ${res.status === 200}`);
+      // todo: remove the refresh token from the cookie
+      // todo: the access_token is removed from the client side
       return createResponse(true);
     } catch (error) {
-      // this.logger.error(`[logout]: Error revoking token: ${error}`);
       return createResponse(false);
     }
   }
 
-  async getFloorsByDomain(domain: string): Promise<string[]> {
-    const result = await this.conferenceRoomsRepository
-      .createQueryBuilder('conferenceRoom')
-      .select('DISTINCT conferenceRoom.floor', 'floor')
-      .where('conferenceRoom.domain = :domain', { domain })
-      .orderBy('conferenceRoom.floor', 'ASC')
-      .getRawMany();
+  async getFloors(domain: string): Promise<string[]> {
+    const conferenceRooms = (await this.getDirectoryResources(domain)) || [];
+    const floors = Array.from(new Set(conferenceRooms.filter((room) => room.domain === domain).map((room) => room.floor)));
 
-    return result.map((row) => row.floor);
-  }
-
-  async getDirectoryResources(domain: string): Promise<ConferenceRoom[]> {
-    const resources = await this.conferenceRoomsRepository.find({
-      where: {
-        domain,
-      },
-      order: {
-        seats: 'ASC',
-      },
+    // assuming floor is a string in the format F1, F2 etc
+    floors.sort((a, b) => {
+      const numA = parseInt(a.slice(1), 10);
+      const numB = parseInt(b.slice(1), 10);
+      return numA - numB;
     });
 
-    return resources;
+    return floors;
   }
 
-  async isCalenderResourceExist(domain: string): Promise<boolean> {
-    return await this.conferenceRoomsRepository.exists({ where: { domain } });
-  }
-
+  /**
+   * gets the calender resources from google and save it in the cache
+   */
   async createCalenderResources(oauth2Client: OAuth2Client, domain: string): Promise<void> {
     const { items } = await this.googleApiService.getCalendarResources(oauth2Client);
 
-    const rooms: ConferenceRoom[] = [];
+    const rooms: IConferenceRoom[] = [];
     for (const resource of items) {
       rooms.push({
         id: resource.resourceId,
@@ -159,7 +149,25 @@ export class AuthService {
       });
     }
 
-    await this.conferenceRoomsRepository.save(rooms);
+    await this.saveDirectoryResouces(rooms);
     this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
+  }
+
+  /**
+   * obtains the directory resources from the in-memory cache
+   */
+  async getDirectoryResources(domain: string): Promise<IConferenceRoom[] | null> {
+    const rooms: IConferenceRoom[] = await this.cacheManager.get('conference_rooms');
+    if (!rooms) return null;
+
+    const resources = rooms.filter((room: IConferenceRoom) => room.domain === domain).sort((a: IConferenceRoom, b: IConferenceRoom) => a.seats - b.seats);
+    return resources;
+  }
+
+  /**
+   * saves the conference rooms in the cache
+   */
+  async saveDirectoryResouces(resources: IConferenceRoom[]): Promise<void> {
+    await this.cacheManager.set('conference_rooms', resources, 15 * 24 * 60 * 60 * 1000); // set TTL to 15 days
   }
 }

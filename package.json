@@ -23,9 +23,6 @@
     "client",
     "server"
   ],
-  "dependencies": {
-    "class-transformer": "^0.5.1"
-  },
   "devDependencies": {
     "npm-run-all2": "^7.0.1"
   }

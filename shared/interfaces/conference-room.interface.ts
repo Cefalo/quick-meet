@@ -6,6 +6,4 @@ export interface IConferenceRoom {
   seats?: number;
   description?: string;
   floor?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }

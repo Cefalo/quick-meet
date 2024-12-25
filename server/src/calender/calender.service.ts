@@ -5,8 +5,7 @@ import { calendar_v3 } from 'googleapis';
 import appConfig from '../config/env/app.config';
 import { extractRoomByEmail, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
-import { ConferenceRoom } from '../auth/entities';
-import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse } from '@quickmeet/shared';
+import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse, type IConferenceRoom } from '@quickmeet/shared';
 import { createResponse } from '../helpers/payload.util';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
@@ -125,7 +124,7 @@ export class CalenderService {
     minSeats: number,
     floor?: string,
     eventId?: string,
-  ): Promise<ConferenceRoom[]> {
+  ): Promise<IConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
     const rooms = await this.authService.getDirectoryResources(domain);
     for (const room of rooms) {
@@ -140,8 +139,8 @@ export class CalenderService {
 
     const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
 
-    const availableRooms: ConferenceRoom[] = [];
-    let room: ConferenceRoom = null;
+    const availableRooms: IConferenceRoom[] = [];
+    let room: IConferenceRoom = null;
 
     for (const roomEmail of Object.keys(calenders)) {
       const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
@@ -193,8 +192,8 @@ export class CalenderService {
   async isRoomAvailable(client: OAuth2Client, start: string, end: string, roomEmail: string, timeZone?: string): Promise<boolean> {
     const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [roomEmail]);
 
-    const availableRooms: ConferenceRoom[] = [];
-    let room: ConferenceRoom = null;
+    const availableRooms: IConferenceRoom[] = [];
+    let room: IConferenceRoom = null;
 
     for (const roomEmail of Object.keys(calenders)) {
       const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
@@ -216,7 +215,7 @@ export class CalenderService {
 
     const formattedEvents = [];
     for (const event of events) {
-      let room: ConferenceRoom = {};
+      let room: IConferenceRoom = {};
       if (event.location) {
         room = rooms.find((_room) => event.location.includes(_room.name));
       }
@@ -439,7 +438,7 @@ export class CalenderService {
   }
 
   async listFloors(domain: string): Promise<ApiResponse<string[]>> {
-    const floors = await this.authService.getFloorsByDomain(domain);
+    const floors = await this.authService.getFloors(domain);
     return createResponse(floors);
   }
 }

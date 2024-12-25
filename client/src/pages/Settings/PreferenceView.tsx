@@ -60,24 +60,17 @@ export default function PreferenceView() {
     const loadInitialData = async () => {
       try {
         let floors = [];
-        const cachedFloors = await cacheService.get('floors');
+        let res = await api.getFloors();
+        const { data, status } = res || {};
 
-        if (cachedFloors) {
-          floors = JSON.parse(cachedFloors);
-        } else {
-          const res = await api.getFloors();
-          const { data, status } = res || {};
-
-          if (status !== 'success' || !data) {
-            renderError(res, navigate);
-            return;
-          }
-
-          floors = data;
-          await cacheService.save('floors', JSON.stringify(data));
+        if (status !== 'success' || !data) {
+          renderError(res, navigate);
+          return;
         }
 
-        const res = await api.getMaxSeatCount();
+        floors = data;
+
+        res = await api.getMaxSeatCount();
         const capacities = populateRoomCapacity(res?.data || 0);
 
         init(floors, capacities);
