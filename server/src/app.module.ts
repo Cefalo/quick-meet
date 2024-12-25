@@ -3,8 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CalenderModule } from './calender/calender.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import typeOrmConfig from './config/orm.config';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/env/app.config';
 import dbConfig from './config/env/db.config';
@@ -21,7 +19,6 @@ import { CacheModule } from '@nestjs/cache-manager';
       rootPath: join(__dirname, '..', '..', 'client', 'build_web'),
       renderPath: '*', //  ensures all routes are redirected to index.html
     }),
-    TypeOrmModule.forRoot(typeOrmConfig),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,

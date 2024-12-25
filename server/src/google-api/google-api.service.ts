@@ -1,5 +1,5 @@
 import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
-import { admin_directory_v1, calendar_v3, google, oauth2_v2 } from 'googleapis';
+import { admin_directory_v1, calendar_v3, google } from 'googleapis';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
 import { OAuth2Client } from 'google-auth-library';
@@ -8,7 +8,7 @@ import { ConfigType } from '@nestjs/config';
 import to from 'await-to-js';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
-import { User } from '../auth/entities';
+import { IJwtPayload } from '../auth/dto';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
@@ -17,20 +17,19 @@ export class GoogleApiService implements IGoogleApiService {
   }
 
   // @ overloaded method signature
-  getOAuthClient(redirectUrl: string, user: User): OAuth2Client;
+  getOAuthClient(redirectUrl: string, payload: IJwtPayload): OAuth2Client;
   getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, user?: User): OAuth2Client {
-    if (!user) {
+  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client {
+    if (!payload) {
       return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
     } else {
       const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
-      const { accessToken, scope, tokenType, expiryDate, idToken, refreshToken } = user.auth;
+      const { accessToken, scope, tokenType, expiryDate, refreshToken } = payload;
       client.setCredentials({
         access_token: accessToken,
         scope: scope,
         token_type: tokenType,
         expiry_date: expiryDate,
-        id_token: idToken,
         refresh_token: refreshToken,
       });
 
@@ -48,16 +47,6 @@ export class GoogleApiService implements IGoogleApiService {
     oauth2Client.setCredentials(response.tokens);
 
     return response as OAuthTokenResponse;
-  }
-
-  async getUserInfo(oauth2Client: OAuth2Client): Promise<oauth2_v2.Schema$Userinfo> {
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: 'v2',
-    });
-
-    const { data } = await oauth2.userinfo.get();
-    return data;
   }
 
   async getCalendarResources(oauth2Client: OAuth2Client) {

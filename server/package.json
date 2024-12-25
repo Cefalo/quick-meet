@@ -15,11 +15,7 @@
     "start:dev": "nest start --watch",
     "start:docker": "docker-compose up --build",
     "start:server": "nest start --watch",
-    "start:client": "cd client && npm run start",
-    "migration:run": "npm run build && typeorm migration:run -d ./dist/config/orm.config.js",
-    "migration:generate": "npm run build && (typeorm -d ./dist/config/orm.config.js migration:generate ./src/migrations/migration)",
-    "migration:create": "typeorm migration:create ./src/migrations/migration/$npm_config_name",
-    "migration:revert": "typeorm -d ./dist/config/orm.config.js migration:revert"
+    "start:client": "cd client && npm run start"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
@@ -31,7 +27,6 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/serve-static": "^4.0.2",
     "@nestjs/throttler": "^6.2.1",
-    "@nestjs/typeorm": "^10.0.2",
     "@quickmeet/shared": "1.0.0",
     "await-to-js": "^3.0.0",
     "cache-manager": "^5.7.6",
@@ -42,7 +37,6 @@
     "nest-winston": "^1.9.7",
     "reflect-metadata": "^0.2.0",
     "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.20",
     "winston": "^3.14.2"
   },
   "devDependencies": {

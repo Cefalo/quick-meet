@@ -4,26 +4,26 @@ import { JwtService } from '@nestjs/jwt';
 import appConfig from '../config/env/app.config';
 import { Request } from 'express';
 import { IJwtPayload } from './dto';
-import { AuthService } from './auth.service';
 import to from 'await-to-js';
+import { EncryptionService } from './encryption.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
+    private readonly encryptionService: EncryptionService,
     private jwtService: JwtService,
-    private authService: AuthService,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
       throw new UnauthorizedException();
     }
 
-    const [err, payload]: [Error, IJwtPayload] = await to(
+    const [err, _]: [Error, IJwtPayload] = await to(
       this.jwtService.verifyAsync(token, {
         secret: this.config.jwtSecret,
       }),
@@ -34,13 +34,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    let user = await this.authService.getUser(payload.sub);
+    const decoded = await this.jwtService.decode(token);
+    decoded.refreshToken = request.cookies.refreshToken;
 
-    if (Date.now() > user.auth.expiryDate) {
-      throw new UnauthorizedException('Session expired');
-    }
+    const decryptedPayload: IJwtPayload = JSON.parse(await this.encryptionService.decrypt(decoded.payload));
+    request['payload'] = decryptedPayload;
+    request['hd'] = decryptedPayload.hd;
 
-    request['user'] = user;
     return true;
   }
 
