@@ -10,5 +10,8 @@
   },
   "author": "Ali Ahnaf",
   "license": "MIT",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "class-transformer": "^0.5.1"
+  }
 }

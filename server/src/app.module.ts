@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GoogleApiModule } from './google-api/google-api.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { GoogleApiModule } from './google-api/google-api.module';
         limit: process.env.NODE_ENV === 'development' ? 1000 : 20,
       },
     ]),
+    CacheModule.register({ isGlobal: true }),
     AuthModule,
     CalenderModule,
     GoogleApiModule,
