@@ -18,7 +18,6 @@ RUN npm install
 
 # Define build arguments
 ARG SQLITE_DB
-ARG TYPEORM_CLI
 ARG APP_PORT
 ARG NODE_ENV
 ARG OAUTH_CLIENT_SECRET
@@ -42,7 +41,6 @@ COPY client/ /app/client/
 # Set environment variables for server
 RUN touch /app/server/.env
 RUN echo "SQLITE_DB=${SQLITE_DB}" >> /app/server/.env && \
-    echo "TYPEORM_CLI=${TYPEORM_CLI}" >> /app/server/.env && \
     echo "APP_PORT=${APP_PORT}" >> /app/server/.env && \
     echo "NODE_ENV=${NODE_ENV}" >> /app/server/.env && \
     echo "OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}" >> /app/server/.env && \

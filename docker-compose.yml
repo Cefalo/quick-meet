@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile
       args:
         SQLITE_DB: ${SQLITE_DB}
-        TYPEORM_CLI: ${TYPEORM_CLI}
         APP_PORT: ${APP_PORT}
         NODE_ENV: ${NODE_ENV}
         OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}

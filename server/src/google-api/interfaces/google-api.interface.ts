@@ -1,12 +1,12 @@
 import { OAuth2Client } from 'google-auth-library';
 import { admin_directory_v1, calendar_v3, oauth2_v2 } from 'googleapis';
-import { OAuthTokenResponse } from '../../auth/dto/oauth-token.response';
-import { User } from '../../auth/entities';
+import { OAuthTokenResponse } from 'src/auth/dto/oauth-token.response';
+import type { IJwtPayload } from 'src/auth/dto';
+
 export interface IGoogleApiService {
   getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, user?: User): OAuth2Client;
+  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client;
   getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse>;
-  getUserInfo(oauth2Client: OAuth2Client): Promise<oauth2_v2.Schema$Userinfo>;
 
   createCalenderEvent(oauth2Client: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event>;
   getCalendarResources(oauth2Client: OAuth2Client): Promise<admin_directory_v1.Schema$CalendarResources>;

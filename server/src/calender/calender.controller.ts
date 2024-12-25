@@ -1,8 +1,8 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { _OAuth2Client, _User } from '../auth/decorators';
+import { _OAuth2Client } from '../auth/decorators';
 import { OAuthInterceptor } from '../auth/oauth.interceptor';
 import {
   ApiResponse,
@@ -15,6 +15,7 @@ import {
   IConferenceRoom,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
+import { Request } from 'express';
 
 @Controller()
 export class CalenderController {
@@ -25,10 +26,12 @@ export class CalenderController {
   @Get('/rooms')
   async getEvents(
     @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
+    @Req() req: Request,
     @Query() listRoomsQueryDto: ListRoomsQueryDto,
   ): Promise<ApiResponse<EventResponse[]>> {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
+    const domain = (req as Request & { hd?: string }).hd;
+
     return await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
   }
 
@@ -37,9 +40,10 @@ export class CalenderController {
   @Get('/available-rooms')
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
+    @Req() req: Request,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
+    const domain = (req as Request & { hd?: string }).hd;
     let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     const startDate = new Date(startTime);
@@ -52,18 +56,16 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @Get('/highest-seat-count')
-  async getMaxSeatCapacity(@_User('domain') domain: string): Promise<ApiResponse<number>> {
+  async getMaxSeatCapacity(@Req() req: Request): Promise<ApiResponse<number>> {
+    const domain = (req as Request & { hd?: string }).hd;
+
     return await this.calenderService.getHighestSeatCapacity(domain);
   }
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Post('/room')
-  async bookRoom(
-    @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
-    @Body() bookRoomDto: BookRoomDto,
-  ): Promise<ApiResponse<EventResponse>> {
+  async bookRoom(@_OAuth2Client() client: OAuth2Client, domain: string, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
 
     // end time
@@ -80,11 +82,12 @@ export class CalenderController {
   @Put('/room')
   async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
-    @_User('domain') domain: string,
+    @Req() req: Request,
     @Body('eventId') eventId: string,
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
+    const domain = (req as Request & { hd?: string }).hd;
 
     // end time
     const startDate = new Date(startTime);
@@ -103,7 +106,9 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @Get('/floors')
-  async listFloors(@_User('domain') domain: string): Promise<ApiResponse<string[]>> {
+  async listFloors(@Req() req: Request): Promise<ApiResponse<string[]>> {
+    const domain = (req as Request & { hd?: string }).hd;
+
     return await this.calenderService.listFloors(domain);
   }
 }

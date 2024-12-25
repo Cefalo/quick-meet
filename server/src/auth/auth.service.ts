@@ -1,27 +1,22 @@
-import { LoginResponse, type IConferenceRoom } from '@quickmeet/shared';
+import { type IConferenceRoom } from '@quickmeet/shared';
 import { ApiResponse } from '@quickmeet/shared';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Auth, User } from './entities';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { createResponse } from '../helpers/payload.util';
-import { GoogleApiService } from 'src/google-api/google-api.service';
+import { GoogleApiService } from '../google-api/google-api.service';
 import type { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { EncryptionService } from './encryption.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Auth)
-    private authRepository: Repository<Auth>,
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly encryptionService: EncryptionService,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -29,49 +24,37 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string, redirectUrl: string): Promise<ApiResponse<LoginResponse>> {
+  async login(code: string, redirectUrl: string) {
     const oauth2Client = this.googleApiService.getOAuthClient(redirectUrl);
     const { tokens } = await this.googleApiService.getToken(oauth2Client, code);
-    const userInfo = await this.googleApiService.getUserInfo(oauth2Client);
+    const userInfo = this.jwtService.decode(tokens.id_token);
 
-    const authPayload: Auth = {
-      accessToken: tokens.access_token,
-      scope: tokens.scope,
-      expiryDate: tokens.expiry_date,
-      tokenType: tokens.token_type,
-      idToken: tokens.id_token,
-      refreshToken: tokens.refresh_token,
-    };
-
-    const domain = userInfo.email.split('@')[1];
+    const domain = userInfo.hd;
     const resources = await this.getDirectoryResources(domain);
     if (!resources) {
       await this.createCalenderResources(oauth2Client, domain);
     }
 
-    const existingUser = await this.getUser(userInfo.id);
-    if (existingUser) {
-      const jwt = await this.createJwt(existingUser.id, existingUser.name, authPayload.expiryDate);
-      await this.authRepository.update({ id: existingUser.authId }, authPayload);
-
-      const res: LoginResponse = { accessToken: jwt };
-      return createResponse(res);
-    }
-
-    const auth = await this.authRepository.save(authPayload);
-    const user = await this.usersRepository.save({
-      id: userInfo.id,
+    // todo: can just send the access_token and refresh_token
+    const jwtPayload: IJwtPayload = {
+      accessToken: tokens.access_token,
+      scope: tokens.scope,
+      expiryDate: tokens.expiry_date,
+      tokenType: tokens.token_type,
+      hd: domain,
       name: userInfo.name,
-      email: userInfo.email,
-      authId: auth.id,
-      domain,
-    });
+    };
 
-    const jwt = await this.createJwt(user.id, user.name, authPayload.expiryDate);
-    const res: LoginResponse = { accessToken: jwt };
-    return createResponse(res);
+    const encryptedPayload = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
+    const jwt = await this.createJwt({ payload: encryptedPayload }, jwtPayload.expiryDate);
+
+    return {
+      jwt,
+      refreshToken: tokens.refresh_token,
+    };
   }
 
+  // purging is required to revoke the refresh token as google's refresh tokens have no expiry date
   async purgeAccess(oauth2Client: OAuth2Client) {
     const [err, _] = await to(oauth2Client.revokeCredentials());
 
@@ -83,23 +66,8 @@ export class AuthService {
     return true;
   }
 
-  async createJwt(id: string, name: string, oAuthExpiry: number) {
-    const payload: IJwtPayload = { sub: id, name: name, expiresIn: oAuthExpiry };
-    const jwt = await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry * 2 });
-    return jwt;
-  }
-
-  async getUser(id: string): Promise<User> {
-    const existingUser = await this.usersRepository.findOne({
-      where: {
-        id,
-      },
-      relations: {
-        auth: true,
-      },
-    });
-
-    return existingUser;
+  async createJwt(payload: any, oAuthExpiry: number) {
+    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry });
   }
 
   async validateSession() {

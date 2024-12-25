@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuth2Client } from 'google-auth-library';
-import { oauth2_v2, calendar_v3, admin_directory_v1 } from 'googleapis';
+import { calendar_v3, admin_directory_v1 } from 'googleapis';
 import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
-import { User } from '../auth/entities';
 import { CalenderMockDb } from './mock.database';
+import type { IJwtPayload } from 'src/auth/dto';
 
 @Injectable()
 export class GoogleApiMockService implements IGoogleApiService {
@@ -15,9 +15,8 @@ export class GoogleApiMockService implements IGoogleApiService {
   }
 
   getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, user?: User): OAuth2Client;
-  getOAuthClient(redirectUrl: unknown, user?: User): OAuth2Client {
-    console.log(`Mock getOAuthClient called with redirectUrl: ${redirectUrl}, user: ${user?.id}`);
+  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client;
+  getOAuthClient(redirectUrl: unknown, payload?: IJwtPayload): OAuth2Client {
     return new OAuth2Client();
   }
 
@@ -34,11 +33,6 @@ export class GoogleApiMockService implements IGoogleApiService {
       },
     };
     return Promise.resolve(res);
-  }
-
-  getUserInfo(oauth2Client: OAuth2Client): Promise<oauth2_v2.Schema$Userinfo> {
-    console.log('Mock getUserInfo called');
-    return Promise.resolve(this.db.getUser(0));
   }
 
   createCalenderEvent(oauth2Client: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
