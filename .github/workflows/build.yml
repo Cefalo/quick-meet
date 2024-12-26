@@ -45,7 +45,6 @@ jobs:
 
       - name: Create .env file for server
         run: |
-          echo "SQLITE_DB=${{ secrets.SQLITE_DB }}" >> ./server/.env
           echo "APP_PORT=${{ secrets.APP_PORT }}" >> ./server/.env
           echo "OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}" >> ./server/.env
           echo "OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}" >> ./server/.env
@@ -66,6 +65,3 @@ jobs:
 
       - name: Build all dependencies
         run: npm run build
-
-      - name: Run database migrations
-        run: npm run migration:run
