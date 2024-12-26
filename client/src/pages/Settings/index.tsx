@@ -5,12 +5,12 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { ROUTES } from '@config/routes';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import Api from '@api/api';
 import { chromeBackground, isChromeExt } from '@helpers/utility';
 import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import PreferenceView from '@/pages/Settings/PreferenceView';
 import SupportView from '@/pages/Settings/SupportView';
+import LogoutView from '@/pages/Settings/LogoutView';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -60,13 +60,6 @@ export default function Settings() {
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
 
-  const api = new Api();
-
-  const onLogoutClick = async () => {
-    await api.logout();
-    navigate(ROUTES.signIn);
-  };
-
   const handleTabChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
       setTabIndex(newValue);
@@ -74,8 +67,8 @@ export default function Settings() {
   };
 
   const handleBackClick = () => {
-    navigate(ROUTES.home)
-  }
+    navigate(ROUTES.home);
+  };
 
   if (!open) {
     return <></>;
@@ -158,7 +151,7 @@ export default function Settings() {
               ml: 0,
             }}
           >
-            <IconButton aria-label="settings" sx={{ mr: 0, backgroundColor: 'white' }} onClick={onLogoutClick}>
+            <IconButton aria-label="settings" sx={{ mr: 0, backgroundColor: 'white' }} onClick={() => handleTabChange(null, 2)}>
               <ExitToAppRoundedIcon
                 fontSize="small"
                 sx={[
@@ -173,6 +166,7 @@ export default function Settings() {
       </Box>
       {tabIndex === 0 && <PreferenceView />}
       {tabIndex === 1 && <SupportView />}
+      {tabIndex === 2 && <LogoutView handleCancel={() => setTabIndex(0)} />}
     </Box>
   );
 }

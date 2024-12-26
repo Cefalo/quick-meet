@@ -10,6 +10,6 @@ import { EncryptionService } from './encryption.service';
   imports: [GoogleApiModule],
   controllers: [AuthController],
   providers: [AuthService, JwtService, AuthGuard, Logger, EncryptionService],
-  exports: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard, EncryptionService],
 })
 export class AuthModule {}

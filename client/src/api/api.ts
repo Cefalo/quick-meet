@@ -74,15 +74,15 @@ export default class Api {
   async logout() {
     try {
       const headers = await this.getHeaders();
-      const res = await this.client.post('/logout', {
+      const res = await this.client.post('/logout', null, {
         headers,
       });
+
+      await this.cacheService.remove('access_token');
 
       return res.data as ApiResponse<boolean>;
     } catch (error: any) {
       console.log(error);
-    } finally {
-      await this.cacheService.remove('access_token');
     }
   }
 

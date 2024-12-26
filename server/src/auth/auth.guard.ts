@@ -10,7 +10,7 @@ import { EncryptionService } from './encryption.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly encryptionService: EncryptionService,
+    private encryptionService: EncryptionService,
     private jwtService: JwtService,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
   ) {}
@@ -37,7 +37,13 @@ export class AuthGuard implements CanActivate {
     const decoded = await this.jwtService.decode(token);
     decoded.refreshToken = request.cookies.refreshToken;
 
-    const decryptedPayload: IJwtPayload = JSON.parse(await this.encryptionService.decrypt(decoded.payload));
+    const decrypted = await this.encryptionService.decrypt(decoded.payload, decoded.iv);
+    if (!decrypted) {
+      throw new UnauthorizedException();
+    }
+
+    const decryptedPayload: IJwtPayload = JSON.parse(decrypted);
+
     request['payload'] = decryptedPayload;
     request['hd'] = decryptedPayload.hd;
 

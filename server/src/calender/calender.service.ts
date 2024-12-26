@@ -27,7 +27,7 @@ export class CalenderService {
     eventTitle?: string,
     attendees?: string[],
   ): Promise<ApiResponse<EventResponse>> {
-    const rooms = await this.authService.getDirectoryResources(domain);
+    const rooms = await this.authService.getDirectoryResources(client, domain);
 
     const attendeeList = [];
     if (attendees?.length) {
@@ -103,8 +103,8 @@ export class CalenderService {
     return createResponse(data, 'Room has been booked');
   }
 
-  async getHighestSeatCapacity(domain: string) {
-    const rooms = await this.authService.getDirectoryResources(domain);
+  async getHighestSeatCapacity(client: OAuth2Client, domain: string) {
+    const rooms = await this.authService.getDirectoryResources(client, domain);
     let max = -1;
     for (const room of rooms) {
       if (room.seats > max) {
@@ -126,7 +126,7 @@ export class CalenderService {
     eventId?: string,
   ): Promise<IConferenceRoom[]> {
     const filteredRoomEmails: string[] = [];
-    const rooms = await this.authService.getDirectoryResources(domain);
+    const rooms = await this.authService.getDirectoryResources(client, domain);
     for (const room of rooms) {
       if (room.seats >= Number(minSeats) && (floor === undefined || floor === '' || room.floor === floor)) {
         filteredRoomEmails.push(room.email);
@@ -210,7 +210,7 @@ export class CalenderService {
   }
 
   async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
-    const rooms = await this.authService.getDirectoryResources(domain);
+    const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
     const formattedEvents = [];
@@ -324,7 +324,7 @@ export class CalenderService {
     room?: string,
   ): Promise<ApiResponse<EventUpdateResponse>> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
-    const rooms = await this.authService.getDirectoryResources(domain);
+    const rooms = await this.authService.getDirectoryResources(client, domain);
 
     const pickedRoom = extractRoomByEmail(rooms, room);
     if (!pickedRoom) {
@@ -437,8 +437,8 @@ export class CalenderService {
     return createResponse(data, 'Event deleted');
   }
 
-  async listFloors(domain: string): Promise<ApiResponse<string[]>> {
-    const floors = await this.authService.getFloors(domain);
+  async listFloors(client: OAuth2Client, domain: string): Promise<ApiResponse<string[]>> {
+    const floors = await this.authService.getFloors(client, domain);
     return createResponse(floors);
   }
 }

@@ -5,6 +5,7 @@ export default registerAs('app', () => ({
   environment: process.env.NODE_ENV || 'development',
   logsDir: process.env.LOGS_DIR || 'logs',
   appDomain: process.env.APP_DOMAIN || 'http://localhost:8000',
+  encryptionKey: process.env.ENCRYPTION_KEY,
 
   jwtSecret: process.env.JWT_SECRET || 'ZZZ',
 
