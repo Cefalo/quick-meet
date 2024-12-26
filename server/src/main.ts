@@ -19,7 +19,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
 
-
   const config = app.get(ConfigService);
   const port = config.get('app').appPort;
   const env = config.get('app').environment;

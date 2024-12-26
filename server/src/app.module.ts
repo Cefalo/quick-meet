@@ -22,7 +22,6 @@ import { CacheModule } from '@nestjs/cache-manager';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: process.env.NODE_ENV === 'development' ? `.env.development` : `.env`,
       load: [appConfig, dbConfig],
     }),
     ThrottlerModule.forRoot([
