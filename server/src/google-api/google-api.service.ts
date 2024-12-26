@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { admin_directory_v1, calendar_v3, google } from 'googleapis';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
@@ -13,7 +13,6 @@ import { IJwtPayload } from '../auth/dto';
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
   constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {
-    console.log('googgle api service: ', config);
   }
 
   // @ overloaded method signature

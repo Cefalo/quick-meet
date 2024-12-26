@@ -6,6 +6,7 @@ import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { winstonInstance } from './config/winston.config';
 import { HttpExceptionFilter } from './helpers';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -14,18 +15,18 @@ async function bootstrap() {
     }),
   });
 
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
+
 
   const config = app.get(ConfigService);
   const port = config.get('app').appPort;
   const env = config.get('app').environment;
 
-  const whitelist = [config.get('app').appDomain];
-
   app.enableCors({
     origin: (origin, callback) => {
-      if (env === 'development' || !origin || whitelist.indexOf(origin) !== -1) {
+      if (env === 'development') {
         callback(null, true);
       } else {
         callback(new ForbiddenException('Not allowed by CORS'));

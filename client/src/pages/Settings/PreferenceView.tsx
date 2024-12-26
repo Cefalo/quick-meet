@@ -3,7 +3,6 @@ import type { DropdownOption } from '@/components/Dropdown';
 import Dropdown from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
 import { usePreferences } from '@/context/PreferencesContext';
-import { CacheServiceFactory, type CacheService } from '@/helpers/cache';
 import { createDropdownOptions, isChromeExt, populateDurationOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
 import { Box, Button, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -29,7 +28,6 @@ export default function PreferenceView() {
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
 
   // Utilities and services
-  const cacheService: CacheService = CacheServiceFactory.getCacheService();
   const api = new Api();
   const navigate = useNavigate();
 
