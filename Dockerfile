@@ -14,17 +14,15 @@ COPY package.json /app/
 RUN npm install
 
 # Stage 2: Build Shared, Server, and Client
+# Assumes client and server dirs contains the .env file
 COPY shared/ /app/shared/
 COPY server/ /app/server/
 COPY client/ /app/client/
-
-COPY .env /app/client
-COPY .env /app/server
 
 # # Build shared libraries
 RUN npm run build
 
 # Stage 3: Runtime Stage
-EXPOSE ${APP_PORT}
+EXPOSE 3000
 
 CMD ["npm", "run", "start"]

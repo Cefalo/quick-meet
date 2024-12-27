@@ -27,51 +27,50 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 ## Development
 
-### Installation [web]
+### Installation
 
 1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
 2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _OPTIONAL: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
-3. Run `npm install`
+3. Run `npm install` from the root dir
 4. Run `npm run build`
-5. Run `npm run migration:run` to create the migrations
-6. Run the server app in development mode using: `npm run start:server`
-7. Run the client app in development mode using: `npm run start:client`
+5. Run both the server and client in-parallel, use: `npm run start:all`
 
-**Note**: In _development_ mode, the calender is mocked, ie, the developer does not need to have access to the OAuth credentials. Every interaction should work as if interacting with a real calender. Check `server/src/google-api/google-api-mock.service.ts` and `server/src/google-api/google-api.module.ts` to learn more on how it works.
+**Note**: If `VITE_MOCK_CALENDER` and `MOCK_CALENDER` is `true`, the calender will be mocked, ie, the developer does not need to have access to the OAuth credentials. Every interaction should work as if interacting with a real calender. Check `server/src/google-api/google-api-mock.service.ts` and `server/src/google-api/google-api.module.ts` to learn more on how it works.
 
-### Installation [chrome-extension]
+#### Installation with Docker
 
-To test the chrome view without bundling the extension files, is by simply using the query param `chrome=true` in the url, ie - `localhost:3000?chrome=true`
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _OPTIONAL: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
+3. Run `docker compose up --build` to start the server and client in-parallel
 
-1. Copy the `.env.example` file as `.env.chrome` file in the `/client` dir and fill the required keys as mentioned earlier.
-2. Run `npm run build:chrome`
-3. Go to Chrome extensions and load the `client/build_chrome` folder. Note the extension id.
-4. Edit the `REACT_APP_REDIRECT_URI` in the `.env.chrome` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
-5. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
-6. Run `npm run start:server` to start the server.
-7. Reload the extension
 
-## Production [without docker]
+### Chrome extension
+
+**NOTE:** To test the chrome view without bundling the extension files, is by simply using the query param `chrome=true` in the url, ie- `localhost:3000?chrome=true`
+
+Front end code for both the web and chrome versions are the same, with the `client/src/pages/BaseLayout.tsx` determining the layout based on the `isChromeExt` flag.
+
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir.
+3. Run `npm run build:chrome` from the root dir
+4. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder. Note the extension id.
+5. Edit the `VITE_REDIRECT_URI` in the `.env` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
+6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
+7. Run `npm run start:server` to start the server.
+8. Reload the extension
+
+## Production
+
+### Installation with Docker
 
 You must require the OAuth credentials and an organization account that utilizes google calender resources in order to test it on a real calender.
 
-1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _REQUIRED: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
-2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _REQUIRED: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
-3. Run `npm install`
-4. Run `npm run build`
-5. Run `npm run migration:run` to create the migrations
-6. Run the server in production mode using: `npm run start`.
+Note that in production, the client build files are served directly from the server, so only a dedicated server is required.
 
-**Note**: The server serves the static files, so a dedicated server for the client is not required.
+1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir.
+3. Run `./build.production.sh` to start the container
 
-## Production [with docker]
-
-You must require the OAuth credentials and an organization account that utilizes google calender resources in order to test it on a real calender.
-
-1. Copy the `.env.example` file as `.env` file in the root dir and fill the required keys. _REQUIRED: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
-2. Run `docker-compose up --build`
-
-**Note**: The server serves the static files, so a dedicated server for the client is not required.
 
 ### Encryption key
 
@@ -108,7 +107,6 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 │   │   ├── App.tsx
 │   │   └── index.tsx
 │   ├── .env
-│   ├── .env.chrome
 │   └── package.json
 └── server/
     ├── dist
@@ -118,7 +116,6 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
     │   ├── google-api
     │   ├── config
     │   ├── helpers
-    │   ├── migrations
     │   ├── app.controller.ts
     │   ├── app.module.ts
     │   ├── app.service.ts
@@ -129,19 +126,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 The app uses [npm workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) with 3 packages: `client`, `server` and `shared`. The `client` is built using **ReactJs** and the `server` is built using **NestJs**. The `shared` dir contains common packages used by both `client` and `server`.
 
-An in-memory database (sqlite) has been used as persisting the users data is not really mandatory. Even if the users data is lost, they can continue normally after logging in again. However, previously stored tokens would have to be revoked in that case.
-
-### Commands
-
-```bash
-npm run build:chrome # chrome production build
-npm run build  # web production build
-
-npm run start:client # start react in dev mode
-
-npm run migration:generate # generates migration files with the code-first-approach based on code changes and current db tables
-npm run migration:run # runs all migration scripts in the migrations folder
-```
+The app does not use any form of databases to persist data. Only an in-memory cache is used to persist the conference rooms which expires every 15 days.
 
 ### Notes
 

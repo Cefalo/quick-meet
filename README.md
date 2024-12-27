@@ -110,7 +110,7 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 **Note**: The **Authorized javascript origins** should have: 
 ```bash
-web: https://<domain>.chromiumapp.org
+web: https://<domain>
 chrome: https://<extension-id>.chromiumapp.org
 ```
 The **Authorized redirect URIs** for the web app should have:
