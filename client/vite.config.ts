@@ -21,5 +21,13 @@ export default defineConfig(({ mode }) => {
       outDir: mode === 'chrome' ? 'build_chrome' : 'build_web',
       chunkSizeWarningLimit: 600,
     },
+    /*
+     * by default, vite listens to only localhost. When running the server inside a docker container with port exposed on 3000, 
+     * it must be configured to listen to 0.0.0.0 (all network intefaces) instead of just localhost 
+     */
+    server: {
+      host: '0.0.0.0',
+      port: 3000,
+    },
   };
 });

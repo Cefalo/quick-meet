@@ -1,15 +1,20 @@
 #!/bin/bash
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-  echo ".env file not found in the root directory."
+# Check if .env file exists in client/ directory
+if [ ! -f client/.env ]; then
+  echo ".env file not found in the client/ directory."
   exit 1
 fi
 
-# Load environment variables from the .env file
-export $(grep -v '^#' .env | xargs)
+# Check if .env file exists in server/ directory
+if [ ! -f server/.env ]; then
+  echo ".env file not found in the server/ directory."
+  exit 1
+fi
 
-# build the Docker image
+echo "All required .env files are present."
+
+# build the docker image
 docker build --build-arg APP_PORT=$APP_PORT -t quickmeet .
 
 # start the container

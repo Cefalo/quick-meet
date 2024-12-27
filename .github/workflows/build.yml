@@ -52,12 +52,12 @@ jobs:
 
       - name: Create .env file for client
         run: |
-          echo "REACT_APP_APP_TITLE=${{ secrets.REACT_APP_APP_TITLE }}" >> ./client/.env
-          echo "REACT_APP_APP_SLOGAN=${{ secrets.REACT_APP_APP_SLOGAN }}" >> ./client/.env
-          echo "REACT_APP_CLIENT_ID=${{ secrets.REACT_APP_CLIENT_ID }}" >> ./client/.env
-          echo "REACT_APP_REDIRECT_URI=${{ secrets.REACT_APP_REDIRECT_URI }}" >> ./client/.env
-          echo "REACT_APP_BACKEND_ENDPOINT=${{ secrets.REACT_APP_BACKEND_ENDPOINT }}" >> ./client/.env
-          echo "REACT_APP_ENVIRONMENT=${{ secrets.REACT_APP_ENVIRONMENT }}" >> ./client/.env
+          echo "VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }}" >> ./client/.env
+          echo "VITE_APP_SLOGAN=${{ secrets.VITE_APP_SLOGAN }}" >> ./client/.env
+          echo "VITE_CLIENT_ID=${{ secrets.VITE_CLIENT_ID }}" >> ./client/.env
+          echo "VITE_REDIRECT_URI=${{ secrets.VITE_REDIRECT_URI }}" >> ./client/.env
+          echo "VITE_BACKEND_ENDPOINT=${{ secrets.VITE_BACKEND_ENDPOINT }}" >> ./client/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> ./client/.env
           echo "BUILD_PATH=${{ secrets.BUILD_PATH }}" >> ./client/.env
 
       - name: Install dependencies using npm workspaces

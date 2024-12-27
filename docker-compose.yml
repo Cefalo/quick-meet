@@ -1,28 +1,32 @@
-version: '3.8'
+version: '3.3'
 
 services:
-  quickmeet-app:
+  client:
+    container_name: quickmeet-client
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        SQLITE_DB: ${SQLITE_DB}
-        APP_PORT: ${APP_PORT}
-        NODE_ENV: ${NODE_ENV}
-        OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
-        OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
-        OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL}
-        JWT_SECRET: ${JWT_SECRET}
-        REACT_APP_APP_TITLE: ${REACT_APP_APP_TITLE}
-        REACT_APP_APP_SLOGAN: ${REACT_APP_APP_SLOGAN}
-        REACT_APP_CLIENT_ID: ${REACT_APP_CLIENT_ID}
-        REACT_APP_REDIRECT_URI: ${REACT_APP_REDIRECT_URI}
-        REACT_APP_BACKEND_ENDPOINT: ${REACT_APP_BACKEND_ENDPOINT}
-        REACT_APP_ENVIRONMENT: ${REACT_APP_ENVIRONMENT}
-        BUILD_PATH: ${BUILD_PATH}
-        REACT_APP_MOCK_CALENDER: ${REACT_APP_MOCK_CALENDAR}
-        MOCK_CALENDER: ${MOCK_CALENDAR}
+    working_dir: /app/client
     ports:
-      - '${APP_PORT}:${APP_PORT}'
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - APP_PORT=3000
     volumes:
-      - ./quickmeet.sqlite:/usr/src/data
+      - ./client:/app/client
+      - /app/client/node_modules
+    command: "npm run start"
+
+  server:
+    container_name: quickmeet-server
+    build:
+      context: .
+    working_dir: /app/server
+    ports:
+      - "3001:3001"
+    environment:
+      - APP_PORT=3001
+      - NODE_ENV=development
+    volumes:
+      - ./server:/app/server
+      - /app/server/node_modules
+    command: "npm run start:server"
