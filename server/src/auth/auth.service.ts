@@ -1,19 +1,19 @@
-import { type IConferenceRoom } from '@quickmeet/shared';
-import { ApiResponse } from '@quickmeet/shared';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { IConferenceRoom } from '@quickmeet/shared';
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
-import { createResponse } from '../helpers/payload.util';
 import { GoogleApiService } from '../google-api/google-api.service';
-import type { Cache } from 'cache-manager';
+import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EncryptionService } from './encryption.service';
 import { _OAuth2Client } from 'src/auth/decorators';
-import type { CookieOptions } from 'express';
+import { CookieOptions } from 'express';
+import { google } from 'googleapis';
+import { RefreshAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
 
 @Injectable()
 export class AuthService {
@@ -33,24 +33,26 @@ export class AuthService {
 
     const _ = await this.getDirectoryResources(client, userInfo.hd);
 
-    const jwtPayload: IJwtPayload = {
-      accessToken: tokens.access_token,
-      scope: tokens.scope,
-      expiryDate: tokens.expiry_date,
-      tokenType: tokens.token_type,
-      hd: userInfo.hd,
-      name: userInfo.name,
-    };
-
-    const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
-    const jwt = await this.createJwt({ payload: encryptedData, iv }, jwtPayload.expiryDate);
-
+    const jwt = await this.createAppToken(tokens.access_token, userInfo.hd, userInfo.name, tokens.expiry_date);
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
     return {
       jwt,
       refreshToken: tokens.refresh_token,
     };
+  }
+
+  async createAppToken(accessToken: string, domain: string, name: string, expiryInMs: number) {
+    const jwtPayload: IJwtPayload = {
+      accessToken: accessToken,
+      hd: domain,
+      name: name,
+    };
+
+    const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
+    const jwt = await this.createJwt({ payload: encryptedData, iv }, expiryInMs);
+
+    return jwt;
   }
 
   /**
@@ -68,29 +70,64 @@ export class AuthService {
     return true;
   }
 
-  async createJwt(payload: any, oAuthExpiry: number) {
-    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry });
+  async createJwt(payload: any, oAuthExpiryMs: number) {
+    // const x =  Math.round(oAuthExpiryMs / 1000);
+
+    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: `${oAuthExpiryMs}ms` });
   }
 
-  getOAuthUrl() {
-    const url = this.googleApiService.getOAuthUrl();
-    return createResponse(url);
+  getOAuthUrl(): string {
+    return this.googleApiService.getOAuthUrl();
   }
 
-  async validateSession() {
-    return createResponse(true);
+  async refreshAppToken(token: string, refreshToken?: string) {
+    let [err, payload]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
+
+    if (err && err.name === 'JsonWebTokenError') {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    if (!payload) {
+      throw new BadRequestException('No token found to refresh');
+    }
+
+    const currentTime = new Date().getTime();
+    const diff = payload.exp * 1000 - currentTime;
+    console.log(new Date(currentTime).toISOString());
+    console.log(new Date(payload.exp).toISOString());
+
+    if (currentTime < payload.exp * 1000) {
+      throw new BadRequestException('Token has not expired');
+    }
+
+    if (!refreshToken) {
+      throw new UnauthorizedException("Couldn't rotate token. Try re-logging");
+    }
+
+    const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+    client.setCredentials({ refresh_token: refreshToken });
+
+    const [refreshTokenErr, res]: [Error, RefreshAccessTokenResponse] = await to(client.refreshAccessToken());
+
+    if (refreshTokenErr) {
+      throw new UnauthorizedException(refreshTokenErr.message);
+    }
+
+    const userInfo = this.jwtService.decode(res.credentials.id_token);
+    const jwt = this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name, res.credentials.expiry_date);
+    return jwt;
   }
 
   /**
    * remove the refresh token from the cookie
    * the access_token is removed from the client side
    */
-  async logout(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<boolean>> {
+  async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
     try {
       await this.purgeAccess(client);
-      return createResponse(true);
+      return true;
     } catch (error) {
-      return createResponse(false);
+      return false;
     }
   }
 

@@ -17,20 +17,14 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    const token = request.headers.authorization?.split(' ')[1];
 
     if (!token) {
       throw new UnauthorizedException();
     }
 
-    const [err, _]: [Error, IJwtPayload] = await to(
-      this.jwtService.verifyAsync(token, {
-        secret: this.config.jwtSecret,
-      }),
-    );
-
+    const [err, _]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
     if (err) {
-      console.error(err);
       throw new UnauthorizedException('Invalid or expired token');
     }
 
@@ -48,10 +42,5 @@ export class AuthGuard implements CanActivate {
     request['hd'] = decryptedPayload.hd;
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
   }
 }

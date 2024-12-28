@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
 import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ROUTES } from './config/routes';
 import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
@@ -37,7 +37,6 @@ function OAuth() {
         }
 
         if (data?.accessToken) {
-          console.log('Access Token:', data?.accessToken);
           const cacheService: CacheService = CacheServiceFactory.getCacheService();
           await cacheService.save('access_token', data.accessToken);
           navigate(ROUTES.home, { replace: true });
@@ -52,22 +51,35 @@ function OAuth() {
 function App() {
   const api = new Api();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const validateSession = async () => {
-      const res = await api.validateSession()
-      if (res?.redirect) {
+    const refreshToken = async () => {
+      const res = await api.refreshToken();
+      if (res.status === 'error') {
         navigate(ROUTES.signIn);
       }
-    }
 
-    validateSession();
+      setLoading(false);
+    };
+
+    refreshToken();
   }, []);
+
+  if (loading) {
+    return <></>;
+  }
 
   return (
     <AppTheme>
       <Routes>
-        <Route element={<BaseLayout><Outlet /></BaseLayout>}>
+        <Route
+          element={
+            <BaseLayout>
+              <Outlet />
+            </BaseLayout>
+          }
+        >
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.signIn} element={<Login />} />
           <Route path={ROUTES.oauth} element={<OAuth />} />
