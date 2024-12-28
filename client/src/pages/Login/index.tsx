@@ -8,6 +8,7 @@ import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
 import Api from '@api/api';
 import { isChromeExt, renderError } from '@helpers/utility';
+import type { ApiResponse } from '@quickmeet/shared';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();
@@ -22,19 +23,23 @@ const Login = () => {
   }
 
   useEffect(() => {
-    const validateSession =async () => {
-      const token =  await cacheService.get('access_token');
+    const validateSession = async () => {
+      const token = await cacheService.get('access_token');
       if (token) {
         navigate(ROUTES.home);
       }
-    }
-   
+    };
+
     validateSession();
   }, []);
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {
-      const res = await api.loginChrome();
+      const res: ApiResponse<any> | undefined = await api.loginChrome();
+      if (!res) {
+        return;
+      }
+
       const { data, status } = res;
 
       if (status !== 'success') {

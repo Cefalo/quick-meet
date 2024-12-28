@@ -26,8 +26,8 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string, redirectUrl: string) {
-    const client = this.googleApiService.getOAuthClient(redirectUrl);
+  async login(code: string) {
+    const client = this.googleApiService.getOAuthClient();
     const { tokens } = await this.googleApiService.getToken(client, code);
     const userInfo = this.jwtService.decode(tokens.id_token);
 
@@ -70,6 +70,11 @@ export class AuthService {
 
   async createJwt(payload: any, oAuthExpiry: number) {
     return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry });
+  }
+
+  getOAuthUrl() {
+    const url = this.googleApiService.getOAuthUrl();
+    return createResponse(url);
   }
 
   async validateSession() {

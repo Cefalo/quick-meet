@@ -1,41 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuth2Client } from 'google-auth-library';
 import { calendar_v3, admin_directory_v1 } from 'googleapis';
 import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
 import { CalenderMockDb } from './mock.database';
-import type { IJwtPayload } from 'src/auth/dto';
+import { IJwtPayload } from 'src/auth/dto';
+import { JwtService } from '@nestjs/jwt';
+import appConfig from 'src/config/env/app.config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class GoogleApiMockService implements IGoogleApiService {
   db: CalenderMockDb;
 
-  constructor() {
+  constructor(
+    private jwtService: JwtService,
+    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+  ) {
     this.db = new CalenderMockDb();
   }
 
-  getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client;
-  getOAuthClient(redirectUrl: unknown, payload?: IJwtPayload): OAuth2Client {
+  getOAuthClient(): OAuth2Client;
+  getOAuthClient(payload?: IJwtPayload): OAuth2Client;
+  getOAuthClient(_?: IJwtPayload): OAuth2Client {
     return new OAuth2Client();
   }
 
-  getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse> {
+  async getToken(_: OAuth2Client, code: string): Promise<OAuthTokenResponse> {
     console.log(`Mock getToken called with code: ${code}`);
+
+    const idTokenPayload = {
+      hd: 'example.com',
+      name: 'Mr Bob',
+    };
+
+    const idToken = await this.jwtService.signAsync({ payload: idTokenPayload }, { secret: this.config.jwtSecret });
     const res: OAuthTokenResponse = {
       tokens: {
         access_token: 'mockAccessToken',
         refresh_token: 'mockRefreshToken',
-        scope: 'mockScope',
-        id_token: 'mockIdToken',
+        scope: 'mockScopes',
+        id_token: idToken,
         token_type: 'Bearer',
         expiry_date: Date.now() + 3600 * 1000,
       },
     };
+
     return Promise.resolve(res);
   }
 
-  createCalenderEvent(oauth2Client: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
+  getOAuthUrl(): string {
+    return `/oauthcallback?code=mock_code`;
+  }
+
+  createCalenderEvent(_: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
     console.log(`Mock createCalenderEvent called with event: ${event.summary}`);
     if (event.conferenceData) {
       event.hangoutLink = 'https://meet.google.com/mock-meeting-id';
@@ -44,7 +62,7 @@ export class GoogleApiMockService implements IGoogleApiService {
     return Promise.resolve(this.db.createEvent(event));
   }
 
-  getCalendarResources(oauth2Client: OAuth2Client): Promise<admin_directory_v1.Schema$CalendarResources> {
+  getCalendarResources(_: OAuth2Client): Promise<admin_directory_v1.Schema$CalendarResources> {
     console.log('Mock getCalendarResources called');
     const items = this.db.getRooms();
     return Promise.resolve({
@@ -55,7 +73,7 @@ export class GoogleApiMockService implements IGoogleApiService {
   }
 
   async getCalenderSchedule(
-    oauth2Client: OAuth2Client,
+    _: OAuth2Client,
     start: string,
     end: string,
     timeZone: string,
@@ -94,7 +112,7 @@ export class GoogleApiMockService implements IGoogleApiService {
     });
   }
 
-  async getCalenderEvents(oauth2Client: OAuth2Client, start: string, end: string, timeZone: string, limit = 30): Promise<calendar_v3.Schema$Event[]> {
+  async getCalenderEvents(_: OAuth2Client, start: string, end: string, timeZone: string, limit = 30): Promise<calendar_v3.Schema$Event[]> {
     console.log(`Mock getCalenderEvents called with start: ${start}, end: ${end}, limit: ${limit}`);
     const events = this.db.listEvents(start, end, limit);
     return new Promise((resolve) => {
@@ -104,7 +122,7 @@ export class GoogleApiMockService implements IGoogleApiService {
     });
   }
 
-  async getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event> {
+  async getCalenderEvent(_: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event> {
     console.log(`Mock getCalenderEvent called with id: ${id}`);
     const event = this.db.getEvent(id);
     return new Promise((resolve) => {
@@ -114,7 +132,7 @@ export class GoogleApiMockService implements IGoogleApiService {
     });
   }
 
-  async updateCalenderEvent(oauth2Client: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
+  async updateCalenderEvent(_: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event> {
     console.log(`Mock updateCalenderEvent called with id: ${id}, event: ${event.summary}`);
     const updatedEvent = this.db.updateEvent(id, event);
     return new Promise((resolve) => {
@@ -124,7 +142,7 @@ export class GoogleApiMockService implements IGoogleApiService {
     });
   }
 
-  async deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void> {
+  async deleteEvent(_: OAuth2Client, id: string): Promise<void> {
     console.log(`Mock deleteEvent called with id: ${id}`);
     this.db.deleteEvent(id);
     return new Promise((resolve) => {

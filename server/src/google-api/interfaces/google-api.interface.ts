@@ -4,9 +4,10 @@ import { OAuthTokenResponse } from 'src/auth/dto/oauth-token.response';
 import type { IJwtPayload } from 'src/auth/dto';
 
 export interface IGoogleApiService {
-  getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client;
+  getOAuthClient(): OAuth2Client;
+  getOAuthClient(payload?: IJwtPayload): OAuth2Client;
   getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse>;
+  getOAuthUrl(): string;
 
   createCalenderEvent(oauth2Client: OAuth2Client, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event>;
   getCalendarResources(oauth2Client: OAuth2Client): Promise<admin_directory_v1.Schema$CalendarResources>;
