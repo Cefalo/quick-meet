@@ -25,7 +25,7 @@ export default class Api {
   constructor() {
     this.client = axios.create({
       baseURL: `${this.apiEndpoint}`,
-      timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
+      timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 1000000000,
     });
   }
 
@@ -42,19 +42,21 @@ export default class Api {
     }
   }
 
-  async validateSession() {
+  async refreshToken() {
     try {
       const token = await this.cacheService.get('access_token');
-      if (!token) {
-        return;
+      if (token) {
+        const headers = await this.getHeaders();
+        const res = await this.client.get('/refresh-token', {
+          headers,
+        });
+
+        if (res.data?.data) {
+          await this.cacheService.save('access_token', res.data.data);
+        }
       }
 
-      const headers = await this.getHeaders();
-      const res = await this.client.get('/session', {
-        headers,
-      });
-
-      return res.data as ApiResponse<LoginResponse>;
+      return { status: 'success' } as ApiResponse<any>;
     } catch (error: any) {
       return this.handleError(error);
     }

@@ -22,14 +22,8 @@ export class GoogleApiService implements IGoogleApiService {
       return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
     } else {
       const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
-      const { accessToken, scope, tokenType, expiryDate, refreshToken } = payload;
-      client.setCredentials({
-        access_token: accessToken,
-        scope: scope,
-        token_type: tokenType,
-        expiry_date: expiryDate,
-        refresh_token: refreshToken,
-      });
+      const { accessToken } = payload;
+      client.setCredentials({ access_token: accessToken });
 
       return client;
     }

@@ -3,6 +3,9 @@ import { Observable } from 'rxjs';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 import { IJwtPayload } from 'src/auth/dto';
 
+/**
+ * must be used after AuthGuard so that the req.payload is populated
+ */
 @Injectable()
 export class OAuthInterceptor implements NestInterceptor {
   constructor(@Inject('GoogleApiService') private readonly googleApiService: GoogleApiService) {}
