@@ -35,7 +35,7 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 4. Run `npm run build`
 5. Run both the server and client in-parallel, use: `npm run start:all`
 
-**Note**: If `VITE_MOCK_CALENDER` and `MOCK_CALENDER` is `true`, the calender will be mocked, ie, the developer does not need to have access to the OAuth credentials. Every interaction should work as if interacting with a real calender. Check `server/src/google-api/google-api-mock.service.ts` and `server/src/google-api/google-api.module.ts` to learn more on how it works.
+**Note**: If the `VITE_MOCK_CALENDER` is set to `true`, the calender will be mocked, ie, the developer does not need to have access to the OAuth credentials. Every interaction should work as if interacting with a real calender. Check `server/src/google-api/google-api-mock.service.ts` and `server/src/google-api/google-api.module.ts` to learn more on how it works.
 
 #### Installation with Docker
 
@@ -54,10 +54,9 @@ Front end code for both the web and chrome versions are the same, with the `clie
 2. Copy the `.env.example` file as `.env` file in the `/client/` dir.
 3. Run `npm run build:chrome` from the root dir
 4. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder. Note the extension id.
-5. Edit the `VITE_REDIRECT_URI` in the `.env` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
+5. Edit the `OAUTH_REDIRECT_URL` in the `server/.env` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
 6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
 7. Run `npm run start:server` to start the server.
-8. Reload the extension
 
 ## Production
 

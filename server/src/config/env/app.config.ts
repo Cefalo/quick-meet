@@ -8,5 +8,5 @@ export default registerAs('app', () => ({
   jwtSecret: process.env.JWT_SECRET || 'secret',
   oAuthClientSecret: process.env.OAUTH_CLIENT_SECRET,
   oAuthClientId: process.env.OAUTH_CLIENT_ID,
-  mockCalender: process.env.MOCK_CALENDER,
+  oAuthRedirectUrl: process.env.OAUTH_REDIRECT_URL,
 }));

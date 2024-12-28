@@ -40,13 +40,13 @@ export class GoogleAPIErrorMapper {
       case 400:
         throw new BadRequestException(`Bad Request. Details: ${data?.error || 'Invalid parameters or request body'}`);
       case 401:
-        throw new UnauthorizedException(`Unauthorized: ${statusText}. You might need to refresh your credentials.`);
+        throw new UnauthorizedException(`${statusText}. You might need to refresh your credentials.`);
       case 403:
-        throw new ForbiddenException(`Forbidden: ${statusText}. Access is denied`);
+        throw new ForbiddenException(`${statusText}. Access is denied`);
       case 404:
-        throw new NotFoundException(`Not Found: ${statusText}. Resource might not exist.`);
+        throw new NotFoundException(`${statusText}. Resource might not exist.`);
       case 429:
-        throw new HttpException(`Too Many Requests: ${statusText}. You've exceeded the rate limit.`, status);
+        throw new HttpException(`${statusText}. You've exceeded the rate limit.`, status);
       case 500:
         throw new InternalServerErrorException(`Internal Server Error: ${statusText}. Please try again later.`);
       case 503:

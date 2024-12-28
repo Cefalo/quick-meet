@@ -10,15 +10,14 @@ export class OAuthInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const payload: IJwtPayload = request['payload'];
-    const redirectUrl = request.headers['x-redirect-url'];
 
-    let oauth2Client = this.createOauthClient(payload, redirectUrl);
+    let oauth2Client = this.createOauthClient(payload);
     request['oauth2Client'] = oauth2Client;
 
     return next.handle();
   }
 
-  private createOauthClient(payload: IJwtPayload, redirectUrl: string) {
-    return this.googleApiService.getOAuthClient(redirectUrl, payload);
+  private createOauthClient(payload: IJwtPayload) {
+    return this.googleApiService.getOAuthClient(payload);
   }
 }

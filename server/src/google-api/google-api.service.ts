@@ -12,17 +12,16 @@ import { IJwtPayload } from '../auth/dto';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
-  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {
-  }
+  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
 
   // @ overloaded method signature
-  getOAuthClient(redirectUrl: string, payload: IJwtPayload): OAuth2Client;
-  getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(redirectUrl: string, payload?: IJwtPayload): OAuth2Client {
+  getOAuthClient(payload: IJwtPayload): OAuth2Client;
+  getOAuthClient(): OAuth2Client;
+  getOAuthClient(payload?: IJwtPayload): OAuth2Client {
     if (!payload) {
-      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
+      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
     } else {
-      const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
+      const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
       const { accessToken, scope, tokenType, expiryDate, refreshToken } = payload;
       client.setCredentials({
         access_token: accessToken,
@@ -34,6 +33,24 @@ export class GoogleApiService implements IGoogleApiService {
 
       return client;
     }
+  }
+
+  getOAuthUrl() {
+    const scopes = [
+      'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
+      'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ];
+
+    const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+    const url = client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+      response_type: 'code',
+    });
+
+    return url;
   }
 
   async getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse> {

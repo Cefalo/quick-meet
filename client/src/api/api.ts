@@ -13,13 +13,6 @@ import { toast } from 'react-hot-toast';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
 
-export const SCOPES = [
-  'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
-  'https://www.googleapis.com/auth/calendar',
-  'https://www.googleapis.com/auth/userinfo.email',
-  'https://www.googleapis.com/auth/userinfo.profile',
-];
-
 /**
  * @description Serves as the base API endpoint for the application. It provides the authorization token in every request
  */
@@ -34,6 +27,19 @@ export default class Api {
       baseURL: `${this.apiEndpoint}`,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
     });
+  }
+
+  async getOAuthUrl() {
+    try {
+      const headers = await this.getHeaders();
+      const res = await this.client.get('/oauth-url', {
+        headers,
+      });
+
+      return res.data as ApiResponse<string>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
   }
 
   async validateSession() {
@@ -87,23 +93,20 @@ export default class Api {
   }
 
   async loginChrome() {
-    const scopes = SCOPES.join(' ').trim();
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${secrets.clientId}&redirect_uri=${secrets.oAuthRedirectUrl}&response_type=code&scope=${scopes}&access_type=offline`;
-    console.log('secrets.oAuthRedirectUrl', secrets.oAuthRedirectUrl);
-
-    return this.handleChromeOauthFlow(authUrl);
+    const { data } = await this.getOAuthUrl();
+    if (data) {
+      return this.handleChromeOauthFlow(data);
+    }
   }
 
   async login() {
-    if (secrets.mockCalender === 'true' || !secrets.mockCalender) {
-      const mockRedirectUrl = `${secrets.oAuthRedirectUrl}?code=mock_code`;
-      window.location.href = mockRedirectUrl;
-    } else {
-      const scopes = SCOPES.join(' ').trim();
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${secrets.clientId}&redirect_uri=${secrets.oAuthRedirectUrl}&response_type=code&scope=${scopes}&access_type=offline`;
-
-      window.location.href = authUrl;
+    const { data } = await this.getOAuthUrl();
+    if (!data) {
+      toast.error('Failed to retrieve oauth callback url');
+      return;
     }
+
+    window.location.href = data;
   }
 
   async handleChromeOauthFlow(authUrl: string) {
@@ -166,10 +169,11 @@ export default class Api {
 
   async getHeaders(): Promise<Partial<RawAxiosRequestHeaders>> {
     const token = await this.cacheService.get('access_token');
+
     return {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
-      'X-Redirect-Url': secrets.oAuthRedirectUrl,
+      'x-mock-api': secrets.mockCalender,
     };
   }
 

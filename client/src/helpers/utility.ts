@@ -177,4 +177,3 @@ export const chromeBackground = {
 const params = new URLSearchParams(window.location.search);
 
 export const isChromeExt = Boolean(params.get('chrome')) || secrets.appEnvironment === 'chrome';
-export const isMock = Boolean(params.get('mock')) || false;
