@@ -88,6 +88,7 @@ const Login = () => {
                 zIndex: 101,
                 '& .MuiButton-startIcon': {
                   marginRight: theme.spacing(3),
+                  marginTop: theme.spacing(-0.55), // Adjusted margin
                 },
               }),
             ]}
