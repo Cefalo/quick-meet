@@ -25,8 +25,8 @@ export default class Api {
   constructor() {
     this.client = axios.create({
       baseURL: `${this.apiEndpoint}`,
-      timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 1000000000,
-    });
+      timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
+});
   }
 
   async getOAuthUrl() {

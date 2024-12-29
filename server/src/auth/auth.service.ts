@@ -29,7 +29,7 @@ export class AuthService {
   async login(code: string) {
     const client = this.googleApiService.getOAuthClient();
     const { tokens } = await this.googleApiService.getToken(client, code);
-    const userInfo = this.jwtService.decode(tokens.id_token);
+    const userInfo = await this.jwtService.decode(tokens.id_token);
 
     const _ = await this.getDirectoryResources(client, userInfo.hd);
 
@@ -70,10 +70,9 @@ export class AuthService {
     return true;
   }
 
-  async createJwt(payload: any, oAuthExpiryMs: number) {
-    // const x =  Math.round(oAuthExpiryMs / 1000);
-
-    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: `${oAuthExpiryMs}ms` });
+  async createJwt(payload: any, _: number) {
+    // todo: hard coding to 1h cause if the oAuthExpiry is used (even when converted to seconds), produce large exp values, eg 2079. No idea why
+    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: '1h' });
   }
 
   getOAuthUrl(): string {
@@ -81,22 +80,17 @@ export class AuthService {
   }
 
   async refreshAppToken(token: string, refreshToken?: string) {
-    let [err, payload]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
+    let [err, _]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
 
-    if (err && err.name === 'JsonWebTokenError') {
-      throw new UnauthorizedException('Invalid token');
+    if (!err) {
+      throw new BadRequestException('Token has not expired');
     }
 
-    if (!payload) {
-      throw new BadRequestException('No token found to refresh');
+    if (err.name === 'JsonWebTokenError') {
+      throw new UnauthorizedException('Token invalid');
     }
 
-    const currentTime = new Date().getTime();
-    const diff = payload.exp * 1000 - currentTime;
-    console.log(new Date(currentTime).toISOString());
-    console.log(new Date(payload.exp).toISOString());
-
-    if (currentTime < payload.exp * 1000) {
+    if (err.name !== 'TokenExpiredError') {
       throw new BadRequestException('Token has not expired');
     }
 
@@ -113,8 +107,8 @@ export class AuthService {
       throw new UnauthorizedException(refreshTokenErr.message);
     }
 
-    const userInfo = this.jwtService.decode(res.credentials.id_token);
-    const jwt = this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name, res.credentials.expiry_date);
+    const userInfo = await this.jwtService.decode(res.credentials.id_token);
+    const jwt = await this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name, res.credentials.expiry_date);
     return jwt;
   }
 
