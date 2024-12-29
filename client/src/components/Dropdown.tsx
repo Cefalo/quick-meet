@@ -32,7 +32,7 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
 
   return (
     <Select
-      value={value ?? '-'}
+      value={options?.find(option => option.value === value) ? value : ''} // Ensure value is valid
       onChange={handleChange}
       fullWidth
       displayEmpty
@@ -40,8 +40,8 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
       disabled={disabled || false}
       renderValue={(selected) => {
         const selectedOption = options?.find((option) => option.value === selected);
-
-        if (placeholder && selected.length === 0) {
+  
+        if (placeholder && (!selected || selected.length === 0)) {
           return (
             <Box
               sx={{
@@ -77,7 +77,7 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
             </Box>
           );
         }
-
+  
         return (
           <Box
             sx={{
@@ -120,7 +120,7 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
           <em>{placeholder}</em>
         </MenuItem>
       )}
-
+  
       {options?.map((option) => (
         <MenuItem value={option.value} key={option.value}>
           <Typography variant="subtitle1">
@@ -130,5 +130,5 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
         </MenuItem>
       ))}
     </Select>
-  );
-}
+  )
+};
