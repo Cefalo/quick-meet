@@ -100,13 +100,14 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 1. [Fork](https://github.com/Propo41/bookify/fork) the repository.
 2. Create a branch and integrate your own Github actions or webhooks to add a seamless CI/CD pipeline.
-1. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
-2. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview)
-3. Copy the **Client ID**, **Client secret** from the OAuth 2.0 Client ID you created in step 1, and place it in the `.env` file.
-4. Add the **Authorized javascript origins** and the **Authorized redirect URIs** in your google cloud project. 
-5. Check out the [installation](CONTRIBUTING.md/#installation-web) section, to prepare the app for launching.
-5. Deploy your branch and your ready to start booking! 🎉
-6. Make sure to sync latest changes from the upstream repository.
+3. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
+4. Add the following scopes to the new credential (OAuth web client id): `./auth/userinfo.profile` and `./auth/calendar`
+5. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview). This is required to read the directory resources; refer to `getCalendarResources()`
+6. Copy the **Client ID**, **Client secret** from the OAuth 2.0 Client ID you created in step 1, and place it in the `.env` file.
+7. Add the **Authorized javascript origins** and the **Authorized redirect URIs** in your google cloud project. 
+8. Check out the [installation](CONTRIBUTING.md/#installation-web) section, to prepare the app for launching.
+9. Deploy your branch and your ready to start booking! 🎉
+10. Make sure to sync latest changes from the upstream repository.
 
 **Note**: The **Authorized javascript origins** should have: 
 ```bash
