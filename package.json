@@ -16,7 +16,8 @@
     "start:client": "npm run start --w client",
     "migration:run": "npm run migration:run --w server",
     "start:prod": "cd server && npm run start",
-    "start:all": "npm-run-all2 -p start:client start:server"
+    "start:all": "npm-run-all2 -p start:client start:server",
+    "start:docker": "docker-compose up --build --remove-orphans"
   },
   "workspaces": [
     "shared",

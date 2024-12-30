@@ -41,7 +41,7 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 
 1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
 2. Copy the `.env.example` file as `.env` file in the `/client/` dir. _OPTIONAL: Obtain the REACT_APP_CLIENT_ID ID by following step 1_
-3. Run `docker compose up --build` to start the server and client in-parallel
+3. Run `npm run start:docker` to start the server and client in-parallel
 
 
 ### Chrome extension
