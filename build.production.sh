@@ -35,4 +35,4 @@ fi
 docker build -t quickmeet .
 
 # start the container
-docker run -p $CONTAINER_PORT:$APP_PORT quickmeet
+docker run -d -p $CONTAINER_PORT:$APP_PORT quickmeet
