@@ -23,6 +23,7 @@ COPY client/ /app/client/
 RUN npm run build
 
 # Stage 3: Runtime Stage
-EXPOSE 3000
+ARG APP_PORT
+EXPOSE ${APP_PORT}
 
 CMD ["npm", "run", "start"]

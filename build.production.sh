@@ -14,6 +14,9 @@ fi
 
 echo "All required .env files are present."
 
+# Load environment variables from server/.env
+export $(grep -v '^#' server/.env | xargs)
+
 # build the docker image
 docker build --build-arg APP_PORT=$APP_PORT -t quickmeet .
 

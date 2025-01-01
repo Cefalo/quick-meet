@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
-import { ForbiddenException, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { winstonInstance } from './config/winston.config';
 import { HttpExceptionFilter } from './helpers';
@@ -22,16 +22,6 @@ async function bootstrap() {
   const config = app.get(ConfigService);
   const port = config.get('app').appPort;
   const env = config.get('app').environment;
-
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (env === 'development') {
-        callback(null, true);
-      } else {
-        callback(new ForbiddenException('Not allowed by CORS'));
-      }
-    },
-  });
 
   await app.listen(port);
 
