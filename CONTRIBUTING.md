@@ -68,8 +68,7 @@ Note that in production, the client build files are served directly from the ser
 
 1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
 2. Copy the `.env.example` file as `.env` file in the `/client/` dir.
-3. Run `./build.production.sh` to start the container
-
+3. Run `./build.production.sh` to start the container. Optionally, an argument indicating the container port can be provided, eg. `./build.production.sh 8080` will expose the app to 8080 (3000 -> 8080) 
 
 ### Encryption key
 
