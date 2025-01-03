@@ -70,7 +70,7 @@ class ChromeCacheService implements CacheService {
 export class CacheServiceFactory {
   static getCacheService(): CacheService {
     const isChrome = secrets.appEnvironment === 'chrome';
-    if (isChrome && secrets.nodeEnvironment !== 'development') {
+    if (isChrome) {
       return new ChromeCacheService();
     } else {
       return new WebCacheService();

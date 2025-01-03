@@ -32,7 +32,6 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
       <Box
         sx={{
           px: 1,
-          py: 1,
         }}
       >
         <Box
@@ -44,6 +43,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
             borderBottomRightRadius: 10,
             textAlign: 'left',
             px: 2,
+            py: 5,
           }}
         >
           <Typography

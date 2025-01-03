@@ -36,6 +36,8 @@ export default function Home() {
     setTabIndex(newValue);
   };
 
+  if (loading) return <></>;
+
   return (
     <Box
       sx={{
