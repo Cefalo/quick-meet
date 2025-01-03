@@ -7,11 +7,13 @@ import {
   GetAvailableRoomsQueryDto,
   IConferenceRoom,
   LoginResponse,
+  type StatusTypes,
 } from '@quickmeet/shared';
-import axios, { AxiosInstance, RawAxiosRequestHeaders } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
+import { ROUTES } from '@/config/routes';
 
 /**
  * @description Serves as the base API endpoint for the application. It provides the authorization token in every request
@@ -20,45 +22,68 @@ export default class Api {
   apiToken?: string;
   apiEndpoint?: string = secrets.backendEndpoint;
   client: AxiosInstance;
+
   cacheService: CacheService = CacheServiceFactory.getCacheService();
 
   constructor() {
     this.client = axios.create({
       baseURL: `${this.apiEndpoint}`,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
-});
+    });
+
+    this.setAuthorizationHeaders();
+    this.handleTokenRefresh();
+  }
+
+  async setAuthorizationHeaders() {
+    this.client.interceptors.request.use(async (config) => {
+      const token = await this.cacheService.get('access_token');
+
+      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers['Accept'] = `application/json`;
+      config.headers['x-mock-api'] = secrets.mockCalender;
+
+      return config;
+    });
+  }
+
+  async handleTokenRefresh() {
+    this.client.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response.status === 401 && !error.config._retry) {
+          error.config._retry = true;
+
+          try {
+            const res = await axios.get('/refresh-token', {
+              baseURL: `${secrets.backendEndpoint}`,
+              headers: {
+                Accept: 'application/json',
+                'x-mock-api': secrets.mockCalender,
+              },
+            });
+
+            await this.cacheService.save('access_token', res.data.data);
+            return this.client(error.config);
+          } catch (error) {
+            window.location.href = ROUTES.signIn;
+            await this.cacheService.remove('access_token');
+            return Promise.reject(error);
+          }
+        }
+
+        return Promise.reject(error);
+      },
+    );
   }
 
   async getOAuthUrl() {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.get('/oauth-url', {
-        headers,
-      });
+      const res = await this.client.get('/oauth-url');
 
       return res.data as ApiResponse<string>;
     } catch (error: any) {
-      return this.handleError(error);
-    }
-  }
-
-  async refreshToken() {
-    try {
-      const token = await this.cacheService.get('access_token');
-      if (token) {
-        const headers = await this.getHeaders();
-        const res = await this.client.get('/refresh-token', {
-          headers,
-        });
-
-        if (res.data?.data) {
-          await this.cacheService.save('access_token', res.data.data);
-        }
-      }
-
-      return { status: 'success' } as ApiResponse<any>;
-    } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
@@ -68,23 +93,17 @@ export default class Api {
         code,
       };
 
-      const headers = await this.getHeaders();
-      const res = await this.client.post('/oauth2callback', payload, {
-        headers,
-      });
+      const res = await this.client.post('/oauth2callback', payload);
 
       return res.data as ApiResponse<LoginResponse>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async logout() {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.post('/logout', null, {
-        headers,
-      });
+      const res = await this.client.post('/logout', null);
 
       await this.cacheService.remove('access_token');
 
@@ -169,33 +188,20 @@ export default class Api {
     return res;
   }
 
-  async getHeaders(): Promise<Partial<RawAxiosRequestHeaders>> {
-    const token = await this.cacheService.get('access_token');
-
-    return {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-mock-api': secrets.mockCalender,
-    };
-  }
-
   async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {
     try {
       const params: GetAvailableRoomsQueryDto = { startTime, duration, timeZone, seats, floor, eventId };
-      const headers = await this.getHeaders();
-      const res = await this.client.get('/available-rooms', { headers, params, signal });
+      const res = await this.client.get('/available-rooms', { params, signal });
 
       return res.data as ApiResponse<IConferenceRoom[]>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async getRooms(startTime: string, endTime: string, timeZone: string) {
     try {
-      const headers = await this.getHeaders();
       const res = await this.client.get('/rooms', {
-        headers,
         params: {
           startTime,
           endTime,
@@ -205,37 +211,27 @@ export default class Api {
 
       return res.data as ApiResponse<EventResponse[]>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async createRoom(payload: BookRoomDto) {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.post('/room', payload, {
-        headers,
-      });
+      const res = await this.client.post('/room', payload);
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async updateRoom(eventId: string, payload: BookRoomDto) {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.put(
-        '/room',
-        { eventId, ...payload },
-        {
-          headers,
-        },
-      );
+      const res = await this.client.put('/room', { eventId, ...payload });
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
@@ -243,61 +239,52 @@ export default class Api {
     try {
       const data = { eventId, roomId, duration };
 
-      const headers = await this.getHeaders();
-      const res = await this.client.put('/room/duration', data, {
-        headers,
-      });
+      const res = await this.client.put('/room/duration', data);
 
       return res.data as ApiResponse<EventUpdateResponse>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async deleteRoom(roomId: string) {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.delete(`/room?id=${roomId}`, {
-        headers,
-      });
+      const res = await this.client.delete(`/room?id=${roomId}`);
 
       return res.data as ApiResponse<DeleteResponse>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async getMaxSeatCount(): Promise<ApiResponse<number>> {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.get('/highest-seat-count', { headers });
+      const res = await this.client.get('/highest-seat-count');
 
       return res.data as ApiResponse<number>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   async getFloors() {
     try {
-      const headers = await this.getHeaders();
-      const res = await this.client.get('/floors', {
-        headers,
-      });
+      const res = await this.client.get('/floors');
 
       return res.data as ApiResponse<string[]>;
     } catch (error: any) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
-  handleError(error: any) {
+  createReply(status: StatusTypes, message?: string, data?: any): ApiResponse<any> {
+    return { status, message, data };
+  }
+
+  async handleError(error: any) {
+    // used for Abort request controllers
     if (error.code === 'ERR_CANCELED') {
-      return {
-        status: 'ignore',
-        message: 'Pending request aborted',
-        data: null,
-      } as ApiResponse<any>;
+      return this.createReply('ignore', 'Pending request aborted', null);
     }
 
     console.error(error);
@@ -308,10 +295,6 @@ export default class Api {
       return res;
     }
 
-    return {
-      status: 'error',
-      message: 'Something went wrong',
-      data: null,
-    } as ApiResponse<any>;
+    return this.createReply('error', 'Something went wrong', null);
   }
 }

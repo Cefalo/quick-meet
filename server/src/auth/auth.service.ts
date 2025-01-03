@@ -79,21 +79,7 @@ export class AuthService {
     return this.googleApiService.getOAuthUrl();
   }
 
-  async refreshAppToken(token: string, refreshToken?: string) {
-    let [err, _]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
-
-    if (!err) {
-      throw new BadRequestException('Token has not expired');
-    }
-
-    if (err.name === 'JsonWebTokenError') {
-      throw new UnauthorizedException('Token invalid');
-    }
-
-    if (err.name !== 'TokenExpiredError') {
-      throw new BadRequestException('Token has not expired');
-    }
-
+  async refreshAppToken(refreshToken?: string) {
     if (!refreshToken) {
       throw new UnauthorizedException("Couldn't rotate token. Try re-logging");
     }

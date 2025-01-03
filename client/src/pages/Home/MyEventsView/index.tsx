@@ -82,14 +82,10 @@ export default function MyEventsView() {
   };
 
   const onEditConfirmed = async (data: FormData) => {
-    console.log(data);
-
     if (!data || !data.eventId || !data.room) {
       toast.error('Room was not updated');
       return;
     }
-
-    console.log('onedit', data);
 
     setEditLoading(true);
 
@@ -129,7 +125,7 @@ export default function MyEventsView() {
       return;
     }
 
-    setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === data.eventId ? { ...event, ...res.data } : event)));
+    setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === data.eventId ? res.data : event)));
     toast.success('Room has been updated');
     setEditView(null);
     setEditLoading(false);
@@ -165,7 +161,9 @@ export default function MyEventsView() {
 
   if (deleteEventViewOpen) {
     const event = events.find((e) => e.eventId === deleteEventId);
-    return <DeleteConfirmationView event={event} open={deleteEventViewOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleDeleteEventClose} />;
+    return (
+      <DeleteConfirmationView event={event} open={deleteEventViewOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleDeleteEventClose} />
+    );
   }
 
   if (editView) {

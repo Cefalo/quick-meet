@@ -215,9 +215,13 @@ export class CalenderService {
 
     const formattedEvents = [];
     for (const event of events) {
-      let room: IConferenceRoom = {};
+      let room: IConferenceRoom | null = {};
       if (event.location) {
         room = rooms.find((_room) => event.location.includes(_room.name));
+        if (!room) {
+          // event location must be an external link
+          event.hangoutLink = event.location;
+        }
       }
 
       let attendees: string[] = [];
@@ -230,12 +234,12 @@ export class CalenderService {
       }
 
       const _event: EventResponse = {
-        meet: event.hangoutLink ? event.hangoutLink.split('/').pop() : undefined,
-        room: room.name,
-        roomEmail: room.email,
+        meet: event.hangoutLink,
+        room: room?.name,
+        roomEmail: room?.email,
         eventId: event.id,
-        seats: room.seats,
-        floor: room.floor,
+        seats: room?.seats,
+        floor: room?.floor,
         summary: event.summary,
         start: event.start.dateTime,
         attendees: attendees,
@@ -414,7 +418,7 @@ export class CalenderService {
     const data: EventResponse = {
       eventId: updatedEvent.id,
       summary: updatedEvent.summary,
-      meet: result.hangoutLink ? result.hangoutLink.split('/').pop() : undefined,
+      meet: result.hangoutLink,
       start: updatedEvent.start.dateTime,
       end: updatedEvent.end.dateTime,
       room: pickedRoom.name,

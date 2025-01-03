@@ -66,6 +66,7 @@ interface ChipData {
   label: string;
   color?: string;
   type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
+  value?: string;
 }
 
 const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
@@ -75,7 +76,6 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    console.log('event', event);
     const startInMs = new Date(event.start!).getTime();
     const endInMs = new Date(event.end!).getTime();
     const currentTimeInMs = Date.now();
@@ -89,8 +89,21 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
     const _chips: ChipData[] = createChips(event);
 
     if (event.meet) {
+      let domain = '-';
+      try {
+        const url = new URL(event.meet);
+        domain = url.hostname;
+      } catch (error) {
+        if (event.meet.length > 15) {
+          domain = event.meet.slice(0, 15) + '...';
+        } else {
+          domain = event.meet;
+        }
+      }
+
       _chips.push({
-        label: event.meet,
+        label: domain,
+        value: event.meet,
         type: 'conference',
         icon: <InsertLinkRoundedIcon fontSize="small" />,
       });
@@ -119,7 +132,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
         ...sx,
       }}
     >
-      <Box display={'flex'} alignItems="center" pl={2}>
+      <Box display={'flex'} alignItems="flex-start" pl={2}>
         <Typography
           variant="h5"
           component="div"
@@ -209,7 +222,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
                 }}
                 onClick={() => {
                   if (chip.type === 'conference') {
-                    window.open(`https://meet.google.com/${chip.label}`, '_blank');
+                    window.open(chip.value, '_blank');
                   }
                 }}
               />

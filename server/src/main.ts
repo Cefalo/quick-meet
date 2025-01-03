@@ -23,6 +23,14 @@ async function bootstrap() {
   const port = config.get('app').appPort;
   const env = config.get('app').environment;
 
+  if (env === 'development') {
+    app.enableCors({
+      origin: (_, callback) => {
+        callback(null, true);
+      },
+    });
+  }
+
   await app.listen(port);
 
   console.log(`Application environment: ${env}`);

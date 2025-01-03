@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
 import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
 import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
@@ -49,27 +49,6 @@ function OAuth() {
 }
 
 function App() {
-  const api = new Api();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const refreshToken = async () => {
-      const res = await api.refreshToken();
-      if (res.status === 'error') {
-        navigate(ROUTES.signIn);
-      }
-
-      setLoading(false);
-    };
-
-    refreshToken();
-  }, []);
-
-  if (loading) {
-    return <></>;
-  }
-
   return (
     <AppTheme>
       <Routes>
