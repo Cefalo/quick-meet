@@ -1,11 +1,10 @@
 import { OAuth2Client } from 'google-auth-library';
-import { admin_directory_v1, calendar_v3, oauth2_v2 } from 'googleapis';
-import { OAuthTokenResponse } from 'src/auth/dto/oauth-token.response';
-import type { IJwtPayload } from 'src/auth/dto';
+import { admin_directory_v1, calendar_v3 } from 'googleapis';
+import { OAuthTokenResponse } from 'src/auth/dto';
 
 export interface IGoogleApiService {
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(payload?: IJwtPayload): OAuth2Client;
+  getOAuthClient(string?: string): OAuth2Client;
   getToken(oauth2Client: OAuth2Client, code: string): Promise<OAuthTokenResponse>;
   getOAuthUrl(): string;
 

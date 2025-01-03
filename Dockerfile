@@ -23,6 +23,4 @@ COPY client/ /app/client/
 RUN npm run build
 
 # Stage 3: Runtime Stage
-EXPOSE 3000
-
 CMD ["npm", "run", "start"]

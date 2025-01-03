@@ -2,9 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuth2Client } from 'google-auth-library';
 import { calendar_v3, admin_directory_v1 } from 'googleapis';
-import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
+import { OAuthTokenResponse } from '../auth/dto';
 import { CalenderMockDb } from './mock.database';
-import { IJwtPayload } from 'src/auth/dto';
 import { JwtService } from '@nestjs/jwt';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
@@ -21,8 +20,8 @@ export class GoogleApiMockService implements IGoogleApiService {
   }
 
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(payload?: IJwtPayload): OAuth2Client;
-  getOAuthClient(_?: IJwtPayload): OAuth2Client {
+  getOAuthClient(accessToken?: string): OAuth2Client;
+  getOAuthClient(_?: string): OAuth2Client {
     return new OAuth2Client();
   }
 

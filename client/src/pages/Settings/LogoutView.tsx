@@ -52,7 +52,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
                 textAlign: 'center',
                 flex: 1,
                 color: theme.palette.common.black,
-                mt: 3,
+                mt: 2,
                 fontWeight: 700,
               }),
             ]}

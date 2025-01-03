@@ -100,13 +100,14 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 1. [Fork](https://github.com/Propo41/bookify/fork) the repository.
 2. Create a branch and integrate your own Github actions or webhooks to add a seamless CI/CD pipeline.
-1. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
-2. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview)
-3. Copy the **Client ID**, **Client secret** from the OAuth 2.0 Client ID you created in step 1, and place it in the `.env` file.
-4. Add the **Authorized javascript origins** and the **Authorized redirect URIs** in your google cloud project. 
-5. Check out the [installation](CONTRIBUTING.md/#installation-web) section, to prepare the app for launching.
-5. Deploy your branch and your ready to start booking! 🎉
-6. Make sure to sync latest changes from the upstream repository.
+3. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
+4. Add the following scopes to the new credential (OAuth web client id): `./auth/userinfo.profile` and `./auth/calendar`
+5. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview). This is required to read the directory resources; refer to `getCalendarResources()`
+6. Copy the **Client ID**, **Client secret** from the OAuth 2.0 Client ID you created in step 1, and place it in the `.env` file.
+7. Add the **Authorized javascript origins** and the **Authorized redirect URIs** in your google cloud project. 
+8. Check out the [installation](CONTRIBUTING.md/#installation-with-docker-1) section, to prepare the app for launching.
+9. Deploy your branch and your ready to start booking! 🎉
+10. Make sure to sync latest changes from the upstream repository.
 
 **Note**: The **Authorized javascript origins** should have: 
 ```bash
@@ -118,6 +119,20 @@ The **Authorized redirect URIs** for the web app should have:
 web: https://<domain>/oauthcallback
 chrome: https://<extension-id>.chromiumapp.org/index.html oauthcallback
 ```
+
+### Deplying to vercel
+
+The application can be easily deployed to Vercel with the following steps:
+
+1. Fork the repository
+2. Obtain the required env credentials from the above steps
+3. Retrieve your [Vercel Access Token](https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token)
+4. Install the [Vercel CLI](https://vercel.com/cli) and run `vercel login`
+5. Inside your project folder, run `vercel link` to create a new Vercel project
+6. Inside the generated .vercel folder, save the `projectId` and `orgId` from the project.json
+7. Add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as secrets in your github repository settings
+9. Add all necessary secrets as per the `deploy.yml` file under `.github/workflows` and push the changes
+
 
 ### Taking app to Production
 For your app to be made publicly usable, the Google OAuth credentials needs to be deployed to production which requires several steps and requirements.

@@ -4,7 +4,7 @@ export class AppService {
   getHello(): string {
     return `<pre>
       Hello from the other side.
-      APP_DOMAIN:  ${process.env.APP_DOMAIN} \n
+      APP_DOMAIN:  ${process.env.DOMAIN} \n
     </pre>`;
   }
 }

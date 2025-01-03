@@ -1,10 +1,7 @@
 export interface IJwtPayload {
-  name?: string;
-  expiresIn?: number;
+  name: string;
   accessToken: string;
-  refreshToken?: string;
-  scope: string;
-  expiryDate: number;
-  tokenType: string;
   hd: string;
+  exp?: number;
+  iat?: number;
 }

@@ -1,35 +1,27 @@
 import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { admin_directory_v1, calendar_v3, google } from 'googleapis';
 import { IGoogleApiService } from './interfaces/google-api.interface';
-import { OAuthTokenResponse } from '../auth/dto/oauth-token.response';
+import { OAuthTokenResponse } from '../auth/dto';
 import { OAuth2Client } from 'google-auth-library';
 import appConfig from 'src/config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import to from 'await-to-js';
 import { GaxiosError, GaxiosResponse } from 'gaxios';
 import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
-import { IJwtPayload } from '../auth/dto';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
   constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
 
   // @ overloaded method signature
-  getOAuthClient(payload: IJwtPayload): OAuth2Client;
+  getOAuthClient(accessToken: string): OAuth2Client;
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(payload?: IJwtPayload): OAuth2Client {
-    if (!payload) {
+  getOAuthClient(accessToken?: string): OAuth2Client {
+    if (!accessToken) {
       return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
     } else {
       const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
-      const { accessToken, scope, tokenType, expiryDate, refreshToken } = payload;
-      client.setCredentials({
-        access_token: accessToken,
-        scope: scope,
-        token_type: tokenType,
-        expiry_date: expiryDate,
-        refresh_token: refreshToken,
-      });
+      client.setCredentials({ access_token: accessToken });
 
       return client;
     }
