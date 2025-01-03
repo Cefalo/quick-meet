@@ -43,23 +43,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      # - name: Create .env file for server
-      #   run: |
-      #     echo "APP_PORT=${{ secrets.APP_PORT }}" >> ./server/.env
-      #     echo "OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}" >> ./server/.env
-      #     echo "OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}" >> ./server/.env
-      #     echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> ./server/.env
-      #     echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./server/.env
-      #     echo "OAUTH_REDIRECT_URL=${{ secrets.OAUTH_REDIRECT_URL }}" >> ./server/.env
-
-      # - name: Create .env file for client
-      #   run: |
-      #     echo "VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }}" >> ./client/.env
-      #     echo "VITE_APP_SLOGAN=${{ secrets.VITE_APP_SLOGAN }}" >> ./client/.env
-      #     echo "VITE_BACKEND_ENDPOINT=${{ secrets.VITE_BACKEND_ENDPOINT }}" >> ./client/.env
-      #     echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> ./client/.env
-      #     echo "VITE_MOCK_CALENDER=${{ secrets.VITE_MOCK_CALENDER }}" >> ./client/.env
-          
       - name: Install dependencies using npm workspaces
         run: npm install
 

@@ -120,6 +120,20 @@ web: https://<domain>/oauthcallback
 chrome: https://<extension-id>.chromiumapp.org/index.html oauthcallback
 ```
 
+### Deplying to vercel
+
+The application can be easily deployed to Vercel with the following steps:
+
+1. Fork the repository
+2. Obtain the required env credentials from the above steps
+3. Retrieve your [Vercel Access Token](https://vercel.com/guides/how-do-i-use-a-vercel-api-access-token)
+4. Install the [Vercel CLI](https://vercel.com/cli) and run `vercel login`
+5. Inside your project folder, run `vercel link` to create a new Vercel project
+6. Inside the generated .vercel folder, save the `projectId` and `orgId` from the project.json
+7. Add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` as secrets in your github repository settings
+9. Add all necessary secrets as per the `deploy.yml` file under `.github/workflows` and push the changes
+
+
 ### Taking app to Production
 For your app to be made publicly usable, the Google OAuth credentials needs to be deployed to production which requires several steps and requirements.
 

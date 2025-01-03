@@ -5,13 +5,16 @@ import { AuthModule } from './auth/auth.module';
 import { CalenderModule } from './calender/calender.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/env/app.config';
-import dbConfig from './config/env/db.config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GoogleApiModule } from './google-api/google-api.module';
 import { CacheModule } from '@nestjs/cache-manager';
+
+const pathToBuildWeb = join(__dirname, '..', '..', 'client', 'build_web');
+console.log(pathToBuildWeb);  // This wil
+console.log(__dirname);  // This wil
 
 @Module({
   imports: [
@@ -22,7 +25,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [appConfig, dbConfig],
+      load: [appConfig],
     }),
     ThrottlerModule.forRoot([
       {
