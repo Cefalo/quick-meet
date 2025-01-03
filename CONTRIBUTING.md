@@ -58,6 +58,15 @@ Front end code for both the web and chrome versions are the same, with the `clie
 6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
 7. Run `npm run start:server` to start the server.
 
+#### Useful tools & documentations
+
+- https://developer.chrome.com/docs/extensions/develop/concepts/storage-and-cookies 
+- https://developer.chrome.com/docs/extensions/reference/api/cookies
+- https://developer.chrome.com/docs/extensions/develop/concepts/declare-permissions#host-permissions 
+- https://developer.chrome.com/docs/extensions/develop/concepts/network-requests 
+- https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3
+- https://chromewebstore.google.com/detail/storage-area-explorer/ocfjjjjhkpapocigimmppepjgfdecjkb 
+
 ## Production
 
 ### Installation with Docker

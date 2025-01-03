@@ -63,10 +63,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    console.log('preferences', preferences);
-  }, [preferences]);
-
-  useEffect(() => {
     initializeDropdowns();
     setInitialPageLoad(true);
 
@@ -198,7 +194,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
     setAvailableRoomOptions([]);
     onRoomBooked();
-    await setAvailableRooms();
   }
 
   return (

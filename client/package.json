@@ -30,8 +30,9 @@
   "scripts": {
     "start": "vite --port 3000",
     "build": "tsc -b && vite build",
-    "build:chrome": "tsc -b && vite build --mode chrome",
-    "serve": "npx http-server dist --port 3000",
+    "chrome:build": "npm run chrome:generate-manifest && tsc -b && vite build --mode chrome",
+    "chrome:generate-manifest": "node generate-manifest.js",
+    "serve": "npx http-server build_web --port 3000",
     "lint": "eslint \"{src}/**/*.ts\" --fix"
   },
   "eslintConfig": {
@@ -59,6 +60,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.3.3",
+    "dotenv": "^16.4.7",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

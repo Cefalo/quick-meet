@@ -69,7 +69,9 @@ export default class Api {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error.response.status === 401 && !originalRequest._retry) {
+        console.log(error);
+        
+        if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           const renewedToken = await this.refreshToken();
