@@ -15,7 +15,7 @@ import {
   IConferenceRoom,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
-import { Request } from 'express';
+import type { _Request } from 'src/auth/interfaces';
 
 @Controller()
 export class CalenderController {
@@ -26,11 +26,11 @@ export class CalenderController {
   @Get('/rooms')
   async getEvents(
     @_OAuth2Client() client: OAuth2Client,
-    @Req() req: Request,
+    @Req() req: _Request,
     @Query() listRoomsQueryDto: ListRoomsQueryDto,
   ): Promise<ApiResponse<EventResponse[]>> {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
-    const domain = (req as Request & { hd?: string }).hd;
+    const domain = req.hd;
 
     return await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
   }
@@ -40,10 +40,10 @@ export class CalenderController {
   @Get('/available-rooms')
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
-    @Req() req: Request,
+    @Req() req: _Request,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IConferenceRoom[]>> {
-    const domain = (req as Request & { hd?: string }).hd;
+    const domain = req.hd;
     let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     const startDate = new Date(startTime);
@@ -56,8 +56,8 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @Get('/highest-seat-count')
-  async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: Request): Promise<ApiResponse<number>> {
-    const domain = (req as Request & { hd?: string }).hd;
+  async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<number>> {
+    const domain = req.hd;
 
     return await this.calenderService.getHighestSeatCapacity(client, domain);
   }
@@ -65,9 +65,9 @@ export class CalenderController {
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Post('/room')
-  async bookRoom(@_OAuth2Client() client: OAuth2Client, @Req() req: Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
+  async bookRoom(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
-    const domain = (req as Request & { hd?: string }).hd;
+    const domain = req.hd;
 
     // end time
     const startDate = new Date(startTime);
@@ -83,12 +83,12 @@ export class CalenderController {
   @Put('/room')
   async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
-    @Req() req: Request,
+    @Req() req: _Request,
     @Body('eventId') eventId: string,
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
-    const domain = (req as Request & { hd?: string }).hd;
+    const domain = req.hd;
 
     // end time
     const startDate = new Date(startTime);
@@ -107,8 +107,8 @@ export class CalenderController {
 
   @UseGuards(AuthGuard)
   @Get('/floors')
-  async listFloors(@_OAuth2Client() client: OAuth2Client, @Req() req: Request): Promise<ApiResponse<string[]>> {
-    const domain = (req as Request & { hd?: string }).hd;
+  async listFloors(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<string[]>> {
+    const domain = req.hd;
 
     return await this.calenderService.listFloors(client, domain);
   }

@@ -21,8 +21,8 @@ export class GoogleApiMockService implements IGoogleApiService {
   }
 
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(payload?: IJwtPayload): OAuth2Client;
-  getOAuthClient(_?: IJwtPayload): OAuth2Client {
+  getOAuthClient(accessToken?: string): OAuth2Client;
+  getOAuthClient(_?: string): OAuth2Client {
     return new OAuth2Client();
   }
 

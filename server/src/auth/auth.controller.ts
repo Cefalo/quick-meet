@@ -41,9 +41,8 @@ export class AuthController {
 
   @Get('/refresh-token')
   async refreshAppToken(@Req() req: Request): Promise<ApiResponse<string>> {
-    const token = req.headers.authorization?.split(' ')[1];
     const refreshToken: string | undefined = req.cookies.refreshToken;
-    const appToken = await this.authService.refreshAppToken(token, refreshToken);
+    const appToken = await this.authService.refreshAppToken(refreshToken);
 
     return createResponse(appToken);
   }

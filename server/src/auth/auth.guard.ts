@@ -2,10 +2,10 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Injec
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import appConfig from '../config/env/app.config';
-import { Request } from 'express';
 import { IJwtPayload } from './dto';
 import to from 'await-to-js';
 import { EncryptionService } from './encryption.service';
+import { _Request } from './interfaces';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const request: _Request = context.switchToHttp().getRequest();
     const token = request.headers.authorization?.split(' ')[1];
 
     if (!token) {
@@ -29,8 +29,6 @@ export class AuthGuard implements CanActivate {
     }
 
     const decoded = await this.jwtService.decode(token);
-    decoded.refreshToken = request.cookies.refreshToken;
-
     const decrypted = await this.encryptionService.decrypt(decoded.payload, decoded.iv);
     if (!decrypted) {
       throw new UnauthorizedException();
@@ -38,8 +36,9 @@ export class AuthGuard implements CanActivate {
 
     const decryptedPayload: IJwtPayload = JSON.parse(decrypted);
 
-    request['payload'] = decryptedPayload;
-    request['hd'] = decryptedPayload.hd;
+    request.access_token = decryptedPayload.accessToken;
+    request.hd = decryptedPayload.hd;
+    request.refresh_token = request.cookies.refreshToken;
 
     return true;
   }
