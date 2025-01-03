@@ -1,18 +1,14 @@
 import { OAuth2Client } from 'google-auth-library';
-import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { calendar_v3 } from 'googleapis';
-import appConfig from '../config/env/app.config';
-import { extractRoomByEmail, isRoomAvailable, toMs, validateEmail } from './util/calender.util';
+import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
-import { ApiResponse, DeleteResponse, EventResponse, EventUpdateResponse, type IConferenceRoom } from '@quickmeet/shared';
-import { createResponse } from '../helpers/payload.util';
+import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom } from '@quickmeet/shared';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
 export class CalenderService {
   constructor(
-    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     private authService: AuthService,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
   ) {}
@@ -26,7 +22,7 @@ export class CalenderService {
     createConference?: boolean,
     eventTitle?: string,
     attendees?: string[],
-  ): Promise<ApiResponse<EventResponse>> {
+  ): Promise<EventResponse> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
 
     const attendeeList = [];
@@ -100,10 +96,10 @@ export class CalenderService {
       seats: pickedRoom.seats,
     };
 
-    return createResponse(data, 'Room has been booked');
+    return data;
   }
 
-  async getHighestSeatCapacity(client: OAuth2Client, domain: string) {
+  async getHighestSeatCapacity(client: OAuth2Client, domain: string): Promise<number> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     let max = -1;
     for (const room of rooms) {
@@ -112,7 +108,7 @@ export class CalenderService {
       }
     }
 
-    return createResponse(max);
+    return max;
   }
 
   async getAvailableRooms(
@@ -209,7 +205,7 @@ export class CalenderService {
     return true;
   }
 
-  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<ApiResponse<EventResponse[]>> {
+  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<EventResponse[]> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
@@ -263,57 +259,7 @@ export class CalenderService {
       return firstCreated === createdAtA ? 1 : -1;
     });
 
-    return createResponse(sortedEvents);
-  }
-
-  async updateEventDuration(client: OAuth2Client, eventId: string, roomId: string, duration: number): Promise<ApiResponse<EventUpdateResponse>> {
-    const event = await this.googleApiService.getCalenderEvent(client, eventId);
-
-    const { start, end } = event;
-
-    // start time
-    const startMs = new Date(start.dateTime).getTime();
-
-    // end time
-    const endMs = new Date(end.dateTime).getTime();
-
-    const newDurationInMs = toMs(duration);
-    const eventDurationInMs = endMs - startMs;
-
-    let newEnd: string;
-
-    if (newDurationInMs === eventDurationInMs) {
-      throw new BadRequestException('Duration has already been set to ' + duration + ' mins');
-    } else if (newDurationInMs < eventDurationInMs && newDurationInMs >= toMs(15)) {
-      newEnd = new Date(endMs - (eventDurationInMs - newDurationInMs)).toISOString();
-    } else {
-      const newStart = end.dateTime;
-      newEnd = new Date(endMs + (newDurationInMs - eventDurationInMs)).toISOString();
-
-      // check if room is available within newStart and newEnd
-      const isAvailable = await this.isRoomAvailable(client, newStart, newEnd, roomId, start.timeZone);
-      if (!isAvailable) {
-        throw new ForbiddenException('Room is not available within time range');
-      }
-    }
-
-    // update the room
-    const newEvent: calendar_v3.Schema$Event = {
-      ...event,
-      end: {
-        dateTime: newEnd,
-        timeZone: end.timeZone,
-      },
-    };
-
-    const result = await this.googleApiService.updateCalenderEvent(client, eventId, newEvent);
-
-    const data: EventUpdateResponse = {
-      start: result.start.dateTime,
-      end: result.end.dateTime,
-    };
-
-    return createResponse(data, 'Room has been updated');
+    return sortedEvents;
   }
 
   async updateEvent(
@@ -326,7 +272,7 @@ export class CalenderService {
     eventTitle?: string,
     attendees?: string[],
     room?: string,
-  ): Promise<ApiResponse<EventUpdateResponse>> {
+  ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms = await this.authService.getDirectoryResources(client, domain);
 
@@ -415,7 +361,7 @@ export class CalenderService {
 
     console.log('Room has been updated', result);
 
-    const data: EventResponse = {
+    const eventResponse: EventResponse = {
       eventId: updatedEvent.id,
       summary: updatedEvent.summary,
       meet: result.hangoutLink,
@@ -428,21 +374,21 @@ export class CalenderService {
       attendees: attendeeEmails,
     };
 
-    return createResponse(data, 'Room has been updated');
+    return eventResponse;
   }
 
-  async deleteEvent(client: OAuth2Client, id: string): Promise<ApiResponse<DeleteResponse>> {
+  async deleteEvent(client: OAuth2Client, id: string): Promise<DeleteResponse> {
     await this.googleApiService.deleteEvent(client, id);
 
     const data: DeleteResponse = {
       deleted: true,
     };
 
-    return createResponse(data, 'Event deleted');
+    return data;
   }
 
-  async listFloors(client: OAuth2Client, domain: string): Promise<ApiResponse<string[]>> {
+  async listFloors(client: OAuth2Client, domain: string): Promise<string[]> {
     const floors = await this.authService.getFloors(client, domain);
-    return createResponse(floors);
+    return floors;
   }
 }

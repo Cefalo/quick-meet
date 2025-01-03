@@ -1,4 +1,4 @@
-import type { IAuth } from './auth.interface';
+import { IAuth } from './auth.interface';
 
 export class IUser {
   id?: string;

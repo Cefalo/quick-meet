@@ -15,7 +15,7 @@ import {
   IConferenceRoom,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
-import type { _Request } from 'src/auth/interfaces';
+import { _Request } from 'src/auth/interfaces';
 
 @Controller()
 export class CalenderController {
@@ -32,7 +32,8 @@ export class CalenderController {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
     const domain = req.hd;
 
-    return await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
+    const events = await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
+    return createResponse(events);
   }
 
   @UseGuards(AuthGuard)
@@ -59,7 +60,8 @@ export class CalenderController {
   async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<number>> {
     const domain = req.hd;
 
-    return await this.calenderService.getHighestSeatCapacity(client, domain);
+    const count = await this.calenderService.getHighestSeatCapacity(client, domain);
+    return createResponse(count);
   }
 
   @UseGuards(AuthGuard)
@@ -75,7 +77,7 @@ export class CalenderController {
     const endTime = startDate.toISOString();
 
     const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, createConference, title, attendees);
-    return event;
+    return createResponse(event, 'Room has been booked');
   }
 
   @UseGuards(AuthGuard)
@@ -95,14 +97,17 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    return await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
+    const updatedEvent = await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
+    return createResponse(updatedEvent, 'Event has been updated!');
   }
 
   @UseGuards(AuthGuard)
   @UseInterceptors(OAuthInterceptor)
   @Delete('/room')
   async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Query('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
-    return await this.calenderService.deleteEvent(client, eventId);
+    const deleted = await this.calenderService.deleteEvent(client, eventId);
+
+    return createResponse(deleted, 'Event has been deleted');
   }
 
   @UseGuards(AuthGuard)
@@ -110,6 +115,7 @@ export class CalenderController {
   async listFloors(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<string[]>> {
     const domain = req.hd;
 
-    return await this.calenderService.listFloors(client, domain);
+    const floors = await this.calenderService.listFloors(client, domain);
+    return createResponse(floors);
   }
 }

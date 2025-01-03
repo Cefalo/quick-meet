@@ -1,6 +1,6 @@
-import { chromeBackground, isChromeExt } from "@/helpers/utility";
-import { Stack, styled } from "@mui/material";
-import type { ReactNode } from "react";
+import { chromeBackground, isChromeExt } from '@/helpers/utility';
+import { Stack, styled } from '@mui/material';
+import { ReactNode } from 'react';
 import MuiCard from '@mui/material/Card';
 
 const ChromeContainer = styled(MuiCard)(({ theme }) => ({

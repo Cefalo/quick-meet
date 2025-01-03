@@ -1,4 +1,4 @@
-import type { IConferenceRoom } from '@quickmeet/shared';
+import { IConferenceRoom } from '@quickmeet/shared';
 import { BusyTimes } from '../interfaces/freebusy.interface';
 
 export function isRoomAvailable(busyTimes: BusyTimes[], startTime: Date, endTime: Date) {
@@ -23,15 +23,6 @@ export function extractRoomByEmail(rooms: IConferenceRoom[], email: string) {
   return null;
 }
 
-export function extractRoomName(rooms: IConferenceRoom[], googleApiRoomName: string) {
-  const index = rooms.findIndex((room) => googleApiRoomName.toLowerCase().includes(room.name.toLowerCase()));
-  if (index !== -1) {
-    return rooms[index].name;
-  }
-
-  return null;
-}
-
 export const validateEmail = (email: string) => {
   return String(email)
     .toLowerCase()
@@ -39,11 +30,3 @@ export const validateEmail = (email: string) => {
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     );
 };
-
-export function toMins(ms: number) {
-  return ms / (1000 * 60);
-}
-
-export function toMs(min: number) {
-  return min * 60 * 1000;
-}

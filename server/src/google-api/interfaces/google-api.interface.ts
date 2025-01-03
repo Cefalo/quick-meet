@@ -1,6 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 import { admin_directory_v1, calendar_v3 } from 'googleapis';
-import { OAuthTokenResponse } from 'src/auth/dto/oauth-token.response';
+import { OAuthTokenResponse } from 'src/auth/dto';
 
 export interface IGoogleApiService {
   getOAuthClient(): OAuth2Client;
