@@ -1,5 +1,5 @@
 import { IConferenceRoom } from '@quickmeet/shared';
-import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
@@ -12,7 +12,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EncryptionService } from './encryption.service';
 import { _OAuth2Client } from 'src/auth/decorators';
 import { CookieOptions } from 'express';
-import { google } from 'googleapis';
 import { RefreshAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
 
 @Injectable()
@@ -33,7 +32,7 @@ export class AuthService {
 
     const _ = await this.getDirectoryResources(client, userInfo.hd);
 
-    const jwt = await this.createAppToken(tokens.access_token, userInfo.hd, userInfo.name, tokens.expiry_date);
+    const jwt = await this.createAppToken(tokens.access_token, userInfo.hd, userInfo.name);
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
     return {
@@ -42,7 +41,7 @@ export class AuthService {
     };
   }
 
-  async createAppToken(accessToken: string, domain: string, name: string, expiryInMs: number) {
+  async createAppToken(accessToken: string, domain: string, name: string) {
     const jwtPayload: IJwtPayload = {
       accessToken: accessToken,
       hd: domain,
@@ -50,7 +49,7 @@ export class AuthService {
     };
 
     const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
-    const jwt = await this.createJwt({ payload: encryptedData, iv }, expiryInMs);
+    const jwt = await this.createJwt({ payload: encryptedData, iv }, '1h');
 
     return jwt;
   }
@@ -70,9 +69,9 @@ export class AuthService {
     return true;
   }
 
-  async createJwt(payload: any, _: number) {
+  async createJwt(payload: any, expiresIn: string) {
     // todo: hard coding to 1h cause if the oAuthExpiry is used (even when converted to seconds), produce large exp values, eg 2079. No idea why
-    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: '1h' });
+    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn });
   }
 
   getOAuthUrl(): string {
@@ -84,7 +83,7 @@ export class AuthService {
       throw new UnauthorizedException("Couldn't rotate token. Try re-logging");
     }
 
-    const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+    const client = this.googleApiService.getOAuthClient();
     client.setCredentials({ refresh_token: refreshToken });
 
     const [refreshTokenErr, res]: [Error, RefreshAccessTokenResponse] = await to(client.refreshAccessToken());
@@ -94,7 +93,7 @@ export class AuthService {
     }
 
     const userInfo = await this.jwtService.decode(res.credentials.id_token);
-    const jwt = await this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name, res.credentials.expiry_date);
+    const jwt = await this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name);
     return jwt;
   }
 
