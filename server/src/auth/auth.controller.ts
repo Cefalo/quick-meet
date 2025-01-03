@@ -4,9 +4,9 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
-import { Response, type CookieOptions, type Request } from 'express';
+import { Response, CookieOptions, Request } from 'express';
 import { OAuthInterceptor } from 'src/auth/oauth.interceptor';
-import type { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 
 @Controller()
 export class AuthController {

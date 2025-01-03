@@ -8,7 +8,7 @@ import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
 import Api from '@api/api';
 import { isChromeExt, renderError } from '@helpers/utility';
-import type { ApiResponse } from '@quickmeet/shared';
+import { ApiResponse } from '@quickmeet/shared';
 
 const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();

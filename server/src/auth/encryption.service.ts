@@ -1,5 +1,5 @@
 import { Inject, Injectable, InternalServerErrorException, Scope } from '@nestjs/common';
-import type { ConfigType } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 import * as crypto from 'crypto';
 import appConfig from 'src/config/env/app.config';
 
