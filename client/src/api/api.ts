@@ -20,14 +20,13 @@ import { ROUTES } from '@/config/routes';
  */
 export default class Api {
   apiToken?: string;
-  apiEndpoint?: string = secrets.backendEndpoint;
   client: AxiosInstance;
 
   cacheService: CacheService = CacheServiceFactory.getCacheService();
 
   constructor() {
     this.client = axios.create({
-      baseURL: `${this.apiEndpoint}`,
+      baseURL: secrets.appEnvironment === 'chrome' ? `${secrets.backendEndpoint}` : undefined,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
       headers: this.getHeaders(),
     });
