@@ -7,7 +7,7 @@ import {
   GetAvailableRoomsQueryDto,
   IConferenceRoom,
   LoginResponse,
-  type StatusTypes,
+  StatusTypes,
 } from '@quickmeet/shared';
 import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
@@ -29,47 +29,59 @@ export default class Api {
     this.client = axios.create({
       baseURL: `${this.apiEndpoint}`,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
+      headers: this.getHeaders(),
     });
 
     this.setAuthorizationHeaders();
     this.handleTokenRefresh();
   }
 
+  getHeaders() {
+    return {
+      Accept: 'application/json',
+      'x-mock-api': secrets.mockCalender,
+    };
+  }
+
   async setAuthorizationHeaders() {
     this.client.interceptors.request.use(async (config) => {
       const token = await this.cacheService.get('access_token');
-
       config.headers['Authorization'] = `Bearer ${token}`;
-      config.headers['Accept'] = `application/json`;
-      config.headers['x-mock-api'] = secrets.mockCalender;
 
       return config;
     });
+  }
+
+  async refreshToken() {
+    try {
+      const res = await axios.get('/refresh-token', {
+        baseURL: `${secrets.backendEndpoint}`,
+        headers: this.getHeaders(),
+      });
+
+      return res.data.data;
+    } catch (error) {
+      return null;
+    }
   }
 
   async handleTokenRefresh() {
     this.client.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (error.response.status === 401 && !error.config._retry) {
-          error.config._retry = true;
+        const originalRequest = error.config;
+        if (error.response.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
 
-          try {
-            const res = await axios.get('/refresh-token', {
-              baseURL: `${secrets.backendEndpoint}`,
-              headers: {
-                Accept: 'application/json',
-                'x-mock-api': secrets.mockCalender,
-              },
-            });
-
-            await this.cacheService.save('access_token', res.data.data);
-            return this.client(error.config);
-          } catch (error) {
-            window.location.href = ROUTES.signIn;
+          const renewedToken = await this.refreshToken();
+          if (!renewedToken) {
             await this.cacheService.remove('access_token');
+            window.location.href = ROUTES.signIn;
             return Promise.reject(error);
           }
+
+          await this.cacheService.save('access_token', renewedToken);
+          return this.client(originalRequest);
         }
 
         return Promise.reject(error);
