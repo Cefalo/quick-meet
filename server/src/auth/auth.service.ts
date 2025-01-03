@@ -1,19 +1,18 @@
-import { type IConferenceRoom } from '@quickmeet/shared';
-import { ApiResponse } from '@quickmeet/shared';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { IConferenceRoom } from '@quickmeet/shared';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { IJwtPayload } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
-import { createResponse } from '../helpers/payload.util';
 import { GoogleApiService } from '../google-api/google-api.service';
-import type { Cache } from 'cache-manager';
+import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { EncryptionService } from './encryption.service';
 import { _OAuth2Client } from 'src/auth/decorators';
-import type { CookieOptions } from 'express';
+import { CookieOptions } from 'express';
+import { RefreshAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
 
 @Injectable()
 export class AuthService {
@@ -29,28 +28,30 @@ export class AuthService {
   async login(code: string) {
     const client = this.googleApiService.getOAuthClient();
     const { tokens } = await this.googleApiService.getToken(client, code);
-    const userInfo = this.jwtService.decode(tokens.id_token);
+    const userInfo = await this.jwtService.decode(tokens.id_token);
 
     const _ = await this.getDirectoryResources(client, userInfo.hd);
 
-    const jwtPayload: IJwtPayload = {
-      accessToken: tokens.access_token,
-      scope: tokens.scope,
-      expiryDate: tokens.expiry_date,
-      tokenType: tokens.token_type,
-      hd: userInfo.hd,
-      name: userInfo.name,
-    };
-
-    const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
-    const jwt = await this.createJwt({ payload: encryptedData, iv }, jwtPayload.expiryDate);
-
+    const jwt = await this.createAppToken(tokens.access_token, userInfo.hd, userInfo.name);
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
     return {
       jwt,
       refreshToken: tokens.refresh_token,
     };
+  }
+
+  async createAppToken(accessToken: string, domain: string, name: string) {
+    const jwtPayload: IJwtPayload = {
+      accessToken: accessToken,
+      hd: domain,
+      name: name,
+    };
+
+    const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
+    const jwt = await this.createJwt({ payload: encryptedData, iv }, '1h');
+
+    return jwt;
   }
 
   /**
@@ -68,29 +69,44 @@ export class AuthService {
     return true;
   }
 
-  async createJwt(payload: any, oAuthExpiry: number) {
-    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn: oAuthExpiry });
+  async createJwt(payload: any, expiresIn: string) {
+    // todo: hard coding to 1h cause if the oAuthExpiry is used (even when converted to seconds), produce large exp values, eg 2079. No idea why
+    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn });
   }
 
-  getOAuthUrl() {
-    const url = this.googleApiService.getOAuthUrl();
-    return createResponse(url);
+  getOAuthUrl(): string {
+    return this.googleApiService.getOAuthUrl();
   }
 
-  async validateSession() {
-    return createResponse(true);
+  async refreshAppToken(refreshToken?: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedException("Couldn't rotate token. Try re-logging");
+    }
+
+    const client = this.googleApiService.getOAuthClient();
+    client.setCredentials({ refresh_token: refreshToken });
+
+    const [refreshTokenErr, res]: [Error, RefreshAccessTokenResponse] = await to(client.refreshAccessToken());
+
+    if (refreshTokenErr) {
+      throw new UnauthorizedException(refreshTokenErr.message);
+    }
+
+    const userInfo = await this.jwtService.decode(res.credentials.id_token);
+    const jwt = await this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name);
+    return jwt;
   }
 
   /**
    * remove the refresh token from the cookie
    * the access_token is removed from the client side
    */
-  async logout(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<boolean>> {
+  async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
     try {
       await this.purgeAccess(client);
-      return createResponse(true);
+      return true;
     } catch (error) {
-      return createResponse(false);
+      return false;
     }
   }
 

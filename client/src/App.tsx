@@ -37,7 +37,6 @@ function OAuth() {
         }
 
         if (data?.accessToken) {
-          console.log('Access Token:', data?.accessToken);
           const cacheService: CacheService = CacheServiceFactory.getCacheService();
           await cacheService.save('access_token', data.accessToken);
           navigate(ROUTES.home, { replace: true });
@@ -50,24 +49,16 @@ function OAuth() {
 }
 
 function App() {
-  const api = new Api();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const validateSession = async () => {
-      const res = await api.validateSession()
-      if (res?.redirect) {
-        navigate(ROUTES.signIn);
-      }
-    }
-
-    validateSession();
-  }, []);
-
   return (
     <AppTheme>
       <Routes>
-        <Route element={<BaseLayout><Outlet /></BaseLayout>}>
+        <Route
+          element={
+            <BaseLayout>
+              <Outlet />
+            </BaseLayout>
+          }
+        >
           <Route path={ROUTES.home} element={<Home />} />
           <Route path={ROUTES.signIn} element={<Login />} />
           <Route path={ROUTES.oauth} element={<OAuth />} />

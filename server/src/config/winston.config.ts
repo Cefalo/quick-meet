@@ -5,16 +5,11 @@ const logFormat = printf(({ level, message, timestamp }) => {
   return `${timestamp} ${level}: ${message}`;
 });
 
-const loggerInstance: LoggerOptions = {
-  level: 'info',
-  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
-  defaultMeta: {
-    service: 'QuickMeet',
-  },
-  transports: [
-    new transports.Console({
-      format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), prettyPrint(), logFormat),
-    }),
+const isRunningOnVercel = !!process.env.VERCEL;
+
+let fileTransports = [];
+if (!isRunningOnVercel) {
+  fileTransports.push(
     new transports.File({
       dirname: 'logs',
       filename: 'error.log',
@@ -26,6 +21,20 @@ const loggerInstance: LoggerOptions = {
       filename: 'combined.log',
       format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), metadata(), logFormat),
     }),
+  );
+}
+
+const loggerInstance: LoggerOptions = {
+  level: 'info',
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+  defaultMeta: {
+    service: 'QuickMeet',
+  },
+  transports: [
+    new transports.Console({
+      format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), prettyPrint(), logFormat),
+    }),
+    ...fileTransports,
   ],
 };
 

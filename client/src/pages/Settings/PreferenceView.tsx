@@ -1,5 +1,5 @@
 import Api from '@/api/api';
-import type { DropdownOption } from '@/components/Dropdown';
+import { DropdownOption } from '@/components/Dropdown';
 import Dropdown from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
 import { usePreferences } from '@/context/PreferencesContext';

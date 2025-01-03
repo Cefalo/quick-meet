@@ -1,10 +1,12 @@
-name: Deploy
+name: Vercel Deployment | Mock app
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
   push:
     branches:
       - develop
-      - main
     paths-ignore:
       - '**/*.md'
       - '**/*.json'
@@ -13,12 +15,61 @@ on:
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Deploy the app
-        uses: digitalocean/app_action/deploy@v2
+      - name: Setup Node.js version
+        uses: actions/setup-node@v4
         with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
-          app_name: ${{ secrets.DIGITAL_OCEAN_APP_NAME_PROD }}
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Create .env file for server
+        run: |
+          echo "APP_PORT=${{ secrets.APP_PORT }}" >> ./server/.env
+          echo "OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}" >> ./server/.env
+          echo "OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}" >> ./server/.env
+          echo "OAUTH_REDIRECT_URL=${{ secrets.OAUTH_REDIRECT_URL }}" >> ./server/.env
+          echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> ./server/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./server/.env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./server/.env
+          echo "DOMAIN=${{ secrets.DOMAIN }}" >> ./server/.env
+
+      - name: Create .env file for client
+        run: |
+          echo "VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }}" >> ./client/.env
+          echo "VITE_APP_SLOGAN=${{ secrets.VITE_APP_SLOGAN }}" >> ./client/.env
+          echo "VITE_BACKEND_ENDPOINT=${{ secrets.VITE_BACKEND_ENDPOINT }}" >> ./client/.env
+          echo "VITE_ENVIRONMENT=${{ secrets.VITE_ENVIRONMENT }}" >> ./client/.env
+          echo "VITE_MOCK_CALENDER=${{ secrets.VITE_MOCK_CALENDER }}" >> ./client/.env
+
+      - name: Install dependencies using npm workspaces
+        run: npm install
+
+      - name: Build all dependencies
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Read .env file and set environment variables
+        run: |
+          # Check if the server/.env file exists
+          if [ -f server/.env ]; then
+            # Loop through each line in the .env file
+            while IFS='=' read -r key value; do
+              # Skip empty lines or lines starting with a comment
+              if [ ! -z "$key" ] && [[ ! "$key" =~ ^# ]]; then
+                # Add environment variable to Vercel for production environment
+                echo "$value" | vercel env add "$key" production --token=${{ secrets.VERCEL_TOKEN }} --force
+              fi
+            done < server/.env
+          else
+            echo "server/.env not found!"
+            exit 1
+          fi
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}

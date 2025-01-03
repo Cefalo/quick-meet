@@ -47,9 +47,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   }, []);
 
   useEffect(() => {
-    if (!(preferences.duration === defaultPreferences.duration && preferences.seats === defaultPreferences.seats)) {
-      cacheService.save('preferences', JSON.stringify(preferences));
-    }
+    cacheService.save('preferences', JSON.stringify(preferences));
   }, [preferences]);
 
   if (loading) {
