@@ -51,12 +51,22 @@ We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public
 Front end code for both the web and chrome versions are the same, with the `client/src/pages/BaseLayout.tsx` determining the layout based on the `isChromeExt` flag.
 
 1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
-2. Copy the `.env.example` file as `.env` file in the `/client/` dir.
-3. Run `npm run build:chrome` from the root dir
+2. Copy the `.env.example` file as `.env` file in the `/client/` dir. Change `VITE_ENVIRONMENT` to `chrome`.
+3. Modify the `client/generate-manifest.js` file to your organization needs if required.
+3. Run `npm run build:chrome` from the root dir. This will generate a `manifest.json` file in the `public` folder and bundle the static files in `build_chrome`
 4. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder. Note the extension id.
 5. Edit the `OAUTH_REDIRECT_URL` in the `server/.env` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
 6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
 7. Run `npm run start:server` to start the server.
+
+During local development, it is recommended to turn off minification. This can be done in the `client/vite.config.ts` file: 
+```json
+build: {
+  sourcemap: true,
+  minify: false,
+  cssMinify: false,
+},
+```
 
 #### Useful tools & documentations
 

@@ -1,14 +1,18 @@
 import { secrets } from '@config/secrets';
 
-type CacheItems = 'access_token' | 'preferences';
+type CacheItems = 'accessToken' | 'preferences';
+
 export interface CacheService {
   save(key: CacheItems, val: string): Promise<void>;
   get(key: CacheItems): Promise<string | null>;
   remove(key: CacheItems): Promise<void>;
+
+  getCookie(key: CacheItems): Promise<string | null | undefined>;
+  removeCookie(key: CacheItems): Promise<void>;
 }
 
 class WebCacheService implements CacheService {
-  get(key: string): Promise<string | null> {
+  async get(key: string): Promise<string | null> {
     return new Promise<string | null>((resolve, _) => {
       const data = window.localStorage.getItem(key);
       if (!data) {
@@ -25,18 +29,31 @@ class WebCacheService implements CacheService {
     });
   }
 
-  remove(key: string): Promise<void> {
+  async remove(key: string): Promise<void> {
     return new Promise<void>((resolve, _) => {
       window.localStorage.removeItem(key);
       resolve();
     });
   }
 
-  save(key: string, val: string): Promise<void> {
+  async save(key: string, val: string): Promise<void> {
     return new Promise<void>((resolve, _) => {
       window.localStorage.setItem(key, val);
       resolve();
     });
+  }
+
+  async getCookie(key: CacheItems): Promise<string | null | undefined> {
+    return new Promise((resolve) => {
+      const cookies = document.cookie.match('(^|;)\\s*' + key + '\\s*=\\s*([^;]+)');
+      const cookie = cookies ? cookies.pop() : null;
+
+      resolve(cookie);
+    });
+  }
+
+  async removeCookie(key: CacheItems): Promise<void> {
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
   }
 }
 
@@ -63,6 +80,15 @@ class ChromeCacheService implements CacheService {
 
   async remove(key: string): Promise<void> {
     await chrome.storage.sync.remove(key);
+  }
+
+  async getCookie(key: CacheItems): Promise<string | null> {
+    const cookie = await chrome.cookies.get({ url: secrets.backendEndpoint, name: key });
+    return cookie ? cookie.value : null;
+  }
+
+  async removeCookie(key: CacheItems): Promise<void> {
+    await chrome.cookies.remove({ url: secrets.backendEndpoint, name: key });
   }
 }
 

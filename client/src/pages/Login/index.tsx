@@ -24,7 +24,7 @@ const Login = () => {
 
   useEffect(() => {
     const validateSession = async () => {
-      const token = await cacheService.get('access_token');
+      const token = await cacheService.getCookie('accessToken');
       if (token) {
         navigate(ROUTES.home);
       }
@@ -47,8 +47,6 @@ const Login = () => {
       }
 
       if (data) {
-        const cacheService: CacheService = CacheServiceFactory.getCacheService();
-        await cacheService.save('access_token', data);
         navigate(ROUTES.home, { replace: true });
       }
     } else {

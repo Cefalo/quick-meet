@@ -21,9 +21,10 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: mode === 'chrome' ? 'build_chrome' : 'build_web',
       chunkSizeWarningLimit: 600,
-      sourcemap: true,
-      minify: false,
-      cssMinify: false,
+      // uncomment the following during local development so that build files are not minified
+      // sourcemap: true,
+      // minify: false,
+      // cssMinify: false,
     },
     /*
      * by default, vite listens to only localhost. When running the server inside a docker container with port exposed on 3000,

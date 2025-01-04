@@ -2,8 +2,8 @@ import { ApiResponse } from '@quickmeet/shared';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '@config/routes';
-import { CacheService, CacheServiceFactory } from './cache';
 import { secrets } from '@config/secrets';
+import { CacheServiceFactory, type CacheService } from '@/helpers/cache';
 
 /**
  * Returns an array of time strings formatted as HH:mm in 12 hrs format with 15mins interval
@@ -133,8 +133,8 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
   if (status === 'error') {
     if (statusCode === 401) {
       const cacheService: CacheService = CacheServiceFactory.getCacheService();
-      await cacheService.remove('access_token');
-      // navigate(ROUTES.signIn);
+      await cacheService.removeCookie('accessToken');
+      navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
       toast.error('Input missing fields');
     } else if (redirect) {

@@ -4,7 +4,7 @@ import { _Request } from './interfaces';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
 /**
- * must be used after AuthGuard so that the req.access_token is populated
+ * must be used after AuthGuard so that the req.accessToken is populated
  */
 @Injectable()
 export class OAuthInterceptor implements NestInterceptor {
@@ -12,7 +12,7 @@ export class OAuthInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {
     const request: _Request = context.switchToHttp().getRequest();
-    const accessToken = request.access_token;
+    const accessToken = request.accessToken;
 
     request.oauth2Client = this.googleApiService.getOAuthClient(accessToken);
 

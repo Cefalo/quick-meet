@@ -42,11 +42,7 @@ export class AuthService {
   }
 
   async createAppToken(accessToken: string, domain: string, name: string) {
-    const jwtPayload: IJwtPayload = {
-      accessToken: accessToken,
-      hd: domain,
-      name: name,
-    };
+    const jwtPayload: IJwtPayload = { accessToken, hd: domain, name: name };
 
     const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
     const jwt = await this.createJwt({ payload: encryptedData, iv }, '1h');
@@ -99,7 +95,7 @@ export class AuthService {
 
   /**
    * remove the refresh token from the cookie
-   * the access_token is removed from the client side
+   * the accessToken is removed from the client side
    */
   async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
     try {
@@ -169,9 +165,9 @@ export class AuthService {
     await this.cacheManager.set('conference_rooms', resources, expiry); // set TTL to 15 days
   }
 
-  getCookieOptions(age = 30 * 24 * 60 * 60 * 1000) {
+  getCookieOptions(httpOnly = true, age = 2592000000) {
     return {
-      httpOnly: true,
+      httpOnly: httpOnly,
       secure: this.config.environment === 'development' ? false : true,
       sameSite: 'strict',
       path: '/',
