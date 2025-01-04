@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 export interface _Request extends Request {
   hd?: string;
-  access_token?: string;
-  refresh_token?: string;
+  accessToken?: string;
+  refreshToken?: string;
   oauth2Client?: OAuth2Client;
 }

@@ -31,7 +31,6 @@ export default class Api {
       headers: this.getHeaders(),
     });
 
-    this.setAuthorizationHeaders();
     this.handleTokenRefresh();
   }
 
@@ -40,15 +39,6 @@ export default class Api {
       Accept: 'application/json',
       'x-mock-api': secrets.mockCalender,
     };
-  }
-
-  async setAuthorizationHeaders() {
-    this.client.interceptors.request.use(async (config) => {
-      const token = await this.cacheService.get('access_token');
-      config.headers['Authorization'] = `Bearer ${token}`;
-
-      return config;
-    });
   }
 
   async refreshToken() {
@@ -70,18 +60,18 @@ export default class Api {
       async (error) => {
         const originalRequest = error.config;
         console.log(error);
-        
+
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
           const renewedToken = await this.refreshToken();
           if (!renewedToken) {
-            await this.cacheService.remove('access_token');
+            await this.cacheService.removeCookie('accessToken');
+
             window.location.href = ROUTES.signIn;
             return Promise.reject(error);
           }
 
-          await this.cacheService.save('access_token', renewedToken);
           return this.client(originalRequest);
         }
 
@@ -118,7 +108,7 @@ export default class Api {
     try {
       const res = await this.client.post('/logout', null);
 
-      await this.cacheService.remove('access_token');
+      await this.cacheService.removeCookie('accessToken');
 
       return res.data as ApiResponse<boolean>;
     } catch (error: any) {

@@ -16,14 +16,14 @@ export default function Home() {
 
   useEffect(() => {
     const validateSession = async () => {
-      const token = await cacheService.get('access_token');
+      const token = await cacheService.getCookie('accessToken');
       if (!token) {
         navigate(ROUTES.signIn);
         return;
       }
 
       setLoading(false);
-    }
+    };
 
     validateSession();
   }, []);

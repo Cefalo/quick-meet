@@ -17,8 +17,8 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: _Request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
 
+    const token = request.cookies.accessToken;
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -36,9 +36,9 @@ export class AuthGuard implements CanActivate {
 
     const decryptedPayload: IJwtPayload = JSON.parse(decrypted);
 
-    request.access_token = decryptedPayload.accessToken;
+    request.accessToken = decryptedPayload.accessToken;
     request.hd = decryptedPayload.hd;
-    request.refresh_token = request.cookies.refreshToken;
+    request.refreshToken = request.cookies.refreshToken;
 
     return true;
   }

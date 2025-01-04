@@ -6,7 +6,6 @@ import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
 import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
-import { CacheService, CacheServiceFactory } from './helpers/cache';
 import Api from './api/api';
 import Settings from '@/pages/Settings';
 import BaseLayout from '@/pages/BaseLayout';
@@ -17,17 +16,19 @@ function OAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get('code');
-    const error = url.searchParams.get('error');
+    const handleOAuthCallback = async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
+      const error = url.searchParams.get('error');
 
-    if (error) {
-      navigate(ROUTES.signIn, { state: { message: error }, replace: true });
-      return;
-    }
+      if (error) {
+        navigate(ROUTES.signIn, { state: { message: error }, replace: true });
+        return;
+      }
 
-    if (code) {
-      new Api().handleOAuthCallback(code).then(async (res) => {
+      if (code) {
+        const api = new Api();
+        const res = await api.handleOAuthCallback(code);
         if (!res) return;
 
         const { status, message, data } = res;
@@ -37,12 +38,12 @@ function OAuth() {
         }
 
         if (data?.accessToken) {
-          const cacheService: CacheService = CacheServiceFactory.getCacheService();
-          await cacheService.save('access_token', data.accessToken);
           navigate(ROUTES.home, { replace: true });
         }
-      });
-    }
+      }
+    };
+
+    handleOAuthCallback();
   }, [navigate]);
 
   return <></>;
