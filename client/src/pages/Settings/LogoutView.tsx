@@ -36,14 +36,13 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
       >
         <Box
           sx={{
-            bgcolor: 'white',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             borderBottomLeftRadius: 10,
             borderBottomRightRadius: 10,
             textAlign: 'left',
             px: 2,
-            py: 5,
+            py: 4,
           }}
         >
           <Typography
@@ -52,7 +51,6 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
                 textAlign: 'center',
                 flex: 1,
                 color: theme.palette.common.black,
-                mt: 2,
                 fontWeight: 700,
               }),
             ]}

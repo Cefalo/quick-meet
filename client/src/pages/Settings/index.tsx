@@ -16,10 +16,8 @@ const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
   paddingBottom: theme.spacing(1.5),
   display: 'flex',
-  width: '100%',
-  justifyContent: 'center',
+  justifyContent: 'space-between',
   alignItems: 'center',
-  textAlign: 'center',
 }));
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme: _ }) => ({
@@ -94,12 +92,7 @@ export default function Settings() {
             sx={{
               borderRadius: 100,
               backgroundColor: 'white',
-              py: 1,
-              px: 0,
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
               mr: 0,
             }}
           >
@@ -115,17 +108,13 @@ export default function Settings() {
             </IconButton>
           </Box>
 
-          <Box flexGrow={1} />
-
           {/* nav bar */}
           <Box
             sx={{
               bgcolor: 'white',
               py: 0.5,
               px: 0.5,
-              width: '100%',
               borderRadius: 30,
-              textAlign: 'center',
             }}
           >
             <StyledToggleButtonGroup sx={{ mx: 0 }} value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
@@ -139,17 +128,18 @@ export default function Settings() {
           </Box>
           {/* logout icon */}
           <Box
-            sx={{
-              borderRadius: 100,
-              backgroundColor: 'white',
-              py: 1,
-              px: 0,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              ml: 0,
-            }}
+            sx={[
+              (theme) => ({
+                borderRadius: 100,
+                backgroundColor: tabIndex === 2 ? theme.palette.grey[100] : 'white',
+                p: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+                ml: 0,
+              }),
+            ]}
           >
             <IconButton aria-label="settings" sx={{ mr: 0, backgroundColor: 'white' }} onClick={() => handleTabChange(null, 2)}>
               <ExitToAppRoundedIcon
