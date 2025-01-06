@@ -36,6 +36,7 @@ jobs:
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./server/.env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./server/.env
           echo "DOMAIN=${{ secrets.DOMAIN }}" >> ./server/.env
+          echo "CHROME_EXTENSION_ID=${{ secrets.CHROME_EXTENSION_ID }}" >> ./server/.env
 
       - name: Create .env file for client
         run: |
