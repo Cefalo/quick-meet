@@ -172,7 +172,7 @@ export default function MyEventsView() {
         open={!!editView}
         handleClose={handleEditEventViewClose}
         event={editView}
-        loading={editLoading}
+        editLoading={editLoading}
         currentRoom={currentRoom}
         onEditConfirmed={onEditConfirmed}
       />

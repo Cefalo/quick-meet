@@ -10,7 +10,7 @@
     "default_title": "QuickMeet"
   },
   "host_permissions": [
-    "http://localhost:3000/*"
+    "https://quickmeet.cefalolab.com/*"
   ],
   "icons": {
     "16": "favicon-16x16.png",
