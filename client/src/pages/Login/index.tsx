@@ -1,8 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
-import { useEffect } from 'react';
 import { GoogleIcon } from '@components/CustomIcons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import { secrets } from '@config/secrets';
 import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
@@ -10,7 +8,6 @@ import Api from '@api/api';
 import { isChromeExt, renderError } from '@helpers/utility';
 import { ApiResponse } from '@quickmeet/shared';
 
-const cacheService: CacheService = CacheServiceFactory.getCacheService();
 const api = new Api();
 
 const Login = () => {
@@ -21,17 +18,6 @@ const Login = () => {
   if (errorMessage) {
     toast.error(errorMessage);
   }
-
-  useEffect(() => {
-    const validateSession = async () => {
-      const token = await cacheService.getCookie('accessToken');
-      if (token) {
-        navigate(ROUTES.home);
-      }
-    };
-
-    validateSession();
-  }, []);
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {

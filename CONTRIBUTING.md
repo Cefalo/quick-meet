@@ -55,7 +55,7 @@ Front end code for both the web and chrome versions are the same, with the `clie
 3. Modify the `client/generate-manifest.js` file to your organization needs if required.
 3. Run `npm run build:chrome` from the root dir. This will generate a `manifest.json` file in the `public` folder and bundle the static files in `build_chrome`
 4. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder. Note the extension id.
-5. Edit the `OAUTH_REDIRECT_URL` in the `server/.env` file to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback
+5. Edit the `CHROME_EXTENSION_ID` in the `server/.env` file. The `OAUTH_REDIRECT_URL` will be replaced by the `https://CHROME_EXTENSION_ID.chromiumapp.org/index.html/oauthcallback`
 6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
 7. Run `npm run start:server` to start the server.
 

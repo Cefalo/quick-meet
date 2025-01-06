@@ -65,7 +65,7 @@ export default function MyEventsView() {
       return;
     }
 
-    const res = await api.deleteRoom(deleteEventId);
+    const res = await api.deleteEvent(deleteEventId);
 
     setLoading(false);
 
@@ -109,7 +109,7 @@ export default function MyEventsView() {
       attendees,
     };
 
-    const res = await new Api().updateRoom(eventId, payload);
+    const res = await new Api().updateEvent(eventId, payload);
     console.log(res);
 
     if (res?.redirect) {

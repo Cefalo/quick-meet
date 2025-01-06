@@ -3,7 +3,6 @@ import {
   BookRoomDto,
   DeleteResponse,
   EventResponse,
-  EventUpdateResponse,
   GetAvailableRoomsQueryDto,
   IConferenceRoom,
   LoginResponse,
@@ -38,12 +37,13 @@ export default class Api {
     return {
       Accept: 'application/json',
       'x-mock-api': secrets.mockCalender,
+      'x-app-environment': secrets.appEnvironment, // can be either chrome or web
     };
   }
 
   async refreshToken() {
     try {
-      const res = await axios.get('/refresh-token', {
+      const res = await axios.get('/auth/token/refresh', {
         baseURL: `${secrets.backendEndpoint}`,
         headers: this.getHeaders(),
       });
@@ -82,7 +82,7 @@ export default class Api {
 
   async getOAuthUrl() {
     try {
-      const res = await this.client.get('/oauth-url');
+      const res = await this.client.get('/auth/oauth2/url');
 
       return res.data as ApiResponse<string>;
     } catch (error: any) {
@@ -96,7 +96,7 @@ export default class Api {
         code,
       };
 
-      const res = await this.client.post('/oauth2callback', payload);
+      const res = await this.client.post('/auth/oauth2/callback', payload);
 
       return res.data as ApiResponse<LoginResponse>;
     } catch (error: any) {
@@ -106,7 +106,7 @@ export default class Api {
 
   async logout() {
     try {
-      const res = await this.client.post('/logout', null);
+      const res = await this.client.post('/auth/logout', null);
 
       await this.cacheService.removeCookie('accessToken');
 
@@ -194,7 +194,7 @@ export default class Api {
   async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {
     try {
       const params: GetAvailableRoomsQueryDto = { startTime, duration, timeZone, seats, floor, eventId };
-      const res = await this.client.get('/available-rooms', { params, signal });
+      const res = await this.client.get('/api/rooms/available', { params, signal });
 
       return res.data as ApiResponse<IConferenceRoom[]>;
     } catch (error: any) {
@@ -204,7 +204,7 @@ export default class Api {
 
   async getRooms(startTime: string, endTime: string, timeZone: string) {
     try {
-      const res = await this.client.get('/rooms', {
+      const res = await this.client.get('/api/events', {
         params: {
           startTime,
           endTime,
@@ -218,9 +218,9 @@ export default class Api {
     }
   }
 
-  async createRoom(payload: BookRoomDto) {
+  async createEvent(payload: BookRoomDto) {
     try {
-      const res = await this.client.post('/room', payload);
+      const res = await this.client.post('/api/event', payload);
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
@@ -228,9 +228,9 @@ export default class Api {
     }
   }
 
-  async updateRoom(eventId: string, payload: BookRoomDto) {
+  async updateEvent(eventId: string, payload: BookRoomDto) {
     try {
-      const res = await this.client.put('/room', { eventId, ...payload });
+      const res = await this.client.put('/api/event', { eventId, ...payload });
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
@@ -238,21 +238,9 @@ export default class Api {
     }
   }
 
-  async updateRoomDuration(eventId: string, roomId: string, duration: number) {
+  async deleteEvent(eventId: string) {
     try {
-      const data = { eventId, roomId, duration };
-
-      const res = await this.client.put('/room/duration', data);
-
-      return res.data as ApiResponse<EventUpdateResponse>;
-    } catch (error: any) {
-      return await this.handleError(error);
-    }
-  }
-
-  async deleteRoom(roomId: string) {
-    try {
-      const res = await this.client.delete(`/room?id=${roomId}`);
+      const res = await this.client.delete(`/api/event?id=${eventId}`);
 
       return res.data as ApiResponse<DeleteResponse>;
     } catch (error: any) {
@@ -262,7 +250,7 @@ export default class Api {
 
   async getMaxSeatCount(): Promise<ApiResponse<number>> {
     try {
-      const res = await this.client.get('/highest-seat-count');
+      const res = await this.client.get('/api/rooms/highest-seat-count');
 
       return res.data as ApiResponse<number>;
     } catch (error: any) {
@@ -272,7 +260,7 @@ export default class Api {
 
   async getFloors() {
     try {
-      const res = await this.client.get('/floors');
+      const res = await this.client.get('/api/floors');
 
       return res.data as ApiResponse<string[]>;
     } catch (error: any) {

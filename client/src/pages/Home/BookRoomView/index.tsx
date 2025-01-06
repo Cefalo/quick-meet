@@ -179,7 +179,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       attendees,
     };
 
-    const res = await api.createRoom(payload);
+    const res = await api.createEvent(payload);
     const { data, status } = res;
     setLoading(false);
 

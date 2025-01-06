@@ -5,14 +5,14 @@ import { AuthGuard } from './auth.guard';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
 import { Response, CookieOptions, Request } from 'express';
-import { OAuthInterceptor } from 'src/auth/oauth.interceptor';
+import { RequestInterceptor } from './request.interceptor';
 import { OAuth2Client } from 'google-auth-library';
 
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/oauth2callback')
+  @Post('/oauth2/callback')
   async oAuthCallback(@Body('code') code: string, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<LoginResponse>> {
     const { jwt, refreshToken } = await this.authService.login(code);
 
@@ -28,7 +28,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
+  @UseInterceptors(RequestInterceptor)
   @Post('/logout')
   async logout(@_OAuth2Client() client: OAuth2Client, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<boolean>> {
     res.clearCookie('refreshToken');
@@ -38,14 +38,14 @@ export class AuthController {
     return createResponse(status);
   }
 
-  @Get('/oauth-url')
+  @Get('/oauth2/url')
   getOAuthUrl(): ApiResponse<string> {
     const url = this.authService.getOAuthUrl();
 
     return createResponse(url);
   }
 
-  @Get('/refresh-token')
+  @Get('/token/refresh')
   async refreshAppToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<string>> {
     const refreshToken: string | undefined = req.cookies.refreshToken;
     const appToken = await this.authService.refreshAppToken(refreshToken);

@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Post, Put, Query, Req, UseGuards, UseInt
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client } from '../auth/decorators';
-import { OAuthInterceptor } from '../auth/oauth.interceptor';
+import { RequestInterceptor } from '../auth/request.interceptor';
 import {
   ApiResponse,
   BookRoomDto,
@@ -17,13 +17,13 @@ import {
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
 
-@Controller()
+@Controller('api')
 export class CalenderController {
   constructor(private readonly calenderService: CalenderService) {}
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Get('/rooms')
+  @UseInterceptors(RequestInterceptor)
+  @Get('/events')
   async getEvents(
     @_OAuth2Client() client: OAuth2Client,
     @Req() req: _Request,
@@ -37,8 +37,8 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Get('/available-rooms')
+  @UseInterceptors(RequestInterceptor)
+  @Get('/rooms/available')
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
     @Req() req: _Request,
@@ -56,7 +56,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/highest-seat-count')
+  @Get('/rooms/highest-seat-count')
   async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<number>> {
     const domain = req.hd;
 
@@ -65,9 +65,9 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Post('/room')
-  async bookRoom(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
+  @UseInterceptors(RequestInterceptor)
+  @Post('/event')
+  async createEvent(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
     const domain = req.hd;
 
@@ -81,8 +81,8 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Put('/room')
+  @UseInterceptors(RequestInterceptor)
+  @Put('/event')
   async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
     @Req() req: _Request,
@@ -102,9 +102,9 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(OAuthInterceptor)
-  @Delete('/room')
-  async deleteRoom(@_OAuth2Client() client: OAuth2Client, @Query('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
+  @UseInterceptors(RequestInterceptor)
+  @Delete('/event')
+  async deleteEvent(@_OAuth2Client() client: OAuth2Client, @Query('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
     const deleted = await this.calenderService.deleteEvent(client, eventId);
 
     return createResponse(deleted, 'Event has been deleted');
