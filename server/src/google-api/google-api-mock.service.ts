@@ -33,7 +33,7 @@ export class GoogleApiMockService implements IGoogleApiService {
       name: 'Mr Bob',
     };
 
-    const idToken = await this.jwtService.signAsync({ payload: idTokenPayload }, { secret: this.config.jwtSecret });
+    const idToken = await this.jwtService.signAsync({ payload: idTokenPayload }, { secret: 'dummy-secret' });
     const res: OAuthTokenResponse = {
       tokens: {
         access_token: 'mockAccessToken',

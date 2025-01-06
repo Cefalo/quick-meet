@@ -6,9 +6,6 @@ export interface CacheService {
   save(key: CacheItems, val: string): Promise<void>;
   get(key: CacheItems): Promise<string | null>;
   remove(key: CacheItems): Promise<void>;
-
-  getCookie(key: CacheItems): Promise<string | null | undefined>;
-  removeCookie(key: CacheItems): Promise<void>;
 }
 
 class WebCacheService implements CacheService {
@@ -42,19 +39,6 @@ class WebCacheService implements CacheService {
       resolve();
     });
   }
-
-  async getCookie(key: CacheItems): Promise<string | null | undefined> {
-    return new Promise((resolve) => {
-      const cookies = document.cookie.match('(^|;)\\s*' + key + '\\s*=\\s*([^;]+)');
-      const cookie = cookies ? cookies.pop() : null;
-
-      resolve(cookie);
-    });
-  }
-
-  async removeCookie(key: CacheItems): Promise<void> {
-    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-  }
 }
 
 class ChromeCacheService implements CacheService {
@@ -80,15 +64,6 @@ class ChromeCacheService implements CacheService {
 
   async remove(key: string): Promise<void> {
     await chrome.storage.sync.remove(key);
-  }
-
-  async getCookie(key: CacheItems): Promise<string | null> {
-    const cookie = await chrome.cookies.get({ url: secrets.backendEndpoint, name: key });
-    return cookie ? cookie.value : null;
-  }
-
-  async removeCookie(key: CacheItems): Promise<void> {
-    await chrome.cookies.remove({ url: secrets.backendEndpoint, name: key });
   }
 }
 
