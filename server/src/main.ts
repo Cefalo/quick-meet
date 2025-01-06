@@ -15,11 +15,12 @@ async function bootstrap() {
     }),
   });
 
-  app.use(cookieParser());
+  const config = app.get(ConfigService);
+
+  app.use(cookieParser(config.get('app').encryptionKey));
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  const config = app.get(ConfigService);
   const port = config.get('app').appPort;
   const env = config.get('app').environment;
 

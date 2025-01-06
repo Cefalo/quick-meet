@@ -1,44 +1,26 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import appConfig from '../config/env/app.config';
-import { IJwtPayload } from './dto';
-import to from 'await-to-js';
-import { EncryptionService } from './encryption.service';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { _Request } from './interfaces';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private encryptionService: EncryptionService,
-    private jwtService: JwtService,
-    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
-  ) {}
+  constructor() {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: _Request = context.switchToHttp().getRequest();
 
-    const token = request.cookies.accessToken;
+    const token = request.signedCookies.accessToken;
     if (!token) {
       throw new UnauthorizedException();
     }
 
-    const [err, _]: [Error, IJwtPayload] = await to(this.jwtService.verifyAsync(token, { secret: this.config.jwtSecret }));
-    if (err) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-
-    const decoded = await this.jwtService.decode(token);
-    const decrypted = await this.encryptionService.decrypt(decoded.payload, decoded.iv);
-    if (!decrypted) {
+    const refreshToken = request.signedCookies.refreshToken;
+    if (refreshToken === false) {
       throw new UnauthorizedException();
     }
 
-    const decryptedPayload: IJwtPayload = JSON.parse(decrypted);
-
-    request.accessToken = decryptedPayload.accessToken;
-    request.hd = decryptedPayload.hd;
-    request.refreshToken = request.cookies.refreshToken;
+    request.accessToken = token;
+    request.hd = request.signedCookies.hd;
+    request.refreshToken = refreshToken;
 
     return true;
   }

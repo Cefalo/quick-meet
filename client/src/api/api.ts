@@ -1,13 +1,4 @@
-import {
-  ApiResponse,
-  BookRoomDto,
-  DeleteResponse,
-  EventResponse,
-  GetAvailableRoomsQueryDto,
-  IConferenceRoom,
-  LoginResponse,
-  StatusTypes,
-} from '@quickmeet/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IConferenceRoom, StatusTypes } from '@quickmeet/shared';
 import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '@config/secrets';
@@ -66,7 +57,7 @@ export default class Api {
 
           const renewedToken = await this.refreshToken();
           if (!renewedToken) {
-            await this.cacheService.removeCookie('accessToken');
+            await this.logout();
 
             window.location.href = ROUTES.signIn;
             return Promise.reject(error);
@@ -98,7 +89,7 @@ export default class Api {
 
       const res = await this.client.post('/auth/oauth2/callback', payload);
 
-      return res.data as ApiResponse<LoginResponse>;
+      return res.data as ApiResponse<boolean>;
     } catch (error: any) {
       return await this.handleError(error);
     }
@@ -107,9 +98,6 @@ export default class Api {
   async logout() {
     try {
       const res = await this.client.post('/auth/logout', null);
-
-      await this.cacheService.removeCookie('accessToken');
-
       return res.data as ApiResponse<boolean>;
     } catch (error: any) {
       console.log(error);

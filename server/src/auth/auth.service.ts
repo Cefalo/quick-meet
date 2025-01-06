@@ -2,22 +2,20 @@ import { IConferenceRoom } from '@quickmeet/shared';
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
-import { IJwtPayload } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import to from 'await-to-js';
 import { GoogleApiService } from '../google-api/google-api.service';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { EncryptionService } from './encryption.service';
 import { _OAuth2Client } from 'src/auth/decorators';
 import { CookieOptions } from 'express';
 import { RefreshAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
+import { toMs } from 'src/helpers/helper.util';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly encryptionService: EncryptionService,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -32,22 +30,13 @@ export class AuthService {
 
     const _ = await this.getDirectoryResources(client, userInfo.hd);
 
-    const jwt = await this.createAppToken(tokens.access_token, userInfo.hd, userInfo.name);
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
     return {
-      jwt,
+      accessToken: tokens.access_token,
+      hd: userInfo.hd,
       refreshToken: tokens.refresh_token,
     };
-  }
-
-  async createAppToken(accessToken: string, domain: string, name: string) {
-    const jwtPayload: IJwtPayload = { accessToken, hd: domain, name: name };
-
-    const { iv, encryptedData } = await this.encryptionService.encrypt(JSON.stringify(jwtPayload));
-    const jwt = await this.createJwt({ payload: encryptedData, iv }, '1h');
-
-    return jwt;
   }
 
   /**
@@ -63,11 +52,6 @@ export class AuthService {
     }
 
     return true;
-  }
-
-  async createJwt(payload: any, expiresIn: string) {
-    // todo: hard coding to 1h cause if the oAuthExpiry is used (even when converted to seconds), produce large exp values, eg 2079. No idea why
-    return await this.jwtService.signAsync(payload, { secret: this.config.jwtSecret, expiresIn });
   }
 
   getOAuthUrl(): string {
@@ -88,9 +72,7 @@ export class AuthService {
       throw new UnauthorizedException(refreshTokenErr.message);
     }
 
-    const userInfo = await this.jwtService.decode(res.credentials.id_token);
-    const jwt = await this.createAppToken(res.credentials.access_token, userInfo.hd, userInfo.name);
-    return jwt;
+    return res.credentials.access_token;
   }
 
   /**
@@ -161,13 +143,14 @@ export class AuthService {
   /**
    * saves the conference rooms in the cache
    */
-  async saveDirectoryResouces(resources: IConferenceRoom[], expiry = 15 * 24 * 60 * 60 * 1000): Promise<void> {
+  async saveDirectoryResouces(resources: IConferenceRoom[], expiry = toMs('15d')): Promise<void> {
     await this.cacheManager.set('conference_rooms', resources, expiry); // set TTL to 15 days
   }
 
-  getCookieOptions(httpOnly = true, age = 2592000000) {
+  getCookieOptions(age = toMs('30d')) {
     return {
-      httpOnly: httpOnly,
+      signed: true,
+      httpOnly: true,
       secure: this.config.environment === 'development' ? false : true,
       sameSite: 'strict',
       path: '/',

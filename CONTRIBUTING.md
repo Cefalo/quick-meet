@@ -91,12 +91,7 @@ Note that in production, the client build files are served directly from the ser
 
 ### Encryption key
 
-The app uses an encryption service to encrypt the tokens (provided by google) into the jwt token. It implements AES (Advanced Encryption Standard) encryption to secure sensitive data. Specifically, it uses the `aes-256-cbc` algorithm, which is a symmetric block cipher with the following characteristics:
-
-- 256-bit Key: Ensures a high level of security by requiring a 32-byte key.
-- CBC (Cipher Block Chaining) Mode: Enhances security by chaining blocks together, using an Initialization Vector (IV) to ensure randomness.
-
-The encryption service requires a 256-bit (32-byte) key to operate. This key must be securely generated and stored.
+The following command can be used to generate encryption keys:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"

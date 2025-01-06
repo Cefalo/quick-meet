@@ -23,7 +23,7 @@ const manifest = {
     16: 'favicon-16x16.png',
     32: 'favicon-32x32.png',
   },
-  permissions: ['identity', 'storage', 'cookies'],
+  permissions: ['identity', 'storage'],
 };
 
 writeFileSync('public/manifest.json', JSON.stringify(manifest, null, 2));

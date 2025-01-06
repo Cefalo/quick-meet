@@ -37,7 +37,7 @@ function OAuth() {
           return;
         }
 
-        if (data?.accessToken) {
+        if (data) {
           navigate(ROUTES.home, { replace: true });
         }
       }
