@@ -197,7 +197,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   }
 
   return (
-    <Box mx={2} mt={1} display={'flex'}>
+    <Box mx={2} display={'flex'}>
       <Box
         sx={{
           background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
@@ -275,10 +275,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
             disabled={!availableRoomOptions.length}
             onChange={handleInputChange}
             placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
-            sx={{
-              borderBottomLeftRadius: 15,
-              borderBottomRightRadius: 15,
-            }}
             icon={
               <MeetingRoomRoundedIcon
                 sx={[
@@ -289,17 +285,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
               />
             }
           />
-          <Box
-            sx={{
-              py: 1,
-            }}
-          >
+          <Box>
             <Box
               sx={{
-                pt: 1,
+                py: 1,
                 bgcolor: 'white',
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
                 borderBottomLeftRadius: 15,
                 borderBottomRightRadius: 15,
               }}
@@ -327,8 +317,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                my: 1,
-                mt: 2,
+                my: 2,
               }}
             >
               <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />

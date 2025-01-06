@@ -59,11 +59,11 @@ interface EditEventsViewProps {
   handleClose: () => void;
   event: EventResponse;
   onEditConfirmed: (data: FormData) => void;
-  loading?: boolean;
+  editLoading?: boolean;
   currentRoom?: IConferenceRoom;
 }
 
-export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, loading }: EditEventsViewProps) {
+export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, editLoading }: EditEventsViewProps) {
   // Context or global state
   const { preferences } = usePreferences();
 
@@ -75,6 +75,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
   // Loading and advanced options state
   const [roomLoading, setRoomLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Form data state
   const [formData, setFormData] = useState<FormData>(initFormData(event));
@@ -94,13 +95,14 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   }, []);
 
   useEffect(() => {
-    console.log('currentRoom', currentRoom);
     setPreferences();
   }, []);
 
   useEffect(() => {
-    setAvailableRooms();
-  }, [formData.startTime, formData.duration, formData.seats]);
+    if (roomCapacityOptions.length > 0) {
+      setAvailableRooms();
+    }
+  }, [formData.startTime, formData.duration, formData.seats, roomCapacityOptions]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     console.log(formData);
@@ -183,12 +185,15 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     setTimeOptions(createDropdownOptions(populateTimeOptions(minTime.toISOString())));
     setDurationOptions(createDropdownOptions(durations, 'time'));
     setRoomCapacityOptions(createDropdownOptions(capacities));
+
+    setLoading(false);
   }
 
   const onSaveClick = () => {
     onEditConfirmed(formData);
   };
 
+  if (loading) return <></>;
   if (!open) return <></>;
 
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)' };
@@ -236,7 +241,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
         </Typography>
       </AppBar>
 
-      {loading ? (
+      {editLoading ? (
         <Box mx={3}>
           <Stack spacing={2} mt={3}>
             <Skeleton animation="wave" variant="rounded" height={80} />
@@ -319,10 +324,6 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               disabled={!availableRoomOptions.length}
               onChange={handleInputChange}
               placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
-              sx={{
-                borderBottomLeftRadius: 15,
-                borderBottomRightRadius: 15,
-              }}
               icon={
                 <MeetingRoomRoundedIcon
                   sx={[
@@ -334,17 +335,10 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               }
             />
 
-            <Box
-              sx={{
-                py: 1,
-              }}
-            >
+            <Box>
               <Box
                 sx={{
-                  pt: 1,
                   bgcolor: 'white',
-                  borderTopLeftRadius: 10,
-                  borderTopRightRadius: 10,
                   borderBottomLeftRadius: 15,
                   borderBottomRightRadius: 15,
                 }}
@@ -372,8 +366,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  my: 1,
-                  mt: 2,
+                  my: 2,
                 }}
               >
                 <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
@@ -404,7 +397,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           fullWidth
           variant="contained"
           disableElevation
-          loading={loading}
+          loading={editLoading}
           loadingPosition="start"
           startIcon={<></>}
           sx={[
