@@ -26,7 +26,7 @@ export default class Api {
 
   constructor() {
     this.client = axios.create({
-      baseURL: secrets.appEnvironment === 'chrome' ? `${secrets.backendEndpoint}` : undefined,
+      baseURL: secrets.backendEndpoint,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
       headers: this.getHeaders(),
     });

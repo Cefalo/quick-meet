@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Checkbox, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
@@ -19,12 +19,13 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
-import AdvancedOptionsView from '../AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
+import StyledTextField from '@/components/StyledTextField';
+import ChipInput from '@/components/ChipInput';
+import TitleIcon from '@mui/icons-material/Title';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -42,7 +43,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const [loading, setLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
   const [initialPageLoad, setInitialPageLoad] = useState(false);
-  const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
   // dropdown options
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
@@ -201,20 +201,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     await setAvailableRooms();
   }
 
-  const handleAdvancedOptionsViewOpen = () => {
-    setAdvOptionsOpen(true);
-  };
-
-  const handleAdvancedOptionsViewClose = () => {
-    setAdvOptionsOpen(false);
-  };
-
-  if (advOptionsOpen) {
-    return <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />;
-  }
-
   return (
-    <Box mx={2} mt={2} display={'flex'}>
+    <Box mx={2} mt={1} display={'flex'}>
       <Box
         sx={{
           background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
@@ -306,33 +294,54 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
               />
             }
           />
-        </Box>
-
-        <Box
-          sx={{
-            display: 'flex',
-            px: 2,
-            py: 3,
-            cursor: 'pointer',
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'manipulation',
-          }}
-          onClick={handleAdvancedOptionsViewOpen}
-        >
-          <Typography variant="subtitle1">Additional options</Typography>
           <Box
             sx={{
-              flexGrow: 1,
+              py: 1,
             }}
-          />
-          <PlayArrowIcon
-            fontSize="small"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[50],
-              }),
-            ]}
-          />
+          >
+            <Box
+              sx={{
+                pt: 1,
+                bgcolor: 'white',
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+                borderBottomLeftRadius: 15,
+                borderBottomRightRadius: 15,
+              }}
+            >
+              <StyledTextField
+                value={formData.title}
+                placeholder="Quick Meeting"
+                id="title"
+                onChange={handleInputChange}
+                sx={{ mx: 0.5 }}
+                startIcon={
+                  <TitleIcon
+                    sx={[
+                      (theme) => ({
+                        color: theme.palette.grey[50],
+                      }),
+                    ]}
+                  />
+                }
+              />
+
+              <ChipInput sx={{ mt: 1, mx: 0.5 }} id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                my: 1,
+                mt: 2,
+              }}
+            >
+              <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
+              <Typography variant="subtitle1" ml={0.5}>
+                Create meet link
+              </Typography>
+            </Box>
+          </Box>
         </Box>
         <Box flexGrow={1} />
       </Box>

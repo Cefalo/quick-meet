@@ -1,4 +1,4 @@
-import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuItem } from '@mui/material';
+import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuItem, Tooltip } from '@mui/material';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
@@ -9,6 +9,7 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -65,8 +66,9 @@ interface ChipData {
   icon: React.ReactElement;
   label: string;
   color?: string;
-  type?: 'conference' | 'floor' | 'seats' | 'time' | 'room';
+  clickable?: boolean;
   value?: string;
+  tooltip?: string;
 }
 
 const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
@@ -88,24 +90,34 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
 
     const _chips: ChipData[] = createChips(event);
 
+    let locationIcon = <InsertLinkRoundedIcon fontSize="small" />;
+
     if (event.meet) {
+      let tooltip = '';
       let domain = '-';
+      let clickable = false;
+
       try {
         const url = new URL(event.meet);
         domain = url.hostname;
+        clickable = true;
       } catch (error) {
         if (event.meet.length > 15) {
+          tooltip = event.meet;
           domain = event.meet.slice(0, 15) + '...';
         } else {
           domain = event.meet;
         }
+
+        locationIcon = <LocationOnRoundedIcon fontSize="small" />;
       }
 
       _chips.push({
         label: domain,
         value: event.meet,
-        type: 'conference',
-        icon: <InsertLinkRoundedIcon fontSize="small" />,
+        icon: locationIcon,
+        clickable,
+        tooltip,
       });
     }
 
@@ -210,22 +222,24 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
         {chips.map((chip, i) => {
           return (
             <ListItem key={i} sx={{ mt: 0.4 }}>
-              <Chip
-                icon={chip.icon}
-                label={chip.label}
-                sx={{
-                  fontSize: 15,
-                  backgroundColor: '#EFEFEF',
-                  cursor: chip.type === 'conference' ? 'pointer' : 'auto',
-                  px: 0.5,
-                  py: 1,
-                }}
-                onClick={() => {
-                  if (chip.type === 'conference') {
-                    window.open(chip.value, '_blank');
-                  }
-                }}
-              />
+              <Tooltip title={chip.tooltip}>
+                <Chip
+                  icon={chip.icon}
+                  label={chip.label}
+                  sx={{
+                    fontSize: 15,
+                    backgroundColor: '#EFEFEF',
+                    cursor: chip.clickable ? 'pointer' : 'auto',
+                    px: 0.5,
+                    py: 1,
+                  }}
+                  onClick={() => {
+                    if (chip.clickable) {
+                      window.open(chip.value, '_blank');
+                    }
+                  }}
+                />
+              </Tooltip>
             </ListItem>
           );
         })}

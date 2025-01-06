@@ -44,6 +44,7 @@ const StyledTextField = ({ id, sx, startIcon, onChange, value, placeholder }: St
         sx={[
           (theme) => ({
             flex: 1,
+            px: 0.5,
             py: 0,
             '& .MuiInputBase-input': {
               fontSize: theme.typography.subtitle1,
