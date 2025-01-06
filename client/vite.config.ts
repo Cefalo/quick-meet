@@ -22,20 +22,12 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 600,
     },
     /*
-     * by default, vite listens to only localhost. When running the server inside a docker container with port exposed on 3000, 
-     * it must be configured to listen to 0.0.0.0 (all network intefaces) instead of just localhost 
+     * by default, vite listens to only localhost. When running the server inside a docker container with port exposed on 3000,
+     * it must be configured to listen to 0.0.0.0 (all network intefaces) instead of just localhost
      */
     server: {
       host: '0.0.0.0',
       port: 3000,
-      // proxy all api requests to the API endpoint. Runs only in development mode
-      proxy: {
-        '/': {
-          target: 'http://localhost:3001',
-          changeOrigin: true,
-        },
-      },
-      origin: 'http://localhost:3001', 
     },
   };
 });

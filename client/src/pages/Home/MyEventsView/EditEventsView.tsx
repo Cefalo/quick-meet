@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, IconButton, Skeleton, Stack, Typography } from '@mui/material';
+import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
 import { useEffect, useRef, useState } from 'react';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -20,13 +20,14 @@ import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRou
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import TitleIcon from '@mui/icons-material/Title';
 import { FormData } from '@helpers/types';
 import Api from '@api/api';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
-import AdvancedOptionsView from '@pages/Home/AdvancedOptionsView';
 import { usePreferences } from '@/context/PreferencesContext';
+import ChipInput from '@/components/ChipInput';
+import StyledTextField from '@/components/StyledTextField';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -74,7 +75,6 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
   // Loading and advanced options state
   const [roomLoading, setRoomLoading] = useState(false);
-  const [advOptionsOpen, setAdvOptionsOpen] = useState(false);
 
   // Form data state
   const [formData, setFormData] = useState<FormData>(initFormData(event));
@@ -185,23 +185,11 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     setRoomCapacityOptions(createDropdownOptions(capacities));
   }
 
-  const handleAdvancedOptionsViewOpen = () => {
-    setAdvOptionsOpen(true);
-  };
-
-  const handleAdvancedOptionsViewClose = () => {
-    setAdvOptionsOpen(false);
-  };
-
   const onSaveClick = () => {
     onEditConfirmed(formData);
   };
 
   if (!open) return <></>;
-
-  if (advOptionsOpen) {
-    return <AdvancedOptionsView open={advOptionsOpen} formData={formData} handleInputChange={handleInputChange} handleClose={handleAdvancedOptionsViewClose} />;
-  }
 
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)' };
 
@@ -345,31 +333,54 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 />
               }
             />
+
             <Box
               sx={{
-                display: 'flex',
-                px: 2,
-                py: 3,
-                cursor: 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-                touchAction: 'manipulation',
+                py: 1,
               }}
-              onClick={handleAdvancedOptionsViewOpen}
             >
-              <Typography variant="subtitle1">Additional options</Typography>
               <Box
                 sx={{
-                  flexGrow: 1,
+                  pt: 1,
+                  bgcolor: 'white',
+                  borderTopLeftRadius: 10,
+                  borderTopRightRadius: 10,
+                  borderBottomLeftRadius: 15,
+                  borderBottomRightRadius: 15,
                 }}
-              />
-              <PlayArrowIcon
-                fontSize="small"
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[50],
-                  }),
-                ]}
-              />
+              >
+                <StyledTextField
+                  value={formData.title}
+                  placeholder="Quick Meeting"
+                  id="title"
+                  onChange={handleInputChange}
+                  sx={{ mx: 0.5 }}
+                  startIcon={
+                    <TitleIcon
+                      sx={[
+                        (theme) => ({
+                          color: theme.palette.grey[50],
+                        }),
+                      ]}
+                    />
+                  }
+                />
+
+                <ChipInput sx={{ mt: 1, mx: 0.5 }} id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  my: 1,
+                  mt: 2,
+                }}
+              >
+                <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
+                <Typography variant="subtitle1" ml={0.5}>
+                  Create meet link
+                </Typography>
+              </Box>
             </Box>
           </Box>
 
@@ -380,7 +391,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
       <Box
         sx={{
           mx: 4,
-          mb: 3,
+          mb: 2,
           textAlign: 'center',
           position: 'absolute',
           left: 0,
@@ -415,8 +426,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           variant="text"
           onClick={handleClose}
           sx={{
-            py: 2,
-            mt: 2,
+            py: 1,
+            mt: 1.5,
             px: 3,
             boxShadow: 'none',
             '&:hover': {

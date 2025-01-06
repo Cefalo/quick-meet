@@ -1,9 +1,8 @@
-
 import BugReportRoundedIcon from '@mui/icons-material/BugReportRounded';
 import { secrets } from '@config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 import { constants } from '@/config/constants';
-import { Box, Button, Divider, styled } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 
 const SettingsButton = styled(Button)(({ theme: _ }) => ({
   boxShadow: 'none',
@@ -17,7 +16,6 @@ const SettingsButton = styled(Button)(({ theme: _ }) => ({
     boxShadow: 'none',
   },
 }));
-
 
 export default function SupportView() {
   const onReportBugClick = () => {
@@ -81,8 +79,6 @@ export default function SupportView() {
             Report a bug
           </SettingsButton>
 
-          <Divider />
-
           <SettingsButton
             sx={{
               py: 2.5,
@@ -99,4 +95,4 @@ export default function SupportView() {
       </Box>
     </Box>
   );
-};
+}

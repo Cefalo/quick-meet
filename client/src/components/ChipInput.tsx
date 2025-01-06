@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TextField, Chip, Box } from '@mui/material';
 import { validateEmail } from '@helpers/utility';
 import { toast } from 'react-hot-toast';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 
 interface ChipInputProps {
   id: string;
@@ -9,9 +10,10 @@ interface ChipInputProps {
   value?: any[];
   disabled?: boolean;
   onChange: (id: string, value: string[]) => void;
+  type?: string;
 }
 
-export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
+export default function ChipInput({ id, sx, onChange, value, type }: ChipInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [chips, setChips] = useState<any[]>(value || []);
 
@@ -53,6 +55,13 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
         }),
       ]}
     >
+      <PeopleAltRoundedIcon
+        sx={[
+          (theme) => ({
+            color: theme.palette.grey[50],
+          }),
+        ]}
+      />
       {chips.map((chip, index) => (
         <Chip
           key={index}
@@ -67,8 +76,10 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
           ]}
         />
       ))}
+
       <TextField
         variant="standard"
+        type={type}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -82,6 +93,7 @@ export default function ChipInput({ id, sx, onChange, value }: ChipInputProps) {
           (theme) => ({
             flex: 1,
             py: 0,
+            px: 0.5,
             '& .MuiInputBase-input': {
               fontSize: theme.typography.subtitle1,
             },

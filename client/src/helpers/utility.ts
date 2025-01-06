@@ -134,7 +134,7 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
     if (statusCode === 401) {
       const cacheService: CacheService = CacheServiceFactory.getCacheService();
       await cacheService.remove('access_token');
-      navigate(ROUTES.signIn);
+      // navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
       toast.error('Input missing fields');
     } else if (redirect) {
