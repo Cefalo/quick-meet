@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Post, Put, Query, Req, UseGuards, UseInt
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client } from '../auth/decorators';
-import { RequestInterceptor } from '../auth/request.interceptor';
+import { OauthInterceptor } from '../auth/oauth.interceptor';
 import {
   ApiResponse,
   BookRoomDto,
@@ -22,7 +22,7 @@ export class CalenderController {
   constructor(private readonly calenderService: CalenderService) {}
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(RequestInterceptor)
+  @UseInterceptors(OauthInterceptor)
   @Get('/events')
   async getEvents(
     @_OAuth2Client() client: OAuth2Client,
@@ -37,7 +37,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(RequestInterceptor)
+  @UseInterceptors(OauthInterceptor)
   @Get('/rooms/available')
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
@@ -69,7 +69,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(RequestInterceptor)
+  @UseInterceptors(OauthInterceptor)
   @Post('/event')
   async createEvent(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
@@ -85,7 +85,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(RequestInterceptor)
+  @UseInterceptors(OauthInterceptor)
   @Put('/event')
   async updateEvent(
     @_OAuth2Client() client: OAuth2Client,
@@ -106,7 +106,7 @@ export class CalenderController {
   }
 
   @UseGuards(AuthGuard)
-  @UseInterceptors(RequestInterceptor)
+  @UseInterceptors(OauthInterceptor)
   @Delete('/event')
   async deleteEvent(@_OAuth2Client() client: OAuth2Client, @Query('id') eventId: string): Promise<ApiResponse<DeleteResponse>> {
     const deleted = await this.calenderService.deleteEvent(client, eventId);

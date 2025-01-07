@@ -6,15 +6,12 @@ import { CalenderModule } from './calender/calender.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/env/app.config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GoogleApiModule } from './google-api/google-api.module';
 import { CacheModule } from '@nestjs/cache-manager';
-
-const pathToBuildWeb = join(__dirname, '..', '..', 'client', 'build_web');
-console.log(pathToBuildWeb);  // This wil
-console.log(__dirname);  // This wil
+import { RequestInterceptor } from 'src/auth/request.interceptor';
 
 @Module({
   imports: [
@@ -44,6 +41,10 @@ console.log(__dirname);  // This wil
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestInterceptor,
     },
   ],
 })

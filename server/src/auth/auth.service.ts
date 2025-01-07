@@ -60,10 +60,6 @@ export class AuthService {
     return true;
   }
 
-  getOAuthUrl(): string {
-    return this.googleApiService.getOAuthUrl();
-  }
-
   async refreshAppToken(refreshToken?: string) {
     if (!refreshToken) {
       throw new UnauthorizedException("Couldn't rotate token. Try re-logging");

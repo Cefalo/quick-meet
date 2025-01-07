@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { Body, Controller, Get, Inject, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -49,7 +49,7 @@ export class AuthController {
 
   @Get('/oauth2/url')
   getOAuthUrl(): ApiResponse<string> {
-    const url = this.authService.getOAuthUrl();
+    const url = this.googleApiService.getOAuthUrl();
 
     return createResponse(url);
   }
