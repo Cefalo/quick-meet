@@ -19,13 +19,13 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { FormData } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
-import Api from '@api/api';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import { usePreferences } from '@/context/PreferencesContext';
 import StyledTextField from '@/components/StyledTextField';
 import ChipInput from '@/components/ChipInput';
 import TitleIcon from '@mui/icons-material/Title';
+import { useApi } from '@/context/ApiContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -59,8 +59,9 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
   // Utilities and hooks
   const navigate = useNavigate();
-  const api = new Api();
+  // const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { api } = useApi();
 
   useEffect(() => {
     initializeDropdowns();

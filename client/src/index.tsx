@@ -5,13 +5,16 @@ import { StyledEngineProvider } from '@mui/material/styles';
 import { secrets } from './config/secrets';
 import './styles.css';
 import { PreferencesProvider } from './context/PreferencesContext';
+import { ApiProvider } from '@/context/ApiContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <StyledEngineProvider injectFirst>
     <BrowserRouter basename={secrets.appEnvironment === 'chrome' ? '/index.html' : ''}>
       <PreferencesProvider>
-        <App />
+        <ApiProvider>
+          <App />
+        </ApiProvider>
       </PreferencesProvider>
     </BrowserRouter>
   </StyledEngineProvider>,
