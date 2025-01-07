@@ -47,6 +47,10 @@ export class CalenderController {
     const domain = req.hd;
     let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
+    if (!seats && eventId) {
+      return createResponse([]);
+    }
+
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + duration);
 

@@ -12,9 +12,9 @@ export class GetAvailableRoomsQueryDto {
   @IsTimeZone()
   timeZone: string;
 
+  @IsOptional()
   @Transform(({ value }) => Number(value))
   @IsNumber()
-  @Min(1, { message: 'Select min seat capacity' })
   seats: number;
 
   @IsOptional()
