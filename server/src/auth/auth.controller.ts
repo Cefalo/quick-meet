@@ -7,17 +7,19 @@ import { Response, CookieOptions, Request } from 'express';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 import { _Request } from './interfaces';
 import { toMs } from 'src/helpers/helper.util';
+import { EncryptionService } from './encryption.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private encryptionService: EncryptionService,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
   ) {}
 
   @Post('/oauth2/callback')
   async oAuthCallback(@Body('code') code: string, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
-    const { accessToken, refreshToken, hd } = await this.authService.login(code);
+    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code);
 
     if (refreshToken) {
       this.setCookie(res, 'refreshToken', refreshToken);
@@ -25,17 +27,21 @@ export class AuthController {
 
     this.setCookie(res, 'accessToken', accessToken, toMs('1h'));
     this.setCookie(res, 'hd', hd);
+    this.setCookie(res, 'userId', userId);
+    this.setCookie(res, 'iv', iv);
 
     return createResponse(true);
   }
 
   @Post('/logout')
   async logout(@Req() req: _Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<boolean>> {
-    const client = this.googleApiService.getOAuthClient(req.signedCookies?.accessToken);
+    const client = this.googleApiService.getOAuthClient(req.cookies.accessToken);
 
     res.clearCookie('refreshToken');
     res.clearCookie('accessToken');
     res.clearCookie('hd');
+    res.clearCookie('iv');
+    res.clearCookie('userId');
 
     const status = await this.authService.logout(client);
     return createResponse(status);
@@ -50,7 +56,7 @@ export class AuthController {
 
   @Get('/token/refresh')
   async refreshAppToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<string>> {
-    const refreshToken: string | undefined = req.signedCookies.refreshToken;
+    const refreshToken = await this.encryptionService.decrypt(req.cookies.refreshToken, req.cookies.iv);
     const accessToken = await this.authService.refreshAppToken(refreshToken);
 
     this.setCookie(res, 'accessToken', accessToken, toMs('1h'));

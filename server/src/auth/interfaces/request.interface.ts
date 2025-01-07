@@ -6,4 +6,6 @@ export interface _Request extends Request {
   accessToken?: string;
   refreshToken?: string;
   oauth2Client?: OAuth2Client;
+  iv?: string;
+  userId?: string;
 }
