@@ -132,7 +132,9 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
   const { status, statusCode, message, redirect } = err;
   if (status === 'error') {
     if (statusCode === 401) {
-      await new Api().logout();
+      try {
+        await new Api().logout();
+      } catch (error) {}
       navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
       toast.error('Input missing fields');

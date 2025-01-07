@@ -35,7 +35,8 @@ export default class Api {
   async refreshToken() {
     try {
       const res = await axios.get('/auth/token/refresh', {
-        baseURL: `${secrets.backendEndpoint}`,
+        baseURL: secrets.backendEndpoint,
+        timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
         headers: this.getHeaders(),
       });
 
@@ -59,6 +60,7 @@ export default class Api {
           if (!renewedToken) {
             await this.logout();
 
+            // todo: error here causing crash in chrome ext
             window.location.href = ROUTES.signIn;
             return Promise.reject(error);
           }
@@ -98,9 +100,11 @@ export default class Api {
   async logout() {
     try {
       const res = await this.client.post('/auth/logout', null);
+      console.log('logout: ' + res);
       return res.data as ApiResponse<boolean>;
     } catch (error: any) {
       console.log(error);
+      return false;
     }
   }
 
@@ -261,14 +265,15 @@ export default class Api {
   }
 
   async handleError(error: any) {
+    console.error(error);
     // used for Abort request controllers
     if (error.code === 'ERR_CANCELED') {
       return this.createReply('ignore', 'Pending request aborted', null);
     }
 
-    console.error(error);
-
     const res: ApiResponse<any> = error?.response?.data;
+    console.log(res);
+
     if (res) {
       console.error(res);
       return res;

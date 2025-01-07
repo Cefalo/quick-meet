@@ -89,6 +89,10 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
   async function initializeDropdowns() {
     const res = await api.getMaxSeatCount();
+    if (res.status === 'error') {
+      // navigate('/sign-in');
+      return;
+    }
 
     const capacities = populateRoomCapacity(res?.data || 0);
     const durations = populateDurationOptions();

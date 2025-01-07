@@ -20,7 +20,7 @@ export class GoogleApiMockService implements IGoogleApiService {
   }
 
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(accessToken?: string): OAuth2Client;
+  getOAuthClient(redirectUrl?: string): OAuth2Client;
   getOAuthClient(_?: string): OAuth2Client {
     return new OAuth2Client();
   }

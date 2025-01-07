@@ -11,7 +11,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GoogleApiModule } from './google-api/google-api.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { RequestInterceptor } from 'src/auth/request.interceptor';
 
 @Module({
   imports: [
@@ -41,10 +40,6 @@ import { RequestInterceptor } from 'src/auth/request.interceptor';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RequestInterceptor,
     },
   ],
 })

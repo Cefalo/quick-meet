@@ -14,20 +14,17 @@ export class GoogleApiService implements IGoogleApiService {
   constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
 
   // @ overloaded method signature
-  getOAuthClient(accessToken: string): OAuth2Client;
+  getOAuthClient(redirectUrl: string): OAuth2Client;
   getOAuthClient(): OAuth2Client;
-  getOAuthClient(accessToken?: string): OAuth2Client {
-    if (!accessToken) {
-      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+  getOAuthClient(redirectUrl?: string): OAuth2Client {
+    if (redirectUrl) {
+      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
     } else {
-      const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
-      client.setCredentials({ access_token: accessToken });
-
-      return client;
+      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret);
     }
   }
 
-  getOAuthUrl() {
+  getOAuthUrl(redirectUrl: string) {
     const scopes = [
       'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
       'https://www.googleapis.com/auth/calendar',
@@ -35,7 +32,7 @@ export class GoogleApiService implements IGoogleApiService {
       'https://www.googleapis.com/auth/userinfo.profile',
     ];
 
-    const client = new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
+    const client = this.getOAuthClient(redirectUrl);
     const url = client.generateAuthUrl({
       access_type: 'offline',
       scope: scopes,

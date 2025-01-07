@@ -12,8 +12,10 @@ export class OauthInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, next: CallHandler<any>): Promise<Observable<any>> {
     const request: _Request = context.switchToHttp().getRequest();
 
-    const accessToken = request.accessToken;
-    request.oauth2Client = this.googleApiService.getOAuthClient(accessToken);
+    const client = this.googleApiService.getOAuthClient();
+    client.setCredentials({ access_token: request.accessToken });
+
+    request.oauth2Client = client;
 
     return next.handle();
   }
