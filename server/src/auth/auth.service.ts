@@ -25,8 +25,8 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string) {
-    const client = this.googleApiService.getOAuthClient();
+  async login(code: string, oauthRedirectUrl: string) {
+    const client = this.googleApiService.getOAuthClient(oauthRedirectUrl);
     const { tokens } = await this.googleApiService.getToken(client, code);
     const userInfo = await this.jwtService.decode(tokens.id_token);
 
@@ -43,21 +43,6 @@ export class AuthService {
       refreshToken: data?.encryptedData,
       iv: data?.iv,
     };
-  }
-
-  /**
-   *  purging is required to revoke the refresh token as google's refresh tokens have no expiry date
-   *  more: https://stackoverflow.com/a/8954103
-   */
-  async purgeAccess(oauth2Client: OAuth2Client) {
-    const [err, _] = await to(oauth2Client.revokeCredentials());
-
-    if (err) {
-      this.logger.error(err);
-      return false;
-    }
-
-    return true;
   }
 
   async refreshAppToken(refreshToken?: string) {
@@ -78,16 +63,19 @@ export class AuthService {
   }
 
   /**
-   * remove the refresh token from the cookie
-   * the accessToken is removed from the client side
+   * purging is required to revoke the refresh token as google's refresh tokens have no expiry date
+   * Revoking a token, also prompts google to issue a new refresh token when logging back again
+   * more: https://stackoverflow.com/a/8954103
    */
   async logout(@_OAuth2Client() client: OAuth2Client): Promise<boolean> {
-    try {
-      await this.purgeAccess(client);
-      return true;
-    } catch (error) {
+    const [err, _] = await to(client.revokeCredentials());
+
+    if (err) {
+      this.logger.error(`[logout]: ${err}`);
       return false;
     }
+
+    return true;
   }
 
   async getFloors(client: OAuth2Client, domain: string): Promise<string[]> {

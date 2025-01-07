@@ -8,18 +8,24 @@ import { GoogleApiService } from 'src/google-api/google-api.service';
 import { _Request } from './interfaces';
 import { toMs } from 'src/helpers/helper.util';
 import { EncryptionService } from './encryption.service';
+import appConfig from 'src/config/env/app.config';
+import { ConfigType } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private encryptionService: EncryptionService,
+    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
   ) {}
 
   @Post('/oauth2/callback')
-  async oAuthCallback(@Body('code') code: string, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
-    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code);
+  async oAuthCallback(@Body('code') code: string, @Req() req: _Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
+    const appEnvironment = (req.headers['x-app-environment'] as 'web' | 'chrome') || 'web';
+
+    const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
+    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code, oauthRedirectUrl);
 
     if (refreshToken) {
       this.setCookie(res, 'refreshToken', refreshToken);
@@ -35,7 +41,8 @@ export class AuthController {
 
   @Post('/logout')
   async logout(@Req() req: _Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<boolean>> {
-    const client = this.googleApiService.getOAuthClient(req.cookies.accessToken);
+    const client = this.googleApiService.getOAuthClient();
+    client.setCredentials({ access_token: req.cookies.accessToken });
 
     res.clearCookie('refreshToken');
     res.clearCookie('accessToken');
@@ -48,8 +55,11 @@ export class AuthController {
   }
 
   @Get('/oauth2/url')
-  getOAuthUrl(): ApiResponse<string> {
-    const url = this.googleApiService.getOAuthUrl();
+  getOAuthUrl(@Req() req: _Request): ApiResponse<string> {
+    const appEnvironment = (req.headers['x-app-environment'] as 'web' | 'chrome') || 'web';
+    const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
+
+    const url = this.googleApiService.getOAuthUrl(oauthRedirectUrl);
 
     return createResponse(url);
   }
@@ -67,5 +77,9 @@ export class AuthController {
   private setCookie(res: Response, name: string, value: string, maxAge: number = toMs('30d')): void {
     const cookieOptions: CookieOptions = this.authService.getCookieOptions(maxAge);
     res.cookie(name, value, cookieOptions);
+  }
+
+  private getOauthRedirectUrl(appEnvironment: string) {
+    return appEnvironment === 'chrome' ? `https://${this.config.chromeExtensionId}.chromiumapp.org/index.html/oauthcallback` : this.config.oAuthRedirectUrl;
   }
 }
