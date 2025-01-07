@@ -51,6 +51,8 @@ export default function ChipInput({ id, sx, onChange, value, type }: ChipInputPr
           '&:focus-within': {
             border: 'none',
           },
+          maxHeight: '50px',
+          overflowY: 'auto',
           ...sx,
         }),
       ]}
