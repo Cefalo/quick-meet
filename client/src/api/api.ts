@@ -4,24 +4,35 @@ import { toast } from 'react-hot-toast';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import { ROUTES } from '@/config/routes';
+import { NavigateFunction } from 'react-router-dom';
 
 /**
  * @description Serves as the base API endpoint for the application. It provides the authorization token in every request
  */
 export default class Api {
+  private static instance: Api;
   apiToken?: string;
   client: AxiosInstance;
+  private navigate: NavigateFunction | undefined;
 
   cacheService: CacheService = CacheServiceFactory.getCacheService();
 
-  constructor() {
+  constructor(navigate?: NavigateFunction) {
     this.client = axios.create({
       baseURL: secrets.backendEndpoint,
       timeout: secrets.nodeEnvironment === 'development' ? 1000000 : 10000,
       headers: this.getHeaders(),
     });
 
+    this.navigate = navigate;
     this.handleTokenRefresh();
+  }
+
+  static getInstance(navigate: NavigateFunction): Api {
+    if (!Api.instance) {
+      Api.instance = new Api(navigate);
+    }
+    return Api.instance;
   }
 
   getHeaders() {
@@ -60,8 +71,11 @@ export default class Api {
           if (!renewedToken) {
             await this.logout();
 
+            // window.history.pushState(null, '', '/sign-in');
+            this.navigate && this.navigate(ROUTES.signIn);
+
             // todo: error here causing crash in chrome ext
-            window.location.href = ROUTES.signIn;
+            // window.location.href = ROUTES.signIn;
             return Promise.reject(error);
           }
 
