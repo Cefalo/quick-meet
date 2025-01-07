@@ -12,12 +12,14 @@ import { _OAuth2Client } from 'src/auth/decorators';
 import { CookieOptions } from 'express';
 import { RefreshAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
 import { toMs } from 'src/helpers/helper.util';
+import { EncryptionService } from './encryption.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
+    private encryptionService: EncryptionService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private jwtService: JwtService,
     private logger: Logger,
@@ -32,10 +34,14 @@ export class AuthService {
 
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
+    const data = await this.encryptionService.encrypt(tokens.refresh_token);
+
     return {
       accessToken: tokens.access_token,
       hd: userInfo.hd,
-      refreshToken: tokens.refresh_token,
+      userId: userInfo.sub,
+      refreshToken: data?.encryptedData,
+      iv: data?.iv,
     };
   }
 
@@ -149,7 +155,6 @@ export class AuthService {
 
   getCookieOptions(age = toMs('30d')) {
     return {
-      signed: true,
       httpOnly: true,
       secure: this.config.environment === 'development' ? false : true,
       sameSite: 'strict',

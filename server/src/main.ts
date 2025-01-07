@@ -17,7 +17,7 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
 
-  app.use(cookieParser(config.get('app').encryptionKey));
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
 
