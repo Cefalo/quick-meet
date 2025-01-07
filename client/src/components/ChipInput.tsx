@@ -73,7 +73,7 @@ export default function ChipInput({ id, sx, onChange, value, type }: ChipInputPr
             (theme) => ({
               backgroundColor: theme.palette.grey[100],
               color: theme.palette.common.black,
-              fontSize: '14px',
+              fontSize: '11px',
             }),
           ]}
         />
