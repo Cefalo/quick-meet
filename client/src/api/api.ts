@@ -92,9 +92,13 @@ export default class Api {
     );
   }
 
-  async getOAuthUrl() {
+  async getOAuthUrl(client: 'chrome' | 'web' = 'web') {
     try {
-      const { data } = await this.client.get('/auth/oauth2/url');
+      const { data } = await this.client.get('/auth/oauth2/url', {
+        params: {
+          client,
+        },
+      });
       return this.createReply('success', '', data.data) as ApiResponse<string>;
     } catch (error: any) {
       return this.handleError(error);
@@ -123,39 +127,14 @@ export default class Api {
     }
   }
 
-  async loginChrome() {
-    const { data } = await this.getOAuthUrl();
-    if (data) {
-      return await this.handleChromeOauthFlow(data);
-    }
-    return this.createReply('error');
-  }
-
   async login() {
-    const { data } = await this.getOAuthUrl();
+    const { data } = await this.getOAuthUrl(secrets.appEnvironment);
     if (!data) {
       toast.error('Failed to retrieve oauth callback url');
       return;
     }
 
-    window.location.href = data;
-  }
-
-  async handleChromeOauthFlow(authUrl: string) {
-    return await new Promise<ApiResponse<any>>((resolve, _) => {
-      chrome.runtime.sendMessage({ type: 'startAuthFlow', redirectUrl: authUrl }, async (response) => {
-        if (!response.success) {
-          return resolve(this.createReply('error', response.error));
-        }
-
-        const res = await this.handleOAuthCallback(response.code);
-        if (res.status === 'error') {
-          return resolve(this.createReply('error', res?.message || 'Something went wrong'));
-        }
-
-        return resolve(this.createReply('success', 'OAuth flow completed'));
-      });
-    });
+    secrets.appEnvironment === 'chrome' ? window.open(data) : (window.location.href = data);
   }
 
   async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {

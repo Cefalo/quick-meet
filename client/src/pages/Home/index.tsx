@@ -4,14 +4,26 @@ import TopNavigationBar from './TopNavigationBar';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
 import { useApi } from '@/context/ApiContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const [tabIndex, setTabIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const api = useApi();
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  useEffect(() => {
+    const message = state?.message;
+    if (message) {
+      toast.success(message, {
+        duration: 10000,
+        icon: '🎉',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const validate = async () => {

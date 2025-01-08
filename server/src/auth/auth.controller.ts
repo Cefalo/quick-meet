@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res, Logger } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res, Logger, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -22,11 +22,8 @@ export class AuthController {
   ) {}
 
   @Post('/oauth2/callback')
-  async oAuthCallback(@Body('code') code: string, @Req() req: _Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
-    const appEnvironment = (req.headers['x-app-environment'] as 'web' | 'chrome') || 'web';
-
-    const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
-    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code, oauthRedirectUrl);
+  async oAuthCallback(@Body('code') code: string, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
+    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code);
 
     if (refreshToken && iv) {
       this.setCookie(res, 'refreshToken', refreshToken);
@@ -65,11 +62,8 @@ export class AuthController {
   }
 
   @Get('/oauth2/url')
-  getOAuthUrl(@Req() req: _Request): ApiResponse<string> {
-    const appEnvironment = (req.headers['x-app-environment'] as 'web' | 'chrome') || 'web';
-    const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
-
-    const url = this.googleApiService.getOAuthUrl(oauthRedirectUrl);
+  getOAuthUrl(@Query('client') client: 'chrome' | 'web'): ApiResponse<string> {
+    const url = this.googleApiService.getOAuthUrl(client);
 
     return createResponse(url);
   }
@@ -87,9 +81,5 @@ export class AuthController {
   private setCookie(res: Response, name: string, value: string, maxAge: number = toMs('30d')): void {
     const cookieOptions: CookieOptions = this.authService.getCookieOptions(maxAge);
     res.cookie(name, value, cookieOptions);
-  }
-
-  private getOauthRedirectUrl(appEnvironment: string) {
-    return appEnvironment === 'chrome' ? `https://${this.config.chromeExtensionId}.chromiumapp.org/index.html/oauthcallback` : this.config.oAuthRedirectUrl;
   }
 }
