@@ -7,6 +7,7 @@ import { WinstonModule } from 'nest-winston';
 import { winstonInstance } from './config/winston.config';
 import { HttpExceptionFilter } from './helpers';
 import * as cookieParser from 'cookie-parser';
+import { LoggingInterceptor } from './logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -14,6 +15,8 @@ async function bootstrap() {
       instance: winstonInstance,
     }),
   });
+
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   const config = app.get(ConfigService);
 
