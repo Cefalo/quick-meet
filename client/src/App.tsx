@@ -1,50 +1,13 @@
-import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import AppTheme from './theme/AppTheme';
 import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
-import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
 import Settings from '@/pages/Settings';
 import BaseLayout from '@/pages/BaseLayout';
-import { useApi } from '@/context/ApiContext';
-
-// only used for the web version
-// for chrome extension, a different oauth flow is used using the chrome api
-function OAuth() {
-  const navigate = useNavigate();
-  const api = useApi();
-
-  useEffect(() => {
-    const handleOAuthCallback = async () => {
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get('code');
-      const error = url.searchParams.get('error');
-
-      console.log(chrome.cookies);
-
-      if (error || !code) {
-        navigate(ROUTES.signIn, { state: { message: error }, replace: true });
-        return;
-      }
-
-      const res = await api.handleOAuthCallback(code);
-      console.log('after handleOAuthCallback response', res);
-
-      if (res.status === 'error') {
-        navigate(ROUTES.signIn, { state: { message: res.message || 'Something went wrong' }, replace: true });
-        return;
-      }
-
-      navigate(ROUTES.home);
-    };
-
-    handleOAuthCallback();
-  }, [navigate]);
-
-  return <></>;
-}
+import OAuth from '@/pages/Oauth';
 
 function App() {
   return (

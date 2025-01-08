@@ -13,18 +13,11 @@ import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
 export class GoogleApiService implements IGoogleApiService {
   constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
 
-  // @ overloaded method signature
-  getOAuthClient(redirectUrl: string): OAuth2Client;
-  getOAuthClient(): OAuth2Client;
-  getOAuthClient(redirectUrl?: string): OAuth2Client {
-    if (redirectUrl) {
-      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, redirectUrl);
-    } else {
-      return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret);
-    }
+  getOAuthClient(): OAuth2Client {
+    return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
   }
 
-  getOAuthUrl(redirectUrl: string) {
+  getOAuthUrl(client: 'web' | 'chrome') {
     const scopes = [
       'https://www.googleapis.com/auth/admin.directory.resource.calendar.readonly',
       'https://www.googleapis.com/auth/calendar',
@@ -32,11 +25,12 @@ export class GoogleApiService implements IGoogleApiService {
       'https://www.googleapis.com/auth/userinfo.profile',
     ];
 
-    const client = this.getOAuthClient(redirectUrl);
-    const url = client.generateAuthUrl({
+    const oAuthClient = this.getOAuthClient();
+    const url = oAuthClient.generateAuthUrl({
       access_type: 'offline',
       scope: scopes,
       response_type: 'code',
+      state: client,
     });
 
     return url;

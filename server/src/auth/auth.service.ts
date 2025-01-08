@@ -25,8 +25,8 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async login(code: string, oauthRedirectUrl: string) {
-    const client = this.googleApiService.getOAuthClient(oauthRedirectUrl);
+  async login(code: string) {
+    const client = this.googleApiService.getOAuthClient();
     const { tokens } = await this.googleApiService.getToken(client, code);
     const userInfo = await this.jwtService.decode(tokens.id_token);
 
