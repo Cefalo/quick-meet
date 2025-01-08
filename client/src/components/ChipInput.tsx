@@ -18,7 +18,11 @@ export default function ChipInput({ id, sx, onChange, value, type }: ChipInputPr
   const [chips, setChips] = useState<any[]>(value || []);
 
   const handleKeyDown = (event: any) => {
-    if ((event.key === 'Enter' || event.key === ' ') && inputValue.trim() !== '') {
+    if (event.key === 'Backspace' && inputValue === '' && chips.length > 0) {
+      const newChips = chips.slice(0, -1);
+      setChips(newChips);
+      onChange(id, newChips);
+    } else if ((event.key === 'Enter' || event.key === ' ') && inputValue.trim() !== '') {
       if (validateEmail(inputValue.trim())) {
         const newChips = [...chips, inputValue.trim()];
         setChips(newChips);
