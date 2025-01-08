@@ -43,6 +43,15 @@ export default class Api {
     };
   }
 
+  async validateSession() {
+    try {
+      await this.client.get('/auth/session/validate');
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
   async refreshToken() {
     try {
       const res = await axios.get('/auth/token/refresh', {
@@ -71,11 +80,7 @@ export default class Api {
           if (!renewedToken) {
             await this.logout();
 
-            // window.history.pushState(null, '', '/sign-in');
             this.navigate && this.navigate(ROUTES.signIn);
-
-            // todo: error here causing crash in chrome ext
-            // window.location.href = ROUTES.signIn;
             return Promise.reject(error);
           }
 
@@ -114,10 +119,8 @@ export default class Api {
   async logout() {
     try {
       const res = await this.client.post('/auth/logout', null);
-      console.log('logout: ' + res);
       return res.data as ApiResponse<boolean>;
     } catch (error: any) {
-      console.log(error);
       return false;
     }
   }

@@ -2,7 +2,6 @@ import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import Api from '@api/api';
 import toast from 'react-hot-toast';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import EventCard from '@components/EventCard';
@@ -10,6 +9,7 @@ import DeleteConfirmationView from '@components/DeleteConfirmationView';
 import EditEventsView from './EditEventsView';
 import { FormData } from '@helpers/types';
 import { ROUTES } from '@config/routes';
+import { useApi } from '@/context/ApiContext';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
@@ -20,8 +20,7 @@ export default function MyEventsView() {
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
   const [editView, setEditView] = useState<EventResponse | null>(null);
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
-
-  const api = new Api();
+  const api = useApi();
 
   useEffect(() => {
     const query = {
@@ -109,7 +108,7 @@ export default function MyEventsView() {
       attendees,
     };
 
-    const res = await new Api().updateEvent(eventId, payload);
+    const res = await api.updateEvent(eventId, payload);
     console.log(res);
 
     if (res?.redirect) {

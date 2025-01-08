@@ -40,7 +40,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const { preferences } = usePreferences();
 
   // loading states
-  const [loading, setLoading] = useState(false);
+  const [bookClickLoading, setBookClickLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
   const [initialPageLoad, setInitialPageLoad] = useState(false);
 
@@ -59,9 +59,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
   // Utilities and hooks
   const navigate = useNavigate();
-  // const api = new Api();
   const abortControllerRef = useRef<AbortController | null>(null);
-  const { api } = useApi();
+  const api = useApi();
 
   useEffect(() => {
     initializeDropdowns();
@@ -91,7 +90,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   async function initializeDropdowns() {
     const res = await api.getMaxSeatCount();
     if (res.status === 'error') {
-      // navigate('/sign-in');
       return;
     }
 
@@ -161,7 +159,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   }
 
   async function onBookClick() {
-    setLoading(true);
+    setBookClickLoading(true);
     const { startTime, duration, seats, conference, attendees, title, room } = formData;
 
     if (!room) {
@@ -186,7 +184,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
     const res = await api.createEvent(payload);
     const { data, status } = res;
-    setLoading(false);
+    setBookClickLoading(false);
 
     if (status !== 'success') {
       await setAvailableRooms();
@@ -350,7 +348,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
         <LoadingButton
           onClick={onBookClick}
           fullWidth
-          loading={loading}
+          loading={bookClickLoading}
           variant="contained"
           disabled={roomLoading || !formData.room ? true : false}
           disableElevation

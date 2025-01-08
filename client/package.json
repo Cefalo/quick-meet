@@ -29,8 +29,8 @@
   },
   "scripts": {
     "start": "vite --port 3000",
-    "build": "tsc -b && vite build --watch",
-    "chrome:build": "npm run chrome:generate-manifest && tsc -b && vite build --mode chrome --watch",
+    "build": "tsc -b && vite build",
+    "chrome:build": "npm run chrome:generate-manifest && tsc -b && vite build --mode chrome",
     "chrome:generate-manifest": "node generate-manifest.js",
     "serve": "npx http-server build_web --port 3000",
     "lint": "eslint \"{src}/**/*.ts\" --fix"

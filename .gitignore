@@ -43,6 +43,7 @@ lerna-debug.log*
 
 # dotenv environment variable files
 **/.env
+**/.env.chrome
 **/.env.development
 **/.env.development.chrome
 .env.test.local

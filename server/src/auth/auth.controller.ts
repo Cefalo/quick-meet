@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { Body, Controller, Get, Inject, Post, Req, Res, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -27,15 +27,23 @@ export class AuthController {
     const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
     const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code, oauthRedirectUrl);
 
-    if (refreshToken) {
+    if (refreshToken && iv) {
       this.setCookie(res, 'refreshToken', refreshToken);
+      this.setCookie(res, 'iv', iv);
     }
 
     this.setCookie(res, 'accessToken', accessToken, toMs('1h'));
     this.setCookie(res, 'hd', hd);
     this.setCookie(res, 'userId', userId);
-    this.setCookie(res, 'iv', iv);
 
+    return createResponse(true);
+  }
+
+  @Get('/session/validate')
+  async validateSession(@Req() req: _Request): Promise<ApiResponse<boolean>> {
+    if (!req.cookies.accessToken) {
+      throw new BadRequestException('Access token is required.');
+    }
     return createResponse(true);
   }
 

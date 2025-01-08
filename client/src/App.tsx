@@ -6,14 +6,15 @@ import { Toaster } from 'react-hot-toast';
 import { FONT_PRIMARY } from './theme/primitives/typography';
 import { useEffect } from 'react';
 import { ROUTES } from './config/routes';
-import Api from './api/api';
 import Settings from '@/pages/Settings';
 import BaseLayout from '@/pages/BaseLayout';
+import { useApi } from '@/context/ApiContext';
 
 // only used for the web version
 // for chrome extension, a different oauth flow is used using the chrome api
 function OAuth() {
   const navigate = useNavigate();
+  const api = useApi();
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -27,7 +28,6 @@ function OAuth() {
       }
 
       if (code) {
-        const api = new Api();
         const res = await api.handleOAuthCallback(code);
         if (!res) return;
 

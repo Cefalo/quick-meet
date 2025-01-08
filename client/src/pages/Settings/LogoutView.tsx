@@ -3,7 +3,7 @@ import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import { ROUTES } from '@/config/routes';
 import { useNavigate } from 'react-router-dom';
-import Api from '@/api/api';
+import { useApi } from '@/context/ApiContext';
 
 interface LogoutViewProps {
   handleCancel: () => void;
@@ -11,7 +11,7 @@ interface LogoutViewProps {
 
 export default function LogoutView({ handleCancel }: LogoutViewProps) {
   const [loading, setLoading] = useState(false);
-  const api = new Api();
+  const api = useApi();
   const navigate = useNavigate();
 
   const onConfirmClick = async () => {

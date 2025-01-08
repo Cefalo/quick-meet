@@ -1,5 +1,5 @@
 import { IConferenceRoom } from '@quickmeet/shared';
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -47,7 +47,7 @@ export class AuthService {
 
   async refreshAppToken(refreshToken?: string) {
     if (!refreshToken) {
-      throw new UnauthorizedException("Couldn't rotate token. Try re-logging");
+      throw new BadRequestException("Couldn't rotate token. No refresh token");
     }
 
     const client = this.googleApiService.getOAuthClient();
