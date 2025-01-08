@@ -16,11 +16,89 @@ interface DropdownProps {
 
 export interface DropdownOption {
   text: string;
-  value: string; // the main value used for api calls
+  value: string; // the main value used for API calls
 }
 
-export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon, placeholder, loading }: DropdownProps) {
+export default function Dropdown({
+  sx,
+  id,
+  disabled,
+  value,
+  options,
+  onChange,
+  decorator,
+  icon,
+  placeholder,
+  loading,
+}: DropdownProps) {
   const height = '60px';
+
+  // Determine the valid value for the dropdown
+  const validValue = options?.find((option) => option.value === value) ? value : '';
+
+  // Determine the content for the `renderValue` prop
+  const getRenderValue = (selected: string) => {
+    const selectedOption = options?.find((option) => option.value === selected);
+
+    if (placeholder && (!selected || selected.length === 0)) {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {icon && icon}
+          {loading ? (
+            <Skeleton
+              animation="wave"
+              sx={{
+                width: '100%',
+                mx: 2,
+                borderRadius: 0.5,
+              }}
+            />
+          ) : (
+            <Typography
+              variant="subtitle2"
+              sx={[
+                (theme) => ({
+                  color: theme.palette.grey[500],
+                  fontStyle: 'italic',
+                  ml: 2,
+                  fontWeight: 400,
+                }),
+              ]}
+            >
+              {placeholder}
+            </Typography>
+          )}
+        </Box>
+      );
+    }
+
+    return (
+      <Box
+        sx={{
+          alignItems: 'center',
+          display: 'flex',
+        }}
+      >
+        {icon && icon}
+        <Typography
+          variant="subtitle1"
+          sx={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            ml: 2,
+          }}
+        >
+          {selectedOption ? selectedOption.text + (decorator || '') : '-'}
+        </Typography>
+      </Box>
+    );
+  };
 
   useEffect(() => {
     console.log(id, value, options);
@@ -32,74 +110,13 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
 
   return (
     <Select
-      value={value ?? '-'}
+      value={validValue} // Use the pre-calculated valid value
       onChange={handleChange}
       fullWidth
       displayEmpty
       variant="standard"
       disabled={disabled || false}
-      renderValue={(selected) => {
-        const selectedOption = options?.find((option) => option.value === selected);
-
-        if (placeholder && selected.length === 0) {
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {icon && icon}
-              {loading ? (
-                <Skeleton
-                  animation="wave"
-                  sx={{
-                    width: '100%',
-                    mx: 2,
-                    borderRadius: 0.5,
-                  }}
-                />
-              ) : (
-                <Typography
-                  variant="subtitle2"
-                  sx={[
-                    (theme) => ({
-                      color: theme.palette.grey[500],
-                      fontStyle: 'italic',
-                      ml: 2,
-                      fontWeight: 400,
-                    }),
-                  ]}
-                >
-                  {placeholder}
-                </Typography>
-              )}
-            </Box>
-          );
-        }
-
-        return (
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-            }}
-          >
-            {icon && icon}
-            <Typography
-              variant="subtitle1"
-              sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                ml: 2,
-              }}
-            >
-              {selectedOption ? selectedOption.text + (decorator || '') : '-'}
-            </Typography>
-          </Box>
-        );
-      }}
+      renderValue={getRenderValue} // Use the extracted renderValue logic
       disableUnderline={true}
       sx={[
         (theme) => ({
