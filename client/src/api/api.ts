@@ -94,11 +94,10 @@ export default class Api {
 
   async getOAuthUrl() {
     try {
-      const res = await this.client.get('/auth/oauth2/url');
-
-      return res.data as ApiResponse<string>;
+      const { data } = await this.client.get('/auth/oauth2/url');
+      return this.createReply('success', '', data.data) as ApiResponse<string>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -108,18 +107,17 @@ export default class Api {
         code,
       };
 
-      const res = await this.client.post('/auth/oauth2/callback', payload);
-
-      return res.data as ApiResponse<boolean>;
+      await this.client.post('/auth/oauth2/callback', payload);
+      return this.createReply() as ApiResponse<boolean>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
   async logout() {
     try {
-      const res = await this.client.post('/auth/logout', null);
-      return res.data as ApiResponse<boolean>;
+      await this.client.post('/auth/logout', null);
+      return true;
     } catch (error: any) {
       return false;
     }
@@ -128,8 +126,9 @@ export default class Api {
   async loginChrome() {
     const { data } = await this.getOAuthUrl();
     if (data) {
-      return this.handleChromeOauthFlow(data);
+      return await this.handleChromeOauthFlow(data);
     }
+    return this.createReply('error');
   }
 
   async login() {
@@ -143,61 +142,20 @@ export default class Api {
   }
 
   async handleChromeOauthFlow(authUrl: string) {
-    const res = await new Promise<ApiResponse<any>>((resolve, _) => {
-      chrome.identity.launchWebAuthFlow(
-        {
-          url: authUrl,
-          interactive: true,
-        },
-        async (redirectUrl) => {
-          if (chrome.runtime.lastError || !redirectUrl) {
-            toast.error("Couldn't complete the OAuth flow");
-            console.error(chrome.runtime.lastError);
-          } else {
-            console.log('Redirect URL:', redirectUrl);
-            const url = new URL(redirectUrl);
+    return await new Promise<ApiResponse<any>>((resolve, _) => {
+      chrome.runtime.sendMessage({ type: 'startAuthFlow', redirectUrl: authUrl }, async (response) => {
+        if (!response.success) {
+          return resolve(this.createReply('error', response.error));
+        }
 
-            const code = url.searchParams.get('code');
-            console.log(code);
+        const res = await this.handleOAuthCallback(response.code);
+        if (res.status === 'error') {
+          return resolve(this.createReply('error', res?.message || 'Something went wrong'));
+        }
 
-            try {
-              if (code) {
-                const res = await this.handleOAuthCallback(code);
-                if (!res) return;
-
-                const { status, message, data } = res;
-                if (status === 'error') {
-                  return resolve({
-                    message: message || 'Something went wrong',
-                    redirect: true,
-                    status: 'success',
-                  });
-                }
-
-                resolve({
-                  status: 'success',
-                  data: data?.accessToken,
-                });
-              }
-            } catch (error: any) {
-              resolve({
-                status: 'error',
-                redirect: true,
-                message: error.message,
-              });
-            }
-
-            resolve({
-              status: 'error',
-              redirect: true,
-              message: 'Something went wrong',
-            });
-          }
-        },
-      );
+        return resolve(this.createReply('success', 'OAuth flow completed'));
+      });
     });
-
-    return res;
   }
 
   async getAvailableRooms(signal: AbortSignal, startTime: string, duration: number, timeZone: string, seats: number, floor?: string, eventId?: string) {
@@ -207,7 +165,7 @@ export default class Api {
 
       return res.data as ApiResponse<IConferenceRoom[]>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -223,7 +181,7 @@ export default class Api {
 
       return res.data as ApiResponse<EventResponse[]>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -233,7 +191,7 @@ export default class Api {
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -243,7 +201,7 @@ export default class Api {
 
       return res.data as ApiResponse<EventResponse>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -253,7 +211,7 @@ export default class Api {
 
       return res.data as ApiResponse<DeleteResponse>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -263,7 +221,7 @@ export default class Api {
 
       return res.data as ApiResponse<number>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
@@ -273,15 +231,15 @@ export default class Api {
 
       return res.data as ApiResponse<string[]>;
     } catch (error: any) {
-      return await this.handleError(error);
+      return this.handleError(error);
     }
   }
 
-  createReply(status: StatusTypes, message?: string, data?: any): ApiResponse<any> {
+  createReply(status: StatusTypes = 'success', message?: string, data?: any): ApiResponse<any> {
     return { status, message, data };
   }
 
-  async handleError(error: any) {
+  handleError(error: any) {
     console.error(error);
     // used for Abort request controllers
     if (error.code === 'ERR_CANCELED') {

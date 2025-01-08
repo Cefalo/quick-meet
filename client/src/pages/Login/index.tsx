@@ -4,14 +4,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { secrets } from '@config/secrets';
 import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
-import { isChromeExt, renderError } from '@helpers/utility';
+import { isChromeExt } from '@helpers/utility';
 import { ApiResponse } from '@quickmeet/shared';
 import { useApi } from '@/context/ApiContext';
+import { useState } from 'react';
 
 const Login = () => {
   const api = useApi();
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [loading, setLoading] = useState(false);
   const errorMessage = state?.message;
 
   if (errorMessage) {
@@ -20,17 +22,15 @@ const Login = () => {
 
   async function onSignInClick(): Promise<void> {
     if (secrets.appEnvironment === 'chrome') {
-      const res: ApiResponse<any> | undefined = await api.loginChrome();
-      if (!res) {
+      setLoading(true);
+      const res: ApiResponse<any> = await api.loginChrome();
+      setLoading(false);
+
+      if (res.status === 'error') {
         return;
       }
 
-      const { status } = res;
-
-      if (status !== 'success') {
-        return renderError(res, navigate);
-      }
-
+      console.log('all good: navigating to ', ROUTES.home);
       navigate(ROUTES.home, { replace: true });
     } else {
       await api.login();
@@ -77,6 +77,7 @@ const Login = () => {
             variant="contained"
             startIcon={<GoogleIcon />}
             onClick={onSignInClick}
+            disabled={loading}
           >
             Sign in
           </Button>

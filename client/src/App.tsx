@@ -22,25 +22,22 @@ function OAuth() {
       const code = url.searchParams.get('code');
       const error = url.searchParams.get('error');
 
-      if (error) {
+      console.log(chrome.cookies);
+
+      if (error || !code) {
         navigate(ROUTES.signIn, { state: { message: error }, replace: true });
         return;
       }
 
-      if (code) {
-        const res = await api.handleOAuthCallback(code);
-        if (!res) return;
+      const res = await api.handleOAuthCallback(code);
+      console.log('after handleOAuthCallback response', res);
 
-        const { status, message, data } = res;
-        if (status !== 'success') {
-          navigate(ROUTES.signIn, { state: { message: message || 'Something went wrong' }, replace: true });
-          return;
-        }
-
-        if (data) {
-          navigate(ROUTES.home, { replace: true });
-        }
+      if (res.status === 'error') {
+        navigate(ROUTES.signIn, { state: { message: res.message || 'Something went wrong' }, replace: true });
+        return;
       }
+
+      navigate(ROUTES.home);
     };
 
     handleOAuthCallback();

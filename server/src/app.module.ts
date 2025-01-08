@@ -6,7 +6,7 @@ import { CalenderModule } from './calender/calender.module';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/env/app.config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GoogleApiModule } from './google-api/google-api.module';

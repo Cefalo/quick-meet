@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res, Logger } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -18,6 +18,7 @@ export class AuthController {
     private encryptionService: EncryptionService,
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
+    private logger: Logger,
   ) {}
 
   @Post('/oauth2/callback')
@@ -36,6 +37,7 @@ export class AuthController {
     this.setCookie(res, 'hd', hd);
     this.setCookie(res, 'userId', userId);
 
+    this.logger.log(`OAuth flow completed for user ${userId} with accessToken ${accessToken} and refreshToken ${refreshToken}`);
     return createResponse(true);
   }
 
