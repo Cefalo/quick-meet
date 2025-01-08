@@ -15,7 +15,7 @@ export class AuthGuard implements CanActivate {
 
     request.accessToken = request.cookies.accessToken;
     request.hd = request.cookies.hd;
-    request.userId = request.cookies.userId;
+    request.email = request.cookies.email;
 
     if (request.cookies.iv && request.cookies.refreshToken) {
       request.iv = request.cookies.iv;

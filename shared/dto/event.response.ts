@@ -11,4 +11,5 @@ export interface EventResponse {
   seats?: number;
   attendees?: string[];
   createdAt?: number;
+  isEditable?: boolean;
 }

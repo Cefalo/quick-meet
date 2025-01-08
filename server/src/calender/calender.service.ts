@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
@@ -205,7 +205,7 @@ export class CalenderService {
     return true;
   }
 
-  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string): Promise<EventResponse[]> {
+  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
@@ -241,6 +241,7 @@ export class CalenderService {
         attendees: attendees,
         end: event.end.dateTime,
         createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
+        isEditable: event.organizer.email === userEmail,
       };
 
       formattedEvents.push(_event);
@@ -268,6 +269,7 @@ export class CalenderService {
     eventId: string,
     startTime: string,
     endTime: string,
+    userEmail: string,
     createConference?: boolean,
     eventTitle?: string,
     attendees?: string[],
@@ -275,6 +277,10 @@ export class CalenderService {
   ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms = await this.authService.getDirectoryResources(client, domain);
+
+    if (event.organizer.email !== userEmail) {
+      throw new ForbiddenException('Not allowed to update this event');
+    }
 
     const pickedRoom = extractRoomByEmail(rooms, room);
     if (!pickedRoom) {
