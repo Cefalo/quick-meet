@@ -22,6 +22,7 @@ const manifest = {
   icons: {
     16: 'favicon-16x16.png',
     32: 'favicon-32x32.png',
+    128: 'logo128.png',
   },
   permissions: ['identity', 'storage'],
 };
