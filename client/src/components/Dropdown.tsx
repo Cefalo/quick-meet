@@ -19,24 +19,11 @@ export interface DropdownOption {
   value: string; // the main value used for API calls
 }
 
-export default function Dropdown({
-  sx,
-  id,
-  disabled,
-  value,
-  options,
-  onChange,
-  decorator,
-  icon,
-  placeholder,
-  loading,
-}: DropdownProps) {
+export default function Dropdown({ sx, id, disabled, value, options, onChange, decorator, icon, placeholder, loading }: DropdownProps) {
   const height = '60px';
 
-  // Determine the valid value for the dropdown
   const validValue = options?.find((option) => option.value === value) ? value : '';
 
-  // Determine the content for the `renderValue` prop
   const getRenderValue = (selected: string) => {
     const selectedOption = options?.find((option) => option.value === selected);
 
@@ -110,13 +97,13 @@ export default function Dropdown({
 
   return (
     <Select
-      value={validValue} // Use the pre-calculated valid value
+      value={validValue}
       onChange={handleChange}
       fullWidth
       displayEmpty
       variant="standard"
       disabled={disabled || false}
-      renderValue={getRenderValue} // Use the extracted renderValue logic
+      renderValue={getRenderValue}
       disableUnderline={true}
       sx={[
         (theme) => ({

@@ -30,7 +30,7 @@ export default function OAuth() {
         return;
       }
 
-      navigate(ROUTES.home, { state: { message: state === 'chrome' ? 'Authentication success! You may open the extension now' : null } });
+      navigate(ROUTES.home, { state: { message: state === 'chrome' ? "You're all set! You can now return to the extension and start using it." : null } });
     };
 
     handleOAuthCallback();
