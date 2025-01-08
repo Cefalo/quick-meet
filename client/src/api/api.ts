@@ -43,15 +43,6 @@ export default class Api {
     };
   }
 
-  async validateSession() {
-    try {
-      await this.client.get('/auth/session/validate');
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   async refreshToken() {
     try {
       const res = await axios.get('/auth/token/refresh', {

@@ -1,7 +1,7 @@
 {
   "name": "QuickMeet",
   "version": "1.0.1",
-  "description": "One click to book them all",
+  "description": "Book meeting rooms with a single click",
   "manifest_version": 3,
   "author": "Ali Ahnaf",
   "action": {

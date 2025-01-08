@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -25,7 +25,7 @@ export class AuthController {
     const appEnvironment = (req.headers['x-app-environment'] as 'web' | 'chrome') || 'web';
 
     const oauthRedirectUrl = this.getOauthRedirectUrl(appEnvironment);
-    const { accessToken, refreshToken, hd, iv, userId } = await this.authService.login(code, oauthRedirectUrl);
+    const { accessToken, refreshToken, hd, iv, email } = await this.authService.login(code, oauthRedirectUrl);
 
     if (refreshToken && iv) {
       this.setCookie(res, 'refreshToken', refreshToken);
@@ -34,16 +34,8 @@ export class AuthController {
 
     this.setCookie(res, 'accessToken', accessToken, toMs('1h'));
     this.setCookie(res, 'hd', hd);
-    this.setCookie(res, 'userId', userId);
+    this.setCookie(res, 'email', email);
 
-    return createResponse(true);
-  }
-
-  @Get('/session/validate')
-  async validateSession(@Req() req: _Request): Promise<ApiResponse<boolean>> {
-    if (!req.cookies.accessToken) {
-      throw new BadRequestException('Access token is required.');
-    }
     return createResponse(true);
   }
 
@@ -56,7 +48,7 @@ export class AuthController {
     res.clearCookie('accessToken');
     res.clearCookie('hd');
     res.clearCookie('iv');
-    res.clearCookie('userId');
+    res.clearCookie('email');
 
     const status = await this.authService.logout(client);
     return createResponse(status);

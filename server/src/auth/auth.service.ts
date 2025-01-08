@@ -39,7 +39,7 @@ export class AuthService {
     return {
       accessToken: tokens.access_token,
       hd: userInfo.hd,
-      userId: userInfo.sub,
+      email: userInfo.email,
       refreshToken: data?.encryptedData,
       iv: data?.iv,
     };

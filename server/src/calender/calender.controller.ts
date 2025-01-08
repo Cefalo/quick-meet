@@ -31,8 +31,9 @@ export class CalenderController {
   ): Promise<ApiResponse<EventResponse[]>> {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
     const domain = req.hd;
+    const userEmail = req.email;
 
-    const events = await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone);
+    const events = await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone, userEmail);
     return createResponse(events);
   }
 
@@ -95,13 +96,25 @@ export class CalenderController {
   ): Promise<ApiResponse<EventUpdateResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
     const domain = req.hd;
+    const userEmail = req.email;
 
     // end time
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const updatedEvent = await this.calenderService.updateEvent(client, domain, eventId, startTime, endTime, createConference, title, attendees, room);
+    const updatedEvent = await this.calenderService.updateEvent(
+      client,
+      domain,
+      eventId,
+      startTime,
+      endTime,
+      userEmail,
+      createConference,
+      title,
+      attendees,
+      room,
+    );
     return createResponse(updatedEvent, 'Event has been updated!');
   }
 

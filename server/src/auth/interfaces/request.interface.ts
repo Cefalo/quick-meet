@@ -7,5 +7,5 @@ export interface _Request extends Request {
   refreshToken?: string;
   oauth2Client?: OAuth2Client;
   iv?: string;
-  userId?: string;
+  email?: string;
 }
