@@ -9,7 +9,7 @@ const appTitle = process.env.VITE_APP_TITLE;
 
 const manifest = {
   name: appTitle,
-  version: '1.0.0',
+  version: '1.0.1',
   description: appDescription,
   manifest_version: 3,
   author: 'Ali Ahnaf',

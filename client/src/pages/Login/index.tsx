@@ -4,13 +4,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { secrets } from '@config/secrets';
 import { ROUTES } from '@config/routes';
 import toast from 'react-hot-toast';
-import Api from '@api/api';
 import { isChromeExt, renderError } from '@helpers/utility';
 import { ApiResponse } from '@quickmeet/shared';
-
-const api = new Api();
+import { useApi } from '@/context/ApiContext';
 
 const Login = () => {
+  const api = useApi();
   const navigate = useNavigate();
   const { state } = useLocation();
   const errorMessage = state?.message;
@@ -26,15 +25,13 @@ const Login = () => {
         return;
       }
 
-      const { data, status } = res;
+      const { status } = res;
 
       if (status !== 'success') {
         return renderError(res, navigate);
       }
 
-      if (data) {
-        navigate(ROUTES.home, { replace: true });
-      }
+      navigate(ROUTES.home, { replace: true });
     } else {
       await api.login();
     }

@@ -1,4 +1,3 @@
-import Api from '@/api/api';
 import { DropdownOption } from '@/components/Dropdown';
 import Dropdown from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
@@ -12,6 +11,7 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import TitleIcon from '@mui/icons-material/Title';
+import { useApi } from '@/context/ApiContext';
 
 export default function PreferenceView() {
   // Form state
@@ -28,7 +28,7 @@ export default function PreferenceView() {
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
 
   // Utilities and services
-  const api = new Api();
+  const api = useApi();
   const navigate = useNavigate();
 
   // Context or global state

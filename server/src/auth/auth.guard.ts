@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
     request.hd = request.cookies.hd;
     request.userId = request.cookies.userId;
 
-    if (request.cookies.iv) {
+    if (request.cookies.iv && request.cookies.refreshToken) {
       request.iv = request.cookies.iv;
       request.refreshToken = await this.encryptionService.decrypt(request.cookies.refreshToken, request.cookies.iv);
     }

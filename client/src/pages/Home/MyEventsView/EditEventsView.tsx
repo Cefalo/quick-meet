@@ -22,12 +22,12 @@ import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import { FormData } from '@helpers/types';
-import Api from '@api/api';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '@/context/PreferencesContext';
 import ChipInput from '@/components/ChipInput';
 import StyledTextField from '@/components/StyledTextField';
+import { useApi } from '@/context/ApiContext';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -81,7 +81,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
   // Utilities and hooks
-  const api = new Api();
+  const api = useApi();
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
 

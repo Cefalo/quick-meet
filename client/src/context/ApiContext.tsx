@@ -16,4 +16,4 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return <ApiContext.Provider value={{ api: apiInstance }}>{children}</ApiContext.Provider>;
 };
 
-export const useApi = () => useContext(ApiContext)!;
+export const useApi = () => useContext(ApiContext)!.api;
