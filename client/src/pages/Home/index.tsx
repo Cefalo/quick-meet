@@ -3,16 +3,11 @@ import { useEffect, useState } from 'react';
 import TopNavigationBar from './TopNavigationBar';
 import BookRoomView from './BookRoomView';
 import MyEventsView from './MyEventsView';
-import { useApi } from '@/context/ApiContext';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/config/routes';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function Home() {
   const [tabIndex, setTabIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const api = useApi();
-  const navigate = useNavigate();
   const { state } = useLocation();
 
   useEffect(() => {
@@ -25,19 +20,6 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const validate = async () => {
-      const res = await api.validateSession();
-      if (!res) {
-        navigate(ROUTES.signIn);
-      }
-
-      setLoading(false);
-    };
-
-    validate();
-  }, []);
-
   const onRoomBooked = () => {
     setTabIndex(1);
   };
@@ -45,8 +27,6 @@ export default function Home() {
   const handleTabChange = (newValue: number) => {
     setTabIndex(newValue);
   };
-
-  if (loading) return <></>;
 
   return (
     <Box

@@ -217,6 +217,7 @@ export default function MyEventsView() {
                 handleEditClick={handleEditClick}
                 disabled={loading}
                 onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
+                hideMenu={!event.isEditable}
               />
               {i !== events.length - 1 && <Divider />}
             </React.Fragment>
