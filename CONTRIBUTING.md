@@ -53,10 +53,9 @@ Front end code for both the web and chrome versions are the same, with the `clie
 1. Copy the `.env.example` file as `.env` file in the `/server/` dir and fill the required keys. _OPTIONAL: Obtain the required OAuth credentials by following this [guide](./README.md#hosting-yourself)_
 2. Copy the `.env.example` file as `.env` file in the `/client/` dir. Change `VITE_ENVIRONMENT` to `chrome`.
 3. Modify the `client/generate-manifest.js` file to your organization needs if required.
-3. Run `npm run build:chrome` from the root dir. This will generate a `manifest.json` file in the `public` folder and bundle the static files in `build_chrome`
-4. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder. Note the extension id.
-5. Edit the `CHROME_EXTENSION_ID` in the `server/.env` file. The `OAUTH_REDIRECT_URL` will be replaced by the `https://CHROME_EXTENSION_ID.chromiumapp.org/index.html/oauthcallback`
-6. Go to you Google cloud project and add/update the Redirect URI to `https://<extension-id>.chromiumapp.org/index.html/oauthcallback`
+4. [optional] When a chrome extension is built, it creates a unique ID. It's different locally and when you publish it to the chrome web store. Preserving a single ID is essential during development. To keep a consistent ID, follow these steps: [Keep consistent id](https://developer.chrome.com/docs/extensions/how-to/integrate/oauth#keep-consistent-id)
+5. Run `npm run build:chrome` from the root dir. This will generate a `manifest.json` file in the `public` folder and bundle the static files in `build_chrome`
+6. Go to Chrome extensions from the browser. Enable developer mode and load the `client/build_chrome` folder.
 7. Run `npm run start:server` to start the server.
 
 During local development, it is recommended to turn off minification. This can be done in the `client/vite.config.ts` file: 
