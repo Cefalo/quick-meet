@@ -10,6 +10,7 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -47,6 +48,44 @@ export const createChips = (event: EventResponse) => {
     chips.push({
       label: event.floor,
       icon: <StairsIcon fontSize="small" />,
+    });
+  }
+
+  if (event.meet) {
+    let locationIcon = <InsertLinkRoundedIcon fontSize="small" />;
+
+    let tooltip = '';
+    let domain = '-';
+    let clickable = false;
+
+    try {
+      const url = new URL(event.meet);
+      domain = url.hostname;
+      clickable = true;
+    } catch (error) {
+      if (event.meet.length > 15) {
+        tooltip = event.meet;
+        domain = event.meet.slice(0, 15) + '...';
+      } else {
+        domain = event.meet;
+      }
+
+      locationIcon = <LocationOnRoundedIcon fontSize="small" />;
+    }
+
+    chips.push({
+      label: domain,
+      value: event.meet,
+      icon: locationIcon,
+      clickable,
+      tooltip,
+    });
+  }
+
+  if (event.attendees?.length) {
+    chips.push({
+      label: event.attendees.length.toString(),
+      icon: <EmailRoundedIcon fontSize="small" />,
     });
   }
 
@@ -88,40 +127,8 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
       setIsOngoingEvent(false);
     }
 
-    const _chips: ChipData[] = createChips(event);
-
-    let locationIcon = <InsertLinkRoundedIcon fontSize="small" />;
-
-    if (event.meet) {
-      let tooltip = '';
-      let domain = '-';
-      let clickable = false;
-
-      try {
-        const url = new URL(event.meet);
-        domain = url.hostname;
-        clickable = true;
-      } catch (error) {
-        if (event.meet.length > 15) {
-          tooltip = event.meet;
-          domain = event.meet.slice(0, 15) + '...';
-        } else {
-          domain = event.meet;
-        }
-
-        locationIcon = <LocationOnRoundedIcon fontSize="small" />;
-      }
-
-      _chips.push({
-        label: domain,
-        value: event.meet,
-        icon: locationIcon,
-        clickable,
-        tooltip,
-      });
-    }
-
-    setChips(_chips);
+    const chips: ChipData[] = createChips(event);
+    setChips(chips);
   }, [event]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

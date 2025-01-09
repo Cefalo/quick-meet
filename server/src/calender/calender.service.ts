@@ -376,7 +376,9 @@ export class CalenderService {
     };
 
     const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
-    const attendeeEmails = result.attendees.map((attendee) => attendee.email).filter((email) => !email.endsWith('resource.calendar.google.com'));
+    const attendeeEmails = result.attendees
+      .filter((attendee) => !attendee.email.endsWith('resource.calendar.google.com') && !attendee.organizer)
+      .map((attendee) => attendee.email);
 
     console.log('Room has been updated', result);
 
