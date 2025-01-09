@@ -58,7 +58,7 @@ export function populateRoomCapacity(max: number) {
   const options = [];
   let capacity = 1;
 
-  while (capacity < max) {
+  while (capacity <= max) {
     options.push(capacity.toString());
     capacity += 1;
   }
