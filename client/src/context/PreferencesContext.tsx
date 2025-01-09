@@ -1,3 +1,4 @@
+import { constants } from '@/config/constants';
 import { CacheService, CacheServiceFactory } from '@/helpers/cache';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
@@ -22,6 +23,7 @@ const PreferencesContext = createContext<PreferencesContextType | undefined>(und
 const defaultPreferences = {
   duration: 30,
   seats: 1,
+  title: constants.defaultTitle,
 };
 
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
@@ -29,6 +31,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   const [preferences, setPreferences] = useState<Preferences>({
     duration: defaultPreferences.duration,
     seats: defaultPreferences.seats,
+    title: defaultPreferences.title,
   });
   const [loading, setLoading] = useState(true);
 

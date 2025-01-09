@@ -61,7 +61,7 @@ export class CalenderService {
     }
 
     const event: calendar_v3.Schema$Event = {
-      summary: eventTitle?.trim() || 'Quick Meeting',
+      summary: eventTitle?.trim() || '-',
       location: pickedRoom.name,
       description: 'A quick meeting created by QuickMeet',
       start: {
@@ -94,6 +94,7 @@ export class CalenderService {
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
+      isEditable: true,
     };
 
     return data;
@@ -343,7 +344,7 @@ export class CalenderService {
 
     const updatedEvent: calendar_v3.Schema$Event = {
       ...event,
-      summary: eventTitle?.trim() || 'Quick Meeting',
+      summary: eventTitle?.trim() || '-',
       location: pickedRoom.name,
       description: 'A quick meeting created by QuickMeet',
       start: {
@@ -378,6 +379,7 @@ export class CalenderService {
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
       attendees: attendeeEmails,
+      isEditable: true,
     };
 
     return eventResponse;
