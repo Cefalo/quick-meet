@@ -16,6 +16,7 @@ import {
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller('api')
 export class CalenderController {
@@ -60,6 +61,7 @@ export class CalenderController {
     return createResponse(rooms);
   }
 
+  @SkipThrottle()
   @UseGuards(AuthGuard)
   @Get('/rooms/highest-seat-count')
   async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<number>> {
@@ -128,6 +130,7 @@ export class CalenderController {
     return createResponse(deleted, 'Event has been deleted');
   }
 
+  @SkipThrottle()
   @UseGuards(AuthGuard)
   @Get('/floors')
   async listFloors(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<string[]>> {

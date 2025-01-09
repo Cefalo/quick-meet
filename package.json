@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "build:client": "npm run build --w client",
+    "build:client:watch": "npm run build:watch --w client",
     "build:chrome": "npm run chrome:build --w client",
     "build:shared": "npm run build --w shared",
     "build:server": "npm run build --w server",
