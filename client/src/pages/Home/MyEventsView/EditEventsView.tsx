@@ -345,7 +345,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               >
                 <StyledTextField
                   value={formData.title}
-                  placeholder="Quick Meeting"
+                  placeholder={preferences.title}
                   id="title"
                   onChange={handleInputChange}
                   sx={{ mx: 0.5 }}

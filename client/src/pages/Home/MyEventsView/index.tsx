@@ -10,6 +10,7 @@ import EditEventsView from './EditEventsView';
 import { FormData } from '@helpers/types';
 import { ROUTES } from '@config/routes';
 import { useApi } from '@/context/ApiContext';
+import { usePreferences } from '@/context/PreferencesContext';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ export default function MyEventsView() {
   const [editView, setEditView] = useState<EventResponse | null>(null);
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
   const api = useApi();
+  const { preferences } = usePreferences();
 
   useEffect(() => {
     const query = {
@@ -103,7 +105,7 @@ export default function MyEventsView() {
       timeZone: getTimeZoneString(),
       seats: Number(seats),
       createConference: conference,
-      title,
+      title: title || preferences.title,
       room: room,
       attendees,
     };

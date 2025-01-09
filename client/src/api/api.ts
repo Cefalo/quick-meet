@@ -39,7 +39,6 @@ export default class Api {
     return {
       Accept: 'application/json',
       'x-mock-api': secrets.mockCalender,
-      'x-app-environment': secrets.appEnvironment, // can be either chrome or web
     };
   }
 

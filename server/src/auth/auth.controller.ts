@@ -37,16 +37,18 @@ export class AuthController {
 
   @Post('/logout')
   async logout(@Req() req: _Request, @Res({ passthrough: true }) res: Response, @Body('revokeToken') revokeToken?: boolean): Promise<ApiResponse<boolean>> {
-    const client = this.googleApiService.getOAuthClient();
-    client.setCredentials({ access_token: req.cookies.accessToken });
-
     res.clearCookie('accessToken');
     res.clearCookie('hd');
     res.clearCookie('email');
 
     if (revokeToken) {
+      this.logger.debug("revoking refresh token")
       res.clearCookie('refreshToken');
       res.clearCookie('iv');
+
+      const client = this.googleApiService.getOAuthClient();
+      client.setCredentials({ access_token: req.cookies.accessToken });
+
       await this.authService.logout(client);
     }
 
