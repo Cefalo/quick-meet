@@ -76,6 +76,8 @@ export class GoogleApiService implements IGoogleApiService {
       calendar.events.insert({
         calendarId: 'primary',
         conferenceDataVersion: 1,
+        sendUpdates: 'all',
+        sendNotifications: true,
         requestBody: {
           ...event,
         },
@@ -173,6 +175,8 @@ export class GoogleApiService implements IGoogleApiService {
         eventId: id,
         calendarId: 'primary',
         requestBody: event,
+        sendNotifications: true,
+        sendUpdates: 'all',
         conferenceDataVersion: 1,
       }),
     );
@@ -194,6 +198,8 @@ export class GoogleApiService implements IGoogleApiService {
       calendar.events.delete({
         calendarId: 'primary',
         eventId: id,
+        sendUpdates: 'all',
+        sendNotifications: true,
       }),
     );
 

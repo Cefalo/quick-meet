@@ -75,13 +75,14 @@ export class CalenderController {
   async createEvent(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
     const domain = req.hd;
+    const userEmail = req.email;
 
     // end time
     const startDate = new Date(startTime);
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, createConference, title, attendees);
+    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, userEmail, createConference, title, attendees);
     return createResponse(event, 'Room has been booked');
   }
 

@@ -19,6 +19,7 @@ export class CalenderService {
     startTime: string,
     endTime: string,
     room: string,
+    organizerEmail: string,
     createConference?: boolean,
     eventTitle?: string,
     attendees?: string[],
@@ -70,7 +71,7 @@ export class CalenderService {
       end: {
         dateTime: endTime,
       },
-      attendees: [...attendeeList, { email: pickedRoom.email }],
+      attendees: [...attendeeList, { email: pickedRoom.email }, { email: organizerEmail, organizer: true, responseStatus: 'accepted' }],
       colorId: '3',
       extendedProperties: {
         private: {
@@ -224,7 +225,7 @@ export class CalenderService {
       let attendees: string[] = [];
       if (event.attendees) {
         for (const attendee of event.attendees) {
-          if (!attendee.resource && attendee.responseStatus !== 'declined') {
+          if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
             attendees.push(attendee.email);
           }
         }
@@ -313,11 +314,22 @@ export class CalenderService {
       }
     }
 
+    if (pickedRoom) {
+      attendees.push(pickedRoom.email);
+    }
+
+    attendees.push(event.organizer.email);
+
     const attendeeList = [];
     if (attendees?.length) {
       for (const attendee of attendees) {
         if (validateEmail(attendee)) {
-          attendeeList.push({ email: attendee });
+          const existingAttendee = event.attendees?.find((a) => a.email === attendee);
+          if (existingAttendee) {
+            attendeeList.push(existingAttendee);
+          } else {
+            attendeeList.push({ email: attendee });
+          }
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
         }
