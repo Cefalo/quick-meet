@@ -109,9 +109,11 @@ export default class Api {
     }
   }
 
-  async logout() {
+  async logout(revokeToken: boolean = false) {
     try {
-      await this.client.post('/auth/logout', null);
+      await this.client.post('/auth/logout', {
+        revokeToken,
+      });
       return true;
     } catch (error: any) {
       return false;

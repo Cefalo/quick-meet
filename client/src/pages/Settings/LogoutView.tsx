@@ -17,7 +17,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
   const onConfirmClick = async () => {
     setLoading(true);
 
-    await api.logout();
+    await api.logout(true);
     navigate(ROUTES.signIn);
   };
 
