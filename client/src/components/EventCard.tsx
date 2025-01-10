@@ -11,6 +11,7 @@ import { convertToLocaleTime } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
@@ -79,6 +80,7 @@ export const createChips = (event: EventResponse) => {
       icon: locationIcon,
       clickable,
       tooltip,
+      hasMeetingLink: true,
     });
   }
 
@@ -108,6 +110,7 @@ interface ChipData {
   clickable?: boolean;
   value?: string;
   tooltip?: string;
+  hasMeetingLink?: boolean;
 }
 
 const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
@@ -143,6 +146,10 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
   const handleDeleteClick = () => {
     onDelete(event!.eventId);
     setAnchorEl(null);
+  };
+
+  const onCopyMeetingLinkClick = (value: string) => {
+    navigator.clipboard.writeText(value);
   };
 
   return (
@@ -245,6 +252,14 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
                       window.open(chip.value, '_blank');
                     }
                   }}
+                  deleteIcon={
+                    chip.hasMeetingLink ? (
+                      <Tooltip title="Copy meeting link">
+                        <ContentCopyIcon sx={{ scale: 0.7 }} />
+                      </Tooltip>
+                    ) : undefined
+                  }
+                  onDelete={chip.hasMeetingLink ? () => onCopyMeetingLinkClick(chip.value!) : undefined}
                 />
               </Tooltip>
             </ListItem>
