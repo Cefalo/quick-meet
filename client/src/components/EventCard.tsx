@@ -12,13 +12,14 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import toast from 'react-hot-toast';
 
 const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.3),
 }));
 
 export const createChips = (event: EventResponse) => {
-  const chips = [];
+  const chips: ChipData[] = [];
 
   if (!event) {
     return [];
@@ -54,15 +55,18 @@ export const createChips = (event: EventResponse) => {
 
   if (event.meet) {
     let locationIcon = <InsertLinkRoundedIcon fontSize="small" />;
+    let endIcon;
 
     let tooltip = '';
     let domain = '-';
     let clickable = false;
+    let hasMeetingLink = false;
 
     try {
       const url = new URL(event.meet);
       domain = url.hostname;
       clickable = true;
+      hasMeetingLink = true;
     } catch (error) {
       if (event.meet.length > 15) {
         tooltip = event.meet;
@@ -74,13 +78,30 @@ export const createChips = (event: EventResponse) => {
       locationIcon = <LocationOnRoundedIcon fontSize="small" />;
     }
 
+    if (hasMeetingLink) {
+      endIcon = (
+        <Tooltip title="Copy meeting link">
+          <ContentCopyIcon sx={{ scale: 0.7 }} />
+        </Tooltip>
+      );
+    }
+
     chips.push({
       label: domain,
       value: event.meet,
       icon: locationIcon,
       clickable,
       tooltip,
-      hasMeetingLink: true,
+      endIcon,
+      action: () => {
+        clickable && window.open(event.meet, '_blank');
+      },
+      endIconAction: () => {
+        if (event.meet) {
+          navigator.clipboard.writeText(event.meet);
+          toast.success('Meeting link copied to clipboard');
+        }
+      },
     });
   }
 
@@ -105,12 +126,15 @@ interface EventCardProps {
 
 interface ChipData {
   icon: React.ReactElement;
+  endIcon?: React.ReactElement;
   label: string;
   color?: string;
   clickable?: boolean;
   value?: string;
   tooltip?: string;
   hasMeetingLink?: boolean;
+  endIconAction?: () => void;
+  action?: () => void;
 }
 
 const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
@@ -146,10 +170,6 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
   const handleDeleteClick = () => {
     onDelete(event!.eventId);
     setAnchorEl(null);
-  };
-
-  const onCopyMeetingLinkClick = (value: string) => {
-    navigator.clipboard.writeText(value);
   };
 
   return (
@@ -247,19 +267,9 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
                     px: 0.5,
                     py: 1,
                   }}
-                  onClick={() => {
-                    if (chip.clickable) {
-                      window.open(chip.value, '_blank');
-                    }
-                  }}
-                  deleteIcon={
-                    chip.hasMeetingLink ? (
-                      <Tooltip title="Copy meeting link">
-                        <ContentCopyIcon sx={{ scale: 0.7 }} />
-                      </Tooltip>
-                    ) : undefined
-                  }
-                  onDelete={chip.hasMeetingLink ? () => onCopyMeetingLinkClick(chip.value!) : undefined}
+                  onClick={chip.action}
+                  deleteIcon={chip.endIcon}
+                  onDelete={chip.endIconAction}
                 />
               </Tooltip>
             </ListItem>

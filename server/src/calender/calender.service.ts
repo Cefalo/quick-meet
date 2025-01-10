@@ -96,6 +96,7 @@ export class CalenderService {
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
       isEditable: true,
+      floor: pickedRoom.floor,
     };
 
     return data;
@@ -212,23 +213,24 @@ export class CalenderService {
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
 
     const formattedEvents = [];
+
     for (const event of events) {
-      let room: IConferenceRoom | null = {};
-      if (event.location) {
-        room = rooms.find((_room) => event.location.includes(_room.name));
-        if (!room) {
-          // event location must be an external link
-          event.hangoutLink = event.location;
-        }
-      }
+      let room: IConferenceRoom | null = null;
 
       let attendees: string[] = [];
       if (event.attendees) {
         for (const attendee of event.attendees) {
           if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
             attendees.push(attendee.email);
+          } else if (attendee.resource) {
+            room = rooms.find((_room) => _room.email === attendee.email);
           }
         }
+      }
+
+      if (!room && event.location) {
+        // event location must be an external link
+        event.hangoutLink = event.location;
       }
 
       const _event: EventResponse = {
@@ -394,6 +396,7 @@ export class CalenderService {
       seats: pickedRoom.seats,
       attendees: attendeeEmails,
       isEditable: true,
+      floor: pickedRoom.floor,
     };
 
     return eventResponse;
