@@ -32,6 +32,7 @@ async function bootstrap() {
       origin: (_, callback) => {
         callback(null, true);
       },
+      credentials: true,
     });
   }
 
