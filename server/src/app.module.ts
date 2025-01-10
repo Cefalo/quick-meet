@@ -26,7 +26,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: process.env.NODE_ENV === 'development' ? 10 : 20,
+        limit: process.env.NODE_ENV === 'development' ? 40 : 30,
       },
     ]),
     CacheModule.register({ isGlobal: true }),

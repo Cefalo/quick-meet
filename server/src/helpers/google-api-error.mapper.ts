@@ -46,7 +46,7 @@ export class GoogleAPIErrorMapper {
       case 404:
         throw new NotFoundException(`${statusText}. Resource might not exist.`);
       case 429:
-        throw new HttpException(`${statusText}. You've exceeded the rate limit.`, status);
+        throw new HttpException(`Oops! You're sending requests a little too quickly. Please wait for a while`, status);
       case 500:
         throw new InternalServerErrorException(`Internal Server Error: ${statusText}. Please try again later.`);
       case 503:
