@@ -160,7 +160,7 @@ export const formatMinsToHM = (value: number, decorator?: string) => {
   return result.trim();
 };
 
-export const validateEmail = (email: string) => {
+export const isEmailValid = (email: string) => {
   return String(email)
     .toLowerCase()
     .match(

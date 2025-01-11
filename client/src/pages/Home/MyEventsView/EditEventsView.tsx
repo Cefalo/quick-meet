@@ -25,9 +25,9 @@ import { FormData } from '@helpers/types';
 import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '@/context/PreferencesContext';
-import ChipInput from '@/components/ChipInput';
 import StyledTextField from '@/components/StyledTextField';
 import { useApi } from '@/context/ApiContext';
+import AttendeeInput from '@/components/AttendeeInput';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -105,8 +105,6 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   }, [formData.startTime, formData.duration, formData.seats, roomCapacityOptions]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
-    console.log(formData);
-
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -359,8 +357,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                     />
                   }
                 />
-
-                <ChipInput sx={{ mt: 1, mx: 0.5 }} id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
+                <AttendeeInput id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
               </Box>
               <Box
                 sx={{
