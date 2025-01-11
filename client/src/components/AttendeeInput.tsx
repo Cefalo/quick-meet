@@ -1,4 +1,4 @@
-import { TextField, Chip, Box, Autocomplete, debounce, IconButton, styled, Popper } from '@mui/material';
+import { TextField, Chip, Box, Autocomplete, debounce, IconButton } from '@mui/material';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import { useState } from 'react';
 import { useApi } from '@/context/ApiContext';
@@ -14,24 +14,24 @@ interface AttendeeInputProps {
   type?: string;
 }
 
-const StyledPopper = styled(Popper)(({ theme }) => ({
-  '& .MuiAutocomplete-paper': {
-    backgroundColor: 'rgba(245, 245, 245)',
-    color: theme.palette.text.primary,
-    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-    borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(0.5),
-  },
-  '& .MuiAutocomplete-listbox': {
-    padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  '& .MuiAutocomplete-option': {
-    padding: theme.spacing(1.5),
-    borderRadius: theme.shape.borderRadius,
-  },
-}));
+// const StyledPopper = styled(Popper)(({ theme }) => ({
+//   '& .MuiAutocomplete-paper': {
+//     backgroundColor: 'rgba(245, 245, 245)',
+//     color: theme.palette.text.primary,
+//     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+//     borderRadius: theme.shape.borderRadius,
+//     padding: theme.spacing(0.5),
+//   },
+//   '& .MuiAutocomplete-listbox': {
+//     padding: 0,
+//     display: 'flex',
+//     flexDirection: 'column',
+//   },
+//   '& .MuiAutocomplete-option': {
+//     padding: theme.spacing(1.5),
+//     borderRadius: theme.shape.borderRadius,
+//   },
+// }));
 
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
   const [options, setOptions] = useState<string[]>([]);
@@ -137,6 +137,23 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           inputValue={textInput}
           fullWidth
           onChange={handleSelectionChange}
+          slotProps={{
+            listbox: {
+              sx: {
+                backgroundColor: 'rgba(245, 245, 245)',
+                '& .MuiAutocomplete-option': {
+                  padding: 1,
+                  mx: 1,
+                  borderRadius: 1,
+                },
+              },
+            },
+            popper: {
+              sx: {
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+              },
+            },
+          }}
           onInputChange={debouncedInputChange}
           renderTags={(value: readonly string[], getTagProps) =>
             value.map((option: string, index: number) => {
@@ -180,7 +197,8 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               ]}
             />
           )}
-          PopperComponent={StyledPopper}
+
+          // PopperComponent={StyledPopper}
         />
         <IconButton
           sx={{
