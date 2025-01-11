@@ -42,6 +42,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   // loading states
   const [bookClickLoading, setBookClickLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [initialPageLoad, setInitialPageLoad] = useState(false);
 
   // dropdown options
@@ -63,8 +64,10 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const api = useApi();
 
   useEffect(() => {
-    initializeDropdowns();
-    setInitialPageLoad(true);
+    initializeDropdowns().finally(() => {
+      setInitialPageLoad(true);
+      setLoading(false);
+    });
 
     // abort pending requests on component unmount
     return () => {
@@ -198,6 +201,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setAvailableRoomOptions([]);
     onRoomBooked();
   }
+
+  if (loading) return <></>;
 
   return (
     <Box mx={2} display={'flex'}>

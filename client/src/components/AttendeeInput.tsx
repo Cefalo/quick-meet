@@ -1,8 +1,7 @@
-import { TextField, Chip, Box, Autocomplete, debounce, IconButton } from '@mui/material';
+import { TextField, Chip, Box, Autocomplete, debounce } from '@mui/material';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import { useState } from 'react';
 import { useApi } from '@/context/ApiContext';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { isEmailValid } from '@/helpers/utility';
 import toast from 'react-hot-toast';
 
@@ -13,25 +12,6 @@ interface AttendeeInputProps {
   onChange: (id: string, value: string[]) => void;
   type?: string;
 }
-
-// const StyledPopper = styled(Popper)(({ theme }) => ({
-//   '& .MuiAutocomplete-paper': {
-//     backgroundColor: 'rgba(245, 245, 245)',
-//     color: theme.palette.text.primary,
-//     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-//     borderRadius: theme.shape.borderRadius,
-//     padding: theme.spacing(0.5),
-//   },
-//   '& .MuiAutocomplete-listbox': {
-//     padding: 0,
-//     display: 'flex',
-//     flexDirection: 'column',
-//   },
-//   '& .MuiAutocomplete-option': {
-//     padding: theme.spacing(1.5),
-//     borderRadius: theme.shape.borderRadius,
-//   },
-// }));
 
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
   const [options, setOptions] = useState<string[]>([]);
@@ -82,10 +62,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       onChange(id, [...existingEmails, inputValue]);
       setTextInput('');
     }
-  };
-
-  const onRemoveAllClick = () => {
-    onChange(id, []);
   };
 
   const debouncedInputChange = debounce(handleInputChange, 300);
@@ -197,28 +173,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               ]}
             />
           )}
-
-          // PopperComponent={StyledPopper}
         />
-        <IconButton
-          sx={{
-            position: 'sticky',
-            p: 0.5,
-            top: 0,
-            bottom: 0,
-            display: (value || []).length > 0 ? 'flex' : 'none',
-          }}
-          onClick={onRemoveAllClick}
-        >
-          <CloseRoundedIcon
-            fontSize="small"
-            sx={[
-              (theme) => ({
-                color: theme.palette.grey[50],
-              }),
-            ]}
-          />
-        </IconButton>
       </Box>
     </Box>
   );
