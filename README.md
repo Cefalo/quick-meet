@@ -2,10 +2,9 @@
     Quick Meet
     <br />
     <br />
-    <a href=""> 
-      <img src="https://github.com/user-attachments/assets/b1354e94-e5cd-4ab8-a745-c86e7db5a58f" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/fc6166fe-353e-4e0e-9551-3a4aff6c5cef" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/0b7a620c-4805-465c-8a66-5a6d4a2598c6" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/289cb6f8-03a5-4ab6-b77f-5b6d5cccd738" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/18ad5031-eae4-430e-982a-dafd83f180a2" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/1a3fc60e-688b-4b3d-8e43-3740e306a264" alt="QuickMeet" width="30%">
     </a>
   </h1>
 </div>
