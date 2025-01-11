@@ -2,10 +2,10 @@
     Quick Meet
     <br />
     <br />
-    <a href="">
-      <img src="https://github.com/user-attachments/assets/d5b40ed0-285b-4c70-88ed-a9706ef15dfb" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/839cb957-e66a-4698-a973-501068befaa5" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/a7d1906f-55a8-446a-90b7-e01ee2cf9cba" alt="QuickMeet" width="30%">
+    <a href=""> 
+      <img src="https://github.com/user-attachments/assets/b1354e94-e5cd-4ab8-a745-c86e7db5a58f" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/fc6166fe-353e-4e0e-9551-3a4aff6c5cef" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/0b7a620c-4805-465c-8a66-5a6d4a2598c6" alt="QuickMeet" width="30%">
     </a>
   </h1>
 </div>
@@ -34,10 +34,10 @@ Quick Meet is specifically tailored for organizations that utilize unique meetin
 
 - Creative Agencies: Organizations that require unique environments for brainstorming sessions, presentations, and client meetings, ensuring that the right atmosphere is matched with the right room.
 
-- Tech Companies: Businesses that rely on collaborative workspaces and need to efficiently manage the booking of cmeeting rooms equipped with specific tools and resources.
+- Tech Companies: Businesses that rely on collaborative workspaces and need to efficiently manage the booking of meeting rooms equipped with specific tools and resources.
 
 
-### Quic kMeet vs Google Calendar
+### Quick Meet vs Google Calendar
 
 #### 1. **Clunky Room Booking**:
 Google Calendar may offer room bookings, but finding a suitable room in a large office with specific requirements (like seat capacity or floor preference) can be a pain. You end up scrolling through a bunch of rooms after checking through several dropdowns.
