@@ -198,6 +198,19 @@ export default class Api {
     }
   }
 
+  async searchPeople(email: string): Promise<ApiResponse<string[]>> {
+    try {
+      const res = await this.client.get('/api/directory/people', {
+        params: {
+          email,
+        },
+      });
+
+      return res.data as ApiResponse<string[]>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
   async getFloors() {
     try {
       const res = await this.client.get('/api/floors');

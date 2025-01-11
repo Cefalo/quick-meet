@@ -16,7 +16,7 @@ import {
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('api')
 export class CalenderController {
@@ -86,6 +86,16 @@ export class CalenderController {
 
     const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, userEmail, createConference, title, attendees);
     return createResponse(event, 'Room has been booked');
+  }
+
+  @Throttle({ default: { limit: 100, ttl: 60000 } })
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OauthInterceptor)
+  @Get('/directory/people')
+  async searchPeople(@_OAuth2Client() client: OAuth2Client, @Query('email') email: string): Promise<ApiResponse<string[]>> {
+    const emails = await this.calenderService.searchPeople(client, email);
+
+    return createResponse(emails);
   }
 
   @UseGuards(AuthGuard)

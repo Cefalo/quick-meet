@@ -1,5 +1,5 @@
-import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { admin_directory_v1, calendar_v3, google } from 'googleapis';
+import { ConflictException, ForbiddenException, HttpStatus, Inject, Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { admin_directory_v1, calendar_v3, google, people_v1 } from 'googleapis';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuthTokenResponse } from '../auth/dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -11,7 +11,10 @@ import { GoogleAPIErrorMapper } from 'src/helpers/google-api-error.mapper';
 
 @Injectable()
 export class GoogleApiService implements IGoogleApiService {
-  constructor(@Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>) {}
+  constructor(
+    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+    private logger: Logger,
+  ) {}
 
   getOAuthClient(): OAuth2Client {
     return new google.auth.OAuth2(this.config.oAuthClientId, this.config.oAuthClientSecret, this.config.oAuthRedirectUrl);
@@ -23,6 +26,7 @@ export class GoogleApiService implements IGoogleApiService {
       'https://www.googleapis.com/auth/calendar',
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/directory.readonly',
     ];
 
     const oAuthClient = this.getOAuthClient();
@@ -206,5 +210,26 @@ export class GoogleApiService implements IGoogleApiService {
     if (err) {
       GoogleAPIErrorMapper.handleError(err);
     }
+  }
+
+  // https://developers.google.com/people/api/rest/v1/people/searchDirectoryPeople
+  async searchPeople(oauth2Client: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]> {
+    const peopleService = google.people({ version: 'v1', auth: oauth2Client });
+
+    const [err, res]: [GaxiosError, GaxiosResponse<people_v1.Schema$SearchDirectoryPeopleResponse>] = await to(
+      peopleService.people.searchDirectoryPeople({
+        query,
+        readMask: 'emailAddresses',
+        pageSize: 10,
+        sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
+      }),
+    );
+
+    if (err) {
+      this.logger.error("Couldn't search directory people: ", err);
+      return [];
+    }
+
+    return res.data?.people || [];
   }
 }

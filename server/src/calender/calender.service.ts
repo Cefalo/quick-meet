@@ -416,4 +416,19 @@ export class CalenderService {
     const floors = await this.authService.getFloors(client, domain);
     return floors;
   }
+
+  async searchPeople(client: OAuth2Client, emailQuery: string): Promise<string[]> {
+    const people = await this.googleApiService.searchPeople(client, emailQuery);
+    const emails = [];
+    for (const p of people) {
+      for (const email of p.emailAddresses) {
+        if (email.metadata.primary && email.metadata.verified) {
+          emails.push(email.value);
+          break;
+        }
+      }
+    }
+
+    return emails;
+  }
 }

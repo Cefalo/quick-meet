@@ -1,4 +1,4 @@
-import { Module, Scope } from '@nestjs/common';
+import { Module, Scope, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { REQUEST } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -13,9 +13,9 @@ import { GoogleApiService } from './google-api.service';
       inject: [REQUEST, JwtService, appConfig.KEY],
       scope: Scope.REQUEST,
       // service provider
-      useFactory: (request: Request, jwtService: JwtService, config: ConfigType<typeof appConfig>) => {
+      useFactory: (request: Request, jwtService: JwtService, config: ConfigType<typeof appConfig>, logger: Logger) => {
         const useMock = request.headers['x-mock-api'] === 'true';
-        return useMock ? new GoogleApiMockService(jwtService, config) : new GoogleApiService(config);
+        return useMock ? new GoogleApiMockService(jwtService, config) : new GoogleApiService(config, logger);
       },
     },
     JwtService,
