@@ -2,7 +2,7 @@
   "name": "@quickmeet/client",
   "version": "0.1.0",
   "private": true,
-  "author": "Ali Ahnaf",
+  "author": "Cefalo https://github.com/Cefalo",
   "license": "MIT",
   "type": "module",
   "dependencies": {

@@ -1,4 +1,4 @@
-# Contributing to QuickMeet
+# Contributing to Quick Meet
 
 The [Open Source Guides](https://opensource.guide/) website has a collection of resources for individuals, communities, and companies who want to learn how to run and contribute to an open source project. Contributors and people new to open source alike will find the following guides especially useful:
 
@@ -10,17 +10,17 @@ The [Open Source Guides](https://opensource.guide/) website has a collection of 
 One great way you can contribute to the project without writing any code is to help triage issues and pull requests as they come in.
 
 - Ask for more information if you believe the issue does not provide all the details required to solve it.
-- Suggest [labels](https://github.com/Propo41/bookify/labels) that can help categorize issues.
+- Suggest [labels](https://github.com/Cefalo/quick-meet/labels) that can help categorize issues.
 - Flag issues that are stale or that should be closed.
 - Ask for test plans and review code.
 
 ## Issues
 
-When [opening a new issue](https://github.com/Propo41/bookify/issues/new/choose), always make sure to fill out the issue template. **This step is very important!** Not doing so may result in your issue not being managed in a timely fashion. Don't take this personally if this happens, and feel free to open a new issue once you've gathered all the information required by the template.
+When [opening a new issue](https://github.com/Cefalo/quick-meet/issues/new/choose), always make sure to fill out the issue template. **This step is very important!** Not doing so may result in your issue not being managed in a timely fashion. Don't take this personally if this happens, and feel free to open a new issue once you've gathered all the information required by the template.
 
 ### Bugs
 
-We use [GitHub Issues](https://github.com/Propo41/bookify/issues) for our public bugs. If you would like to report a problem, take a look around and see if someone already opened an issue about it. If you are certain this is a new, unreported bug, you can submit a [bug report](https://github.com/Propo41/bookify/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D).
+We use [GitHub Issues](https://github.com/Cefalo/quick-meet/issues) for our public bugs. If you would like to report a problem, take a look around and see if someone already opened an issue about it. If you are certain this is a new, unreported bug, you can submit a [bug report](https://github.com/Cefalo/quick-meet/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D).
 
 - **One issue, one bug:** Please report a single bug per issue.
 - **Provide reproduction steps:** List all the steps necessary to reproduce the issue. The person reading your bug report should be able to follow these steps to reproduce your issue with minimal effort.

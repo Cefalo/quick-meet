@@ -64,7 +64,7 @@ export class CalenderService {
     const event: calendar_v3.Schema$Event = {
       summary: eventTitle?.trim() || '-',
       location: pickedRoom.name,
-      description: 'A quick meeting created by QuickMeet',
+      description: 'A quick meeting created by Quick Meet',
       start: {
         dateTime: startTime,
       },
@@ -360,7 +360,7 @@ export class CalenderService {
       ...event,
       summary: eventTitle?.trim() || '-',
       location: pickedRoom.name,
-      description: 'A quick meeting created by QuickMeet',
+      description: 'A quick meeting created by Quick Meet',
       start: {
         dateTime: startTime,
       },

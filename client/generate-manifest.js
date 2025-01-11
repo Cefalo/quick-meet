@@ -13,7 +13,7 @@ const manifest = {
   description: appDescription,
   manifest_version: 3,
   key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAstDgQFGfJrfxo3id/1KTHVZpKbsCRMKZJXDUsDT8JRfasB/CeDGmuVs1hFYBJcGgn9PbK/mnE9hzWERVFpa4sfGZ3o0lvyfPLUfJd7PmfZ/4PQvE4+GfVQPAz/p4OVtP1WtbN4DED3jmrXiSrZ72paioz/ydVOSRDfo8m3+s9K92LcraYXHItvs+rSKXgfKxflfGzByme/fVO2V4yvE6T0YOqdLDc2USF4KGx0llHvqnmtB2K+rLr3V1/UcM1b4fP6kCiZAo7K2Tngpqa8DxgLVp8GYZ7NPPFJqu4tG1G1iRjtwk8Qblqmw+jmH+qZ2WguGtFpxU7P2JD8znPu//OwIDAQAB',
-  author: 'Ali Ahnaf',
+  author: 'Cefalo https://github.com/Cefalo',
   action: {
     default_popup: 'index.html',
     default_icon: 'favicon-32x32.png',

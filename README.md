@@ -1,5 +1,5 @@
   <h1 align="center">
-    QuickMeet
+    Quick Meet
     <br />
     <br />
     <a href="">
@@ -11,14 +11,14 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/Propo41/bookify/actions/workflows/build.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/build.yml/badge.svg" alt="GitHub Actions status"></a>
-  <a href="https://github.com/Propo41/bookify/actions/workflows/deploy.yml"><img src="https://github.com/Propo41/bookify/actions/workflows/deploy.yml/badge.svg" alt="GitHub Actions status"></a>
+  <a href="https://github.com/Cefalo/quick-meet/actions/workflows/build.yml"><img src="https://github.com/Cefalo/quick-meet/actions/workflows/build.yml/badge.svg" alt="GitHub Actions status"></a>
+  <a href="https://github.com/Cefalo/quick-meet/actions/workflows/deploy.yml"><img src="https://github.com/Cefalo/quick-meet/actions/workflows/deploy.yml/badge.svg" alt="GitHub Actions status"></a>
   <a href="README.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
   <a href= "https://github.com/prettier/prettier"><img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg"></a>
   <a href="#license"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
 </p>
 
-QuickMeet enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
+Quick Meet enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
 
 ### Key Features:
 - **Quick Meeting Setup**: Book a room in seconds by selecting start time, seat requirements, and an optional floor preference.
@@ -28,7 +28,7 @@ QuickMeet enhances productivity by minimizing the time spent finding and securin
 
 ### Who this is for?
 
-QuickMeet is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
+Quick Meet is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
 
 - Corporate Offices: Companies with various specialized meeting spaces that need to streamline room bookings for teams and departments.
 
@@ -37,29 +37,29 @@ QuickMeet is specifically tailored for organizations that utilize unique meeting
 - Tech Companies: Businesses that rely on collaborative workspaces and need to efficiently manage the booking of cmeeting rooms equipped with specific tools and resources.
 
 
-### QuickMeet vs Google Calendar
+### Quic kMeet vs Google Calendar
 
 #### 1. **Clunky Room Booking**:
 Google Calendar may offer room bookings, but finding a suitable room in a large office with specific requirements (like seat capacity or floor preference) can be a pain. You end up scrolling through a bunch of rooms after checking through several dropdowns.
 
-**QuickMeet** solves this by instantly booking the best available room based on your needs—no endless scrolling or guesswork!
+**Quick Meet** solves this by instantly booking the best available room based on your needs—no endless scrolling or guesswork!
 
 #### 2. **Overrunning Meetings? Google Calendar Isn't Built for That**:
 If your meeting is running late, extending it on Google Calendar isn't exactly smooth. You'll likely have to go through the hassle of updating the event or manually finding another room when time runs out.
 
-**QuickMeet** has got your back—when your meeting is overrunning, you can either extend the current room’s time (if it’s free) or quickly book a new one without breaking a sweat.
+**Quick Meet** has got your back—when your meeting is overrunning, you can either extend the current room’s time (if it’s free) or quickly book a new one without breaking a sweat.
 
 #### 3. **Floor-Specific Booking Is a Nightmare**:
 Need a room close to your team or on a specific floor? Google Calendar makes you hunt for room locations manually, wasting time in the process.
 
-**QuickMeet** makes floor-specific booking a breeze. Just input the floor you need, and voilà—a room on that floor is booked for you instantly.
+**Quick Meet** makes floor-specific booking a breeze. Just input the floor you need, and voilà—a room on that floor is booked for you instantly.
 
 #### 4. **High-Demand Periods Lead to Chaos**:
 During peak times, manually searching for a free room on Google Calendar is frustrating. Rooms fill up fast, and you're left scrambling to find an available one.
 
-**QuickMeet** shines here by quickly scanning room availability and securing the best available space, so you're never left without a meeting room, even during the busiest hours.
+**Quick Meet** shines here by quickly scanning room availability and securing the best available space, so you're never left without a meeting room, even during the busiest hours.
 
-#### TL;DR: Google Calendar may get the job done, but it's clunky, slow, and inefficient when it comes to room bookings. **QuickMeet** offers a faster, smarter solution tailored to modern office needs, making room scheduling hassle-free.
+#### TL;DR: Google Calendar may get the job done, but it's clunky, slow, and inefficient when it comes to room bookings. **Quick Meet** offers a faster, smarter solution tailored to modern office needs, making room scheduling hassle-free.
 
 
 ## Use cases
@@ -98,7 +98,7 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 ## Hosting yourself
 
-1. [Fork](https://github.com/Propo41/bookify/fork) the repository.
+1. [Fork](https://github.com/Cefalo/quick-meet/fork) the repository.
 2. Create a branch and integrate your own Github actions or webhooks to add a seamless CI/CD pipeline.
 3. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
 4. Add the following scopes to the new credential (OAuth web client id): `./auth/userinfo.profile` and `./auth/calendar`
@@ -113,15 +113,21 @@ During peak times, manually searching for a free room on Google Calendar is frus
 **Note**: The **Authorized javascript origins** should have: 
 ```bash
 web: https://<domain>
-chrome: https://<extension-id>.chromiumapp.org
 ```
 The **Authorized redirect URIs** for the web app should have:
 ```bash
 web: https://<domain>/oauthcallback
-chrome: https://<extension-id>.chromiumapp.org/index.html oauthcallback
 ```
 
-### Deplying to vercel
+
+## Taking app to Production
+For your app to be made publicly usable, the Google OAuth credentials needs to be deployed to production which requires several steps and requirements.
+
+Verification requirements can be found [here](https://support.google.com/cloud/answer/13464321?sjid=11123215207226220395-AP)
+
+*Note: The [following](https://support.google.com/cloud/answer/13464323/?sjid=11123215207226220395-AP#exemptions) apps do not need to go through the verification process. So, if you are an organization, you can simply create the credentials as Internal, which is highly recommended.*
+
+### Web version: Deplying to vercel
 
 The application can be easily deployed to Vercel with the following steps:
 
@@ -135,17 +141,20 @@ The application can be easily deployed to Vercel with the following steps:
 9. Add all necessary secrets as per the `deploy.yml` file under `.github/workflows` and push the changes
 
 
-### Taking app to Production
-For your app to be made publicly usable, the Google OAuth credentials needs to be deployed to production which requires several steps and requirements.
+### Chrome extension: Publishing to chrome web store
+In order to publish the extension to chrome web store, the following steps should be followed: 
 
-Verification requirements can be found [here](https://support.google.com/cloud/answer/13464321?sjid=11123215207226220395-AP)
+1. Create a chrome web store developer account: [Register your account](https://developer.chrome.com/docs/webstore/register)
+2. [Prepare the account](https://developer.chrome.com/docs/webstore/set-up-account)
+3. If you are publishing the extension only for your internal organization, follow this [guide](https://developer.chrome.com/docs/webstore/cws-enterprise/#private-cws)
+4. Build the extension bundle by running `npm run build:chrome`. Make sure, the `.env` variables are set accordingly. Finally, zip the files and upload it to the chrome developer console.
 
-*Note: The [following](https://support.google.com/cloud/answer/13464323/?sjid=11123215207226220395-AP#exemptions) apps do not need to go through the verification process.*
-
+**References**:
+- [Review process](https://developer.chrome.com/docs/webstore/review-process/)
 
 ## Contributing
 
-Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to QuickMeet.
+Read our [contributing guide](https://github.com/Cefalo/quick-meet/blob/develop/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Quick Meet.
 
 
 ## Reference
@@ -168,4 +177,4 @@ Read our [contributing guide](https://github.com/Propo41/bookify/blob/develop/CO
 
 ## License
 
-QuickMeet is [MIT licensed](./LICENSE).
+Quick Meet is [MIT licensed](./LICENSE).
