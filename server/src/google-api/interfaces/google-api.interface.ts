@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { admin_directory_v1, calendar_v3 } from 'googleapis';
+import { admin_directory_v1, calendar_v3, people_v1 } from 'googleapis';
 import { OAuthTokenResponse } from 'src/auth/dto';
 
 export interface IGoogleApiService {
@@ -13,4 +13,5 @@ export interface IGoogleApiService {
   getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event>;
   updateCalenderEvent(oauth2Client: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event>;
   deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void>;
+  searchPeople(oauth2Client: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]>;
 }
