@@ -50,6 +50,10 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
   }, []);
 
   useEffect(() => {
+    if (!preferences.title) {
+      preferences.title = defaultPreferences.title;
+    }
+
     cacheService.save('preferences', JSON.stringify(preferences));
   }, [preferences]);
 

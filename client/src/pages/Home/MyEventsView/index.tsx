@@ -186,6 +186,7 @@ export default function MyEventsView() {
         display: 'flex',
         overflow: 'hidden',
         justifyContent: 'center',
+        flexDirection: 'column',
       }}
     >
       {events.length === 0 ? (

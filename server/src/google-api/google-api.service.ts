@@ -152,12 +152,15 @@ export class GoogleApiService implements IGoogleApiService {
   async getCalenderEvents(oauth2Client: OAuth2Client, start: string, end: string, timeZone: string, limit: number = 30): Promise<calendar_v3.Schema$Event[]> {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+    // https://developers.google.com/calendar/api/v3/reference/events/list
+    const eventTypes = ['workingLocation', 'default', 'fromGmail'];
     const [err, result]: [GaxiosError, GaxiosResponse<calendar_v3.Schema$Events>] = await to(
       calendar.events.list({
         calendarId: 'primary',
         timeMin: start,
         timeMax: end,
         timeZone,
+        eventTypes,
         maxResults: limit,
         singleEvents: true,
         orderBy: 'startTime',
