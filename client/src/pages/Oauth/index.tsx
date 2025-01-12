@@ -23,8 +23,6 @@ export default function OAuth() {
       }
 
       const res = await api.handleOAuthCallback(code);
-      console.log('after handleOAuthCallback response', res);
-
       if (res.status === 'error') {
         navigate(ROUTES.signIn, { state: { message: res.message || 'Something went wrong' }, replace: true });
         return;

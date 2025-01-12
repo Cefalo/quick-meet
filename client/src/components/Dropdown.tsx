@@ -1,5 +1,5 @@
 import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '@mui/material';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 
 interface DropdownProps {
   id: string;
@@ -86,10 +86,6 @@ export default function Dropdown({ sx, id, disabled, value, options, onChange, d
       </Box>
     );
   };
-
-  useEffect(() => {
-    console.log(id, value, options);
-  }, []);
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);

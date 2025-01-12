@@ -111,8 +111,6 @@ export default function MyEventsView() {
     };
 
     const res = await api.updateEvent(eventId, payload);
-    console.log(res);
-
     if (res?.redirect) {
       toast.error("Couldn't complete request. Redirecting to login page");
       setTimeout(() => {

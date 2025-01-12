@@ -63,7 +63,6 @@ export default class Api {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        console.log(error);
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
@@ -226,17 +225,13 @@ export default class Api {
   }
 
   handleError(error: any) {
-    console.error(error);
     // used for Abort request controllers
     if (error.code === 'ERR_CANCELED') {
       return this.createReply('ignore', 'Pending request aborted', null);
     }
 
     const res: ApiResponse<any> = error?.response?.data;
-    console.log(res);
-
     if (res) {
-      console.error(res);
       return res;
     }
 

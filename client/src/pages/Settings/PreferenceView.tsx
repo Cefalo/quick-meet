@@ -73,7 +73,6 @@ export default function PreferenceView() {
 
         init(floors, capacities);
       } catch (error: any) {
-        console.error('Error loading initial data', error);
         renderError(error, navigate);
       }
     };

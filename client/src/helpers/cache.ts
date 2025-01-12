@@ -48,7 +48,6 @@ class ChromeCacheService implements CacheService {
 
   async get(key: CacheItems): Promise<string | null> {
     const item = await chrome.storage.sync.get(key);
-    console.log('token from storage api: ', item[key]);
     const data = item[key];
 
     if (!data) {

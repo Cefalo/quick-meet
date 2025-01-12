@@ -120,8 +120,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
 
-    console.log('room fetch', startTime, duration, seats, floor);
-
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
 
