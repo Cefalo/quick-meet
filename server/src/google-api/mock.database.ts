@@ -1,4 +1,4 @@
-import { admin_directory_v1, calendar_v3, oauth2_v2 } from 'googleapis';
+import { admin_directory_v1, calendar_v3, oauth2_v2, people_v1 } from 'googleapis';
 
 export class CalenderMockDb {
   events: calendar_v3.Schema$Event[];
@@ -101,6 +101,68 @@ export class CalenderMockDb {
         name: 'Sam Lee',
       },
     );
+  }
+
+  getDirectoryPeople(query: string) {
+    const people: people_v1.Schema$Person[] = [
+      {
+        emailAddresses: [
+          {
+            metadata: {
+              primary: true,
+              verified: true,
+            },
+            value: 'example@org.com',
+          },
+        ],
+      },
+      {
+        emailAddresses: [
+          {
+            metadata: {
+              primary: true,
+              verified: true,
+            },
+            value: 'john.doe@org.com',
+          },
+        ],
+      },
+      {
+        emailAddresses: [
+          {
+            metadata: {
+              primary: true,
+              verified: true,
+            },
+            value: 'jane.doe@org.com',
+          },
+        ],
+      },
+      {
+        emailAddresses: [
+          {
+            metadata: {
+              primary: true,
+              verified: false,
+            },
+            value: 'unverified@org.com',
+          },
+        ],
+      },
+      {
+        emailAddresses: [
+          {
+            metadata: {
+              primary: true,
+              verified: true,
+            },
+            value: 'test.user@org.com',
+          },
+        ],
+      },
+    ];
+
+    return people.filter((person) => person.emailAddresses?.some((email) => email.value?.toLowerCase().includes(query.toLowerCase())));
   }
 
   getUser(index: number) {

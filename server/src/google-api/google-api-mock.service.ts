@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuth2Client } from 'google-auth-library';
-import { calendar_v3, admin_directory_v1 } from 'googleapis';
+import { calendar_v3, admin_directory_v1, type people_v1 } from 'googleapis';
 import { OAuthTokenResponse } from '../auth/dto';
 import { CalenderMockDb } from './mock.database';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +17,10 @@ export class GoogleApiMockService implements IGoogleApiService {
     @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
   ) {
     this.db = new CalenderMockDb();
+  }
+
+  async searchPeople(_: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]> {
+    return this.db.getDirectoryPeople(query);
   }
 
   getOAuthClient(): OAuth2Client;
