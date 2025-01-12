@@ -34,14 +34,16 @@ export class AuthService {
 
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
-    const data = await this.encryptionService.encrypt(tokens.refresh_token);
+    const encryptedAccessToken = await this.encryptionService.encrypt(tokens.access_token);
+    const encryptedRefreshToken = await this.encryptionService.encrypt(tokens.refresh_token);
 
     return {
-      accessToken: tokens.access_token,
+      accessToken: encryptedAccessToken.encryptedData,
+      accessTokenIv: encryptedAccessToken.iv,
+      refreshToken: encryptedRefreshToken?.encryptedData,
+      refreshTokenIv: encryptedRefreshToken?.iv,
       hd: userInfo.hd,
-      email: userInfo.email,
-      refreshToken: data?.encryptedData,
-      iv: data?.iv,
+      email: userInfo.email
     };
   }
 

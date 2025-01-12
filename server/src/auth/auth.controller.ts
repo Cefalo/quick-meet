@@ -1,5 +1,5 @@
 import { ApiResponse } from '@quickmeet/shared';
-import { Body, Controller, Get, Inject, Post, Req, Res, Logger, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res, Logger, Query, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { _OAuth2Client } from './decorators';
 import { createResponse } from 'src/helpers/payload.util';
@@ -20,14 +20,16 @@ export class AuthController {
 
   @Post('/oauth2/callback')
   async oAuthCallback(@Body('code') code: string, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
-    const { accessToken, refreshToken, hd, iv, email } = await this.authService.login(code);
+    const { accessToken, accessTokenIv, refreshToken, refreshTokenIv, hd, email } = await this.authService.login(code);
 
-    if (refreshToken && iv) {
+    if (refreshToken && refreshTokenIv) {
       this.setCookie(res, 'refreshToken', refreshToken);
-      this.setCookie(res, 'iv', iv);
+      this.setCookie(res, 'refreshTokenIv', refreshTokenIv);
     }
 
     this.setCookie(res, 'accessToken', accessToken, toMs('1h'));
+    this.setCookie(res, 'accessTokenIv', accessTokenIv, toMs('1h'));
+
     this.setCookie(res, 'hd', hd);
     this.setCookie(res, 'email', email);
 
@@ -38,18 +40,25 @@ export class AuthController {
   @Post('/logout')
   async logout(@Req() req: _Request, @Res({ passthrough: true }) res: Response, @Body('revokeToken') revokeToken?: boolean): Promise<ApiResponse<boolean>> {
     res.clearCookie('accessToken');
+    res.clearCookie('accessTokenIv');
     res.clearCookie('hd');
     res.clearCookie('email');
 
     if (revokeToken) {
-      this.logger.debug("revoking refresh token")
+      this.logger.debug('revoking refresh token');
       res.clearCookie('refreshToken');
-      res.clearCookie('iv');
+      res.clearCookie('refreshTokenIv');
+      
+      const { accessToken, accessTokenIv } = req.cookies;
+      if (accessToken && accessTokenIv) {
+        const decryptedAccessToken = await this.encryptionService.decrypt(accessToken, accessTokenIv);
 
-      const client = this.googleApiService.getOAuthClient();
-      client.setCredentials({ access_token: req.cookies.accessToken });
+        const client = this.googleApiService.getOAuthClient();
 
-      await this.authService.logout(client);
+        client.setCredentials({ access_token: decryptedAccessToken });
+
+        await this.authService.logout(client);
+      }
     }
 
     return createResponse(true);
@@ -63,13 +72,16 @@ export class AuthController {
   }
 
   @Get('/token/refresh')
-  async refreshAppToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<string>> {
-    const refreshToken = await this.encryptionService.decrypt(req.cookies.refreshToken, req.cookies.iv);
+  async refreshAppToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ApiResponse<Boolean>> {
+    const refreshToken = await this.encryptionService.decrypt(req.cookies.refreshToken, req.cookies.refreshTokenIv);
     const accessToken = await this.authService.refreshAppToken(refreshToken);
 
-    this.setCookie(res, 'accessToken', accessToken, toMs('1h'));
+    const { iv, encryptedData } = await this.encryptionService.encrypt(accessToken);
 
-    return createResponse(accessToken);
+    this.setCookie(res, 'accessToken', encryptedData, toMs('1h'));
+    this.setCookie(res, 'accessTokenIv', iv, toMs('1h'));
+
+    return createResponse(true);
   }
 
   private setCookie(res: Response, name: string, value: string, maxAge: number = toMs('30d')): void {
