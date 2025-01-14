@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
 import toast from 'react-hot-toast';
+import Avatar from '@mui/material/Avatar';
+import { Typography } from '@mui/material';
 
 interface AttendeeInputProps {
   id: string;
@@ -173,6 +175,22 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               ]}
             />
           )}
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...optionProps} gap={1}>
+                <Avatar src="https://avatars.githubusercontent.com/u/63257806?v=4" alt={`Image of ${option}`} />
+                <Box>
+                  <Typography variant="subtitle1" noWrap={true} width={250}>
+                    Name of the person
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary" noWrap={true} width={250}>
+                    {option}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          }}
         />
       </Box>
     </Box>
