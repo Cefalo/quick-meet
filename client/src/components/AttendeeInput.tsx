@@ -191,7 +191,12 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               <Box
                 key={key}
                 component="li"
-                sx={{ '& > img': { mr: 2, flexShrink: 0 }, backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                sx={[
+                  (theme) => ({
+                    '& > img': { mr: 2, flexShrink: 0 },
+                    backgroundColor: isSelected ? theme.palette.grey[100] : 'transparent',
+                  }),
+                ]}
                 {...optionProps}
                 gap={1}
               >
