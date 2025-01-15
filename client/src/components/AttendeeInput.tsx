@@ -71,8 +71,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
   const filteredEmails = (newValue: Array<string | IAttendeeInformation>): string[] => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
-    return filteredEmails;
+    return emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
   };
 
   return (
@@ -117,7 +116,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           multiple
           options={options}
           value={value || []}
-          getOptionLabel={(option) => (typeof option === 'object' && option.name ? option.name : '')}
+          getOptionLabel={(option) => (typeof option === 'object' && option.email ? option.email : '')}
           noOptionsText=""
           freeSolo
           inputValue={textInput}
@@ -144,7 +143,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           }}
           onInputChange={debouncedInputChange}
           renderTags={(value: readonly string[], getTagProps) =>
-            value.map((email, index) => {
+            value.map((email: string, index: number) => {
               const { key, ...tagProps } = getTagProps({ index });
               return <Chip variant="filled" label={email} key={key} {...tagProps} />;
             })
