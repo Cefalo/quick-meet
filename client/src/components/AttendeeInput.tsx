@@ -6,6 +6,7 @@ import { isEmailValid } from '@/helpers/utility';
 import toast from 'react-hot-toast';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
+import type { IAttendeeInformation } from '@quickmeet/shared';
 
 interface AttendeeInputProps {
   id: string;
@@ -16,7 +17,7 @@ interface AttendeeInputProps {
 }
 
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
-  const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<IAttendeeInformation[]>([]);
   const [textInput, setTextInput] = useState('');
 
   const api = useApi();
@@ -25,7 +26,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     if (newInputValue.length > 2) {
       const res = await api.searchPeople(newInputValue);
       if (res.status === 'success') {
-        setOptions(res.data || []);
+        setOptions((res.data as IAttendeeInformation[]) || []);
       }
     }
   };
@@ -110,7 +111,8 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           multiple
           options={options}
           value={value || []}
-          getOptionLabel={(option) => option}
+          getOptionLabel={(option) => (typeof option === 'object' && option.name ? option.name : '')}
+          noOptionsText=""
           freeSolo
           inputValue={textInput}
           fullWidth
@@ -133,10 +135,10 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
             },
           }}
           onInputChange={debouncedInputChange}
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => {
+          renderTags={(value: readonly { name: string }[], getTagProps) =>
+            value.map((option: { name: string }, index: number) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip variant="filled" label={option} key={key} {...tagProps} />;
+              return <Chip variant="filled" label={option.name} key={key} {...tagProps} />;
             })
           }
           renderInput={(params) => (
