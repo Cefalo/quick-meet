@@ -69,6 +69,12 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
   const debouncedInputChange = debounce(handleInputChange, 300);
 
+  const filteredEmails = (newValue: Array<string | IAttendeeInformation>): string[] => {
+    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
+    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
+    return filteredEmails;
+  };
+
   return (
     <Box
       display="flex"
@@ -116,7 +122,9 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           freeSolo
           inputValue={textInput}
           fullWidth
-          onChange={handleSelectionChange}
+          onChange={(_, newValue) => {
+            handleSelectionChange(_, filteredEmails(newValue));
+          }}
           slotProps={{
             listbox: {
               sx: {
@@ -135,10 +143,10 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
             },
           }}
           onInputChange={debouncedInputChange}
-          renderTags={(value: readonly { name: string }[], getTagProps) =>
-            value.map((option: { name: string }, index: number) => {
+          renderTags={(value: readonly string[], getTagProps) =>
+            value.map((email, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip variant="filled" label={option.name} key={key} {...tagProps} />;
+              return <Chip variant="filled" label={email} key={key} {...tagProps} />;
             })
           }
           renderInput={(params) => (
@@ -179,11 +187,18 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           )}
           renderOption={(props, option) => {
             const { key, ...optionProps } = props;
+            const isSelected = value?.includes(option.email);
             return (
-              <Box key={key} component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...optionProps} gap={1}>
+              <Box
+                key={key}
+                component="li"
+                sx={{ '& > img': { mr: 2, flexShrink: 0 }, backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                {...optionProps}
+                gap={1}
+              >
                 <Avatar src={option.photo} alt={`Image of ${option.name}`} />
                 <Box>
-                  <Typography variant="subtitle1" noWrap={true} width={250}>
+                  <Typography variant="subtitle2" noWrap={true} width={250}>
                     {option.name}
                   </Typography>
                   <Typography variant="subtitle2" color="text.secondary" noWrap={true} width={250}>
