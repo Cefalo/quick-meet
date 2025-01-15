@@ -179,13 +179,13 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
             const { key, ...optionProps } = props;
             return (
               <Box key={key} component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...optionProps} gap={1}>
-                <Avatar src="https://avatars.githubusercontent.com/u/63257806?v=4" alt={`Image of ${option}`} />
+                <Avatar src={option.photo} alt={`Image of ${option.name}`} />
                 <Box>
                   <Typography variant="subtitle1" noWrap={true} width={250}>
-                    Name of the person
+                    {option.name}
                   </Typography>
                   <Typography variant="subtitle2" color="text.secondary" noWrap={true} width={250}>
-                    {option}
+                    {option.email}
                   </Typography>
                 </Box>
               </Box>
