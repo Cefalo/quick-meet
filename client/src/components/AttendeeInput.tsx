@@ -31,17 +31,19 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     }
   };
 
-  const handleSelectionChange = (_: React.SyntheticEvent, newValue: string[]) => {
-    if (newValue.length > 0) {
-      const lastValue = newValue[newValue.length - 1].trim();
+  const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
+    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
+    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
+    if (filteredEmails.length > 0) {
+      const lastValue = filteredEmails[filteredEmails.length - 1].trim();
       if (isEmailValid(lastValue)) {
-        onChange(id, newValue);
+        onChange(id, filteredEmails);
         setTextInput('');
       } else {
         toast.error('Invalid email entered');
       }
     } else {
-      onChange(id, newValue);
+      onChange(id, filteredEmails);
       setTextInput('');
     }
   };
@@ -68,11 +70,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
   };
 
   const debouncedInputChange = debounce(handleInputChange, 300);
-
-  const filteredEmails = (newValue: Array<string | IPeopleInformation>): string[] => {
-    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    return emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
-  };
 
   return (
     <Box
@@ -121,9 +118,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           freeSolo
           inputValue={textInput}
           fullWidth
-          onChange={(_, newValue) => {
-            handleSelectionChange(_, filteredEmails(newValue));
-          }}
+          onChange={handleSelectionChange}
           slotProps={{
             listbox: {
               sx: {
@@ -201,11 +196,11 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
                 gap={1}
               >
                 <Avatar src={option.photo} alt={`Image of ${option.name}`} />
-                <Box>
-                  <Typography variant="subtitle2" noWrap={true} width={250}>
+                <Box sx={{ width: '80%' }}>
+                  <Typography variant="subtitle2" noWrap={true}>
                     {option.name}
                   </Typography>
-                  <Typography variant="subtitle2" color="text.secondary" noWrap={true} width={250}>
+                  <Typography variant="subtitle2" color="text.secondary" noWrap={true}>
                     {option.email}
                   </Typography>
                 </Box>
