@@ -13,7 +13,7 @@ import {
   EventResponse,
   EventUpdateResponse,
   IConferenceRoom,
-  IAttendeeInformation,
+  IPeopleInformation,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
@@ -93,7 +93,7 @@ export class CalenderController {
   @UseGuards(AuthGuard)
   @UseInterceptors(OauthInterceptor)
   @Get('/directory/people')
-  async searchPeople(@_OAuth2Client() client: OAuth2Client, @Query('email') email: string): Promise<ApiResponse<IAttendeeInformation[]>> {
+  async searchPeople(@_OAuth2Client() client: OAuth2Client, @Query('email') email: string): Promise<ApiResponse<IPeopleInformation[]>> {
     const peoples = await this.calenderService.searchPeople(client, email);
 
     return createResponse(peoples);

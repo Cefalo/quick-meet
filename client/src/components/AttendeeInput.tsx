@@ -6,7 +6,7 @@ import { isEmailValid } from '@/helpers/utility';
 import toast from 'react-hot-toast';
 import Avatar from '@mui/material/Avatar';
 import { Typography } from '@mui/material';
-import type { IAttendeeInformation } from '@quickmeet/shared';
+import type { IPeopleInformation } from '@quickmeet/shared';
 
 interface AttendeeInputProps {
   id: string;
@@ -17,7 +17,7 @@ interface AttendeeInputProps {
 }
 
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
-  const [options, setOptions] = useState<IAttendeeInformation[]>([]);
+  const [options, setOptions] = useState<IPeopleInformation[]>([]);
   const [textInput, setTextInput] = useState('');
 
   const api = useApi();
@@ -26,7 +26,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     if (newInputValue.length > 2) {
       const res = await api.searchPeople(newInputValue);
       if (res.status === 'success') {
-        setOptions((res.data as IAttendeeInformation[]) || []);
+        setOptions((res.data as IPeopleInformation[]) || []);
       }
     }
   };
@@ -69,7 +69,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
   const debouncedInputChange = debounce(handleInputChange, 300);
 
-  const filteredEmails = (newValue: Array<string | IAttendeeInformation>): string[] => {
+  const filteredEmails = (newValue: Array<string | IPeopleInformation>): string[] => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
     return emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
   };

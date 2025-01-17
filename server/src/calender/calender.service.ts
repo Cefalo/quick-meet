@@ -3,7 +3,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Inject, Inj
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
-import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IAttendeeInformation } from '@quickmeet/shared';
+import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation } from '@quickmeet/shared';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
@@ -417,11 +417,11 @@ export class CalenderService {
     return floors;
   }
 
-  async searchPeople(client: OAuth2Client, emailQuery: string): Promise<IAttendeeInformation[]> {
+  async searchPeople(client: OAuth2Client, emailQuery: string): Promise<IPeopleInformation[]> {
     const response = await this.googleApiService.searchPeople(client, emailQuery);
-    const peoples: IAttendeeInformation[] = response.map((people) => {
+    const peoples: IPeopleInformation[] = response.map((people) => {
       const email = people.emailAddresses.find((email) => email.metadata.primary && email.metadata.verified);
-      const photo = people.photos.find((photo) => photo.metadata.primary);
+      const photo = people.photos?.find((photo) => photo.metadata.primary);
       const name = people.names?.find((name) => name.metadata.primary);
       return {
         email: email?.value,
