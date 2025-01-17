@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
 import toast from 'react-hot-toast';
+import Avatar from '@mui/material/Avatar';
+import { Typography } from '@mui/material';
+import type { IPeopleInformation } from '@quickmeet/shared';
 
 interface AttendeeInputProps {
   id: string;
@@ -14,7 +17,7 @@ interface AttendeeInputProps {
 }
 
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
-  const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<IPeopleInformation[]>([]);
   const [textInput, setTextInput] = useState('');
 
   const api = useApi();
@@ -23,22 +26,24 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     if (newInputValue.length > 2) {
       const res = await api.searchPeople(newInputValue);
       if (res.status === 'success') {
-        setOptions(res.data || []);
+        setOptions((res.data as IPeopleInformation[]) || []);
       }
     }
   };
 
-  const handleSelectionChange = (_: React.SyntheticEvent, newValue: string[]) => {
-    if (newValue.length > 0) {
-      const lastValue = newValue[newValue.length - 1].trim();
+  const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
+    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
+    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
+    if (filteredEmails.length > 0) {
+      const lastValue = filteredEmails[filteredEmails.length - 1].trim();
       if (isEmailValid(lastValue)) {
-        onChange(id, newValue);
+        onChange(id, filteredEmails);
         setTextInput('');
       } else {
         toast.error('Invalid email entered');
       }
     } else {
-      onChange(id, newValue);
+      onChange(id, filteredEmails);
       setTextInput('');
     }
   };
@@ -108,7 +113,8 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           multiple
           options={options}
           value={value || []}
-          getOptionLabel={(option) => option}
+          getOptionLabel={(option) => (typeof option === 'object' && option.email ? option.email : '')}
+          noOptionsText=""
           freeSolo
           inputValue={textInput}
           fullWidth
@@ -132,9 +138,9 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           }}
           onInputChange={debouncedInputChange}
           renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => {
+            value.map((email: string, index: number) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip variant="filled" label={option} key={key} {...tagProps} />;
+              return <Chip variant="filled" label={email} key={key} {...tagProps} />;
             })
           }
           renderInput={(params) => (
@@ -173,6 +179,34 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               ]}
             />
           )}
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props;
+            const isSelected = value?.includes(option.email);
+            return (
+              <Box
+                key={key}
+                component="li"
+                sx={[
+                  (theme) => ({
+                    '& > img': { mr: 2, flexShrink: 0 },
+                    backgroundColor: isSelected ? theme.palette.grey[100] : 'transparent',
+                  }),
+                ]}
+                {...optionProps}
+                gap={1}
+              >
+                <Avatar src={option.photo} alt={`Image of ${option.name}`} />
+                <Box sx={{ width: '80%' }}>
+                  <Typography variant="subtitle2" noWrap={true}>
+                    {option.name}
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary" noWrap={true}>
+                    {option.email}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          }}
         />
       </Box>
     </Box>
