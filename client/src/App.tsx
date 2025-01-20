@@ -8,7 +8,9 @@ import { ROUTES } from './config/routes';
 import Settings from '@/pages/Settings';
 import BaseLayout from '@/pages/BaseLayout';
 import OAuth from '@/pages/Oauth';
+import { initI18n } from '@/config/i18n';
 
+initI18n();
 function App() {
   return (
     <AppTheme>

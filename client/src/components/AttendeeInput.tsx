@@ -1,12 +1,12 @@
-import { TextField, Chip, Box, Autocomplete, debounce } from '@mui/material';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import { useState } from 'react';
+import { useLocales } from '@/config/i18n';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
-import toast from 'react-hot-toast';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import { Autocomplete, Box, Chip, debounce, TextField, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import { Typography } from '@mui/material';
 import type { IPeopleInformation } from '@quickmeet/shared';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface AttendeeInputProps {
   id: string;
@@ -19,6 +19,7 @@ interface AttendeeInputProps {
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
   const [options, setOptions] = useState<IPeopleInformation[]>([]);
   const [textInput, setTextInput] = useState('');
+  const { locale } = useLocales('newEventPage');
 
   const api = useApi();
 
@@ -40,7 +41,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
         onChange(id, filteredEmails);
         setTextInput('');
       } else {
-        toast.error('Invalid email entered');
+        toast.error(locale.error.invalidEmail);
       }
     } else {
       onChange(id, filteredEmails);
