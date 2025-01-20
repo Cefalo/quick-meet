@@ -29,6 +29,25 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       }
     }
   };
+  const extractEmails = (input: string[]) => {
+    return input
+      .join(' ')
+      .split(/\s|,/)
+      .map((email) => email.trim())
+      .filter((email) => email !== '');
+  };
+
+  const validateEmails = (emails: string[]) => {
+    const validEmails = emails.filter(isEmailValid);
+    const invalidEmails = emails.filter((email) => !isEmailValid(email));
+    return { validEmails, invalidEmails };
+  };
+
+  const handleInvalidEmails = (invalidEmails: string[]) => {
+    invalidEmails.forEach((email: string) => {
+      toast.error(`${email} is invalid.`);
+    });
+  };
 
   const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
