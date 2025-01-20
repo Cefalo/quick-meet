@@ -1,83 +1,102 @@
-import { TextField, Chip, Box, Autocomplete, debounce } from '@mui/material';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import { useState } from 'react';
-import { useApi } from '@/context/ApiContext';
-import { isEmailValid } from '@/helpers/utility';
-import toast from 'react-hot-toast';
-import Avatar from '@mui/material/Avatar';
-import { Typography } from '@mui/material';
-import type { IPeopleInformation } from '@quickmeet/shared';
+import { useApi } from '@/context/ApiContext'
+import { isEmailValid } from '@/helpers/utility'
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
+import { Autocomplete, Box, Chip, debounce, TextField, Typography } from '@mui/material'
+import Avatar from '@mui/material/Avatar'
+import type { IPeopleInformation } from '@quickmeet/shared'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 interface AttendeeInputProps {
-  id: string;
-  value?: any[];
-  disabled?: boolean;
-  onChange: (id: string, value: string[]) => void;
-  type?: string;
+  id: string
+  value?: any[]
+  disabled?: boolean
+  onChange: (id: string, value: string[]) => void
+  type?: string
 }
 
-export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
-  const [options, setOptions] = useState<IPeopleInformation[]>([]);
-  const [textInput, setTextInput] = useState('');
+export default function AttendeeInput ({ id, onChange, value, type }: AttendeeInputProps) {
+  const [options, setOptions] = useState<IPeopleInformation[]>([])
+  const [textInput, setTextInput] = useState('')
 
-  const api = useApi();
+  const api = useApi()
 
   const handleInputChange = async (_: React.SyntheticEvent, newInputValue: string) => {
     if (newInputValue.length > 2) {
-      const res = await api.searchPeople(newInputValue);
+      const res = await api.searchPeople(newInputValue)
       if (res.status === 'success') {
-        setOptions((res.data as IPeopleInformation[]) || []);
+        setOptions((res.data as IPeopleInformation[]) || [])
       }
     }
-  };
+  }
+  const extractEmails = (input: string[]) => {
+    return input
+      .join(' ')
+      .split(/\s|,/)
+      .map(email => email.trim())
+      .filter(email => email !== '')
+  }
+
+  const validateEmails = (emails: string[]) => {
+    const validEmails = emails.filter(isEmailValid)
+    const invalidEmails = emails.filter(email => !isEmailValid(email))
+    return { validEmails, invalidEmails }
+  }
+
+  const handleInvalidEmails = (invalidEmails: string[]) => {
+    invalidEmails.forEach((email: string) => {
+      toast.error(`${email} is invalid.`)
+    })
+  }
 
   const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
-    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
-    if (filteredEmails.length > 0) {
-      const lastValue = filteredEmails[filteredEmails.length - 1].trim();
-      if (isEmailValid(lastValue)) {
-        onChange(id, filteredEmails);
-        setTextInput('');
-      } else {
-        toast.error('Invalid email entered');
-      }
-    } else {
-      onChange(id, filteredEmails);
-      setTextInput('');
+    const emails = newValue.map(option => (typeof option === 'object' && option.email ? option.email : (option as string)))
+    const filteredEmails = extractEmails(emails)
+    const { validEmails, invalidEmails } = validateEmails(filteredEmails)
+    if (invalidEmails.length > 0) {
+      handleInvalidEmails(invalidEmails)
     }
-  };
+    const uniqueEmails = [...new Set(validEmails)]
+    if (uniqueEmails.length >= 0) {
+      onChange(id, uniqueEmails)
+    }
+    setTextInput('')
+  }
 
   const handleKeyDown = (event: any) => {
-    if (event.key === ' ') {
-      event.preventDefault();
-      const inputValue = event.target.value.trim();
-      const existingEmails = value || [];
-
-      if (existingEmails.find((email) => email === inputValue)) {
-        toast.error('Duplicate email entered');
-        return;
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
+      const inputValue = event.target.value.trim()
+      console.log('Input value', inputValue)
+      const existingEmails = value || []
+      if (inputValue.includes(',') || inputValue.includes(' ')) {
+        const emails = inputValue
+          .split(/[\s,]+/)
+          .map((email: string) => email.trim())
+          .filter((email: string) => email !== '')
+        emails.forEach((email: string) => {
+          if (!isEmailValid(email)) {
+            toast.error(`${email} is invalid.`)
+          } else {
+            onChange(id, [...existingEmails, email])
+          }
+        })
+      } else if (isEmailValid(inputValue)) {
+        onChange(id, [...existingEmails, inputValue])
       }
-
-      if (!isEmailValid(inputValue)) {
-        toast.error('Invalid email entered');
-        return;
-      }
-
-      onChange(id, [...existingEmails, inputValue]);
-      setTextInput('');
+      setTextInput('')
     }
-  };
+  }
 
-  const debouncedInputChange = debounce(handleInputChange, 300);
+  const debouncedInputChange = debounce(handleInputChange, 300)
 
   return (
     <Box
-      display="flex"
-      alignItems="center"
-      flexWrap="wrap"
+      display='flex'
+      alignItems='center'
+      flexWrap='wrap'
       sx={[
-        (theme) => ({
+        theme => ({
           gap: '8px',
           padding: '10px',
           borderRadius: 1,
@@ -101,7 +120,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       >
         <PeopleAltRoundedIcon
           sx={[
-            (theme) => ({
+            theme => ({
               color: theme.palette.grey[50],
               position: 'sticky',
               top: 0,
@@ -113,8 +132,8 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           multiple
           options={options}
           value={value || []}
-          getOptionLabel={(option) => (typeof option === 'object' && option.email ? option.email : '')}
-          noOptionsText=""
+          getOptionLabel={option => (typeof option === 'object' && option.email ? option.email : '')}
+          noOptionsText=''
           freeSolo
           inputValue={textInput}
           fullWidth
@@ -139,17 +158,17 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           onInputChange={debouncedInputChange}
           renderTags={(value: readonly string[], getTagProps) =>
             value.map((email: string, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return <Chip variant="filled" label={email} key={key} {...tagProps} />;
+              const { key, ...tagProps } = getTagProps({ index })
+              return <Chip variant='filled' label={email} key={key} {...tagProps} />
             })
           }
-          renderInput={(params) => (
+          renderInput={params => (
             <TextField
               {...params}
-              onChange={(e) => setTextInput(e.target.value)}
+              onChange={e => setTextInput(e.target.value)}
               type={type}
-              variant="standard"
-              placeholder="Attendees"
+              variant='standard'
+              placeholder='Attendees'
               onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
@@ -158,7 +177,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
                 },
               }}
               sx={[
-                (theme) => ({
+                theme => ({
                   flex: 1,
                   py: 0,
                   px: 1,
@@ -180,14 +199,14 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
             />
           )}
           renderOption={(props, option) => {
-            const { key, ...optionProps } = props;
-            const isSelected = value?.includes(option.email);
+            const { key, ...optionProps } = props
+            const isSelected = value?.includes(option.email)
             return (
               <Box
                 key={key}
-                component="li"
+                component='li'
                 sx={[
-                  (theme) => ({
+                  theme => ({
                     '& > img': { mr: 2, flexShrink: 0 },
                     backgroundColor: isSelected ? theme.palette.grey[100] : 'transparent',
                   }),
@@ -197,18 +216,18 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               >
                 <Avatar src={option.photo} alt={`Image of ${option.name}`} />
                 <Box sx={{ width: '80%' }}>
-                  <Typography variant="subtitle2" noWrap={true}>
+                  <Typography variant='subtitle2' noWrap={true}>
                     {option.name}
                   </Typography>
-                  <Typography variant="subtitle2" color="text.secondary" noWrap={true}>
+                  <Typography variant='subtitle2' color='text.secondary' noWrap={true}>
                     {option.email}
                   </Typography>
                 </Box>
               </Box>
-            );
+            )
           }}
         />
       </Box>
     </Box>
-  );
+  )
 }
