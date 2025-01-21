@@ -2,7 +2,7 @@ import { DropdownOption } from '@/components/Dropdown';
 import Dropdown from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
 import { usePreferences } from '@/context/PreferencesContext';
-import { createDropdownOptions, isChromeExt, populateDurationOptions, populateLanguageOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
+import { createDropdownOptions, createLanguageOptions, isChromeExt, populateDurationOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
 import { Box, Button, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
 import { changeLanguage } from 'i18next';
+import { I18N_LANGUAGES } from '@/config/i18n';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ export default function PreferenceView() {
     duration: '30',
     seats: 1,
     title: '',
-    language: 'en',
+    language: I18N_LANGUAGES.EN as string,
   });
 
   // Dropdown options state
@@ -48,7 +49,7 @@ export default function PreferenceView() {
       setFloorOptions(floorOptions);
       setRoomCapacityOptions(createDropdownOptions(capacities));
       setDurationOptions(createDropdownOptions(durations, 'time'));
-      setLanguageOptions(createDropdownOptions(populateLanguageOptions()));
+      setLanguageOptions(createLanguageOptions());
 
       const { floor, duration, title, seats, language } = preferences;
       setFormData({
@@ -56,7 +57,7 @@ export default function PreferenceView() {
         title: title || '',
         duration: String(duration) || durations[0],
         seats: seats || 1,
-        language: language || 'en',
+        language: language || (I18N_LANGUAGES.EN as string),
       });
     };
 

@@ -1,4 +1,5 @@
 import { constants } from '@/config/constants';
+import { I18N_LANGUAGES } from '@/config/i18n';
 import { CacheService, CacheServiceFactory } from '@/helpers/cache';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
@@ -25,7 +26,7 @@ const defaultPreferences = {
   duration: 30,
   seats: 1,
   title: constants.defaultTitle,
-  language: 'en',
+  language: I18N_LANGUAGES.EN,
 };
 
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {

@@ -4,6 +4,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '@config/routes';
 import { secrets } from '@config/secrets';
 import Api from '@/api/api';
+import { I18N_LANGUAGES, LANGUAGE_MAP } from '@/config/i18n';
 
 /**
  * Returns an array of time strings formatted as HH:mm in 12 hrs format with 15mins interval
@@ -66,10 +67,6 @@ export function populateRoomCapacity(max: number) {
   return options;
 }
 
-export function populateLanguageOptions(): string[] {
-  return ['en', 'no'];
-}
-
 export function toMinutesSinceMidnight(hours: number, minutes: number) {
   return hours * 60 + minutes;
 }
@@ -130,6 +127,13 @@ export function convertToLocaleTime(dateStr?: string) {
 
 export const createDropdownOptions = (options: string[], type: 'time' | 'default' = 'default') => {
   return (options || []).map((option) => ({ value: option, text: type === 'time' ? formatMinsToHM(Number(option), 'm') : option }));
+};
+
+export const createLanguageOptions = () => {
+  return Object.values(I18N_LANGUAGES).map((lang) => ({
+    value: lang,
+    text: LANGUAGE_MAP[lang] || lang,
+  }));
 };
 
 export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunction) => {
