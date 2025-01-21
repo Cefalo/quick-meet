@@ -19,7 +19,7 @@ interface AttendeeInputProps {
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
   const [options, setOptions] = useState<IPeopleInformation[]>([]);
   const [textInput, setTextInput] = useState('');
-  const { locale } = useLocales('newEventPage');
+  const { locale } = useLocales();
 
   const api = useApi();
 
