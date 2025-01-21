@@ -13,6 +13,7 @@ import StairsIcon from '@mui/icons-material/Stairs';
 import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
+import { changeLanguage } from 'i18next';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -99,6 +100,7 @@ export default function PreferenceView() {
       duration: Number(formData.duration),
       language: formData.language,
     });
+    changeLanguage(formData.language);
 
     toast.success('Saved successfully!');
   };

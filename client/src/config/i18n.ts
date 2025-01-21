@@ -21,5 +21,13 @@ export const useLocales = () => {
   const currentLanguage = i18n.language;
   const locale = i18n.getResourceBundle(currentLanguage, 'translation');
 
-  return { locale };
+  const changeLanguage = (language: string) => {
+    i18n.changeLanguage(language);
+  };
+
+  return {
+    locale,
+    currentLanguage,
+    changeLanguage,
+  };
 };
