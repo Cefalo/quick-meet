@@ -8,20 +8,8 @@ import { ROUTES } from './config/routes';
 import Settings from '@/pages/Settings';
 import BaseLayout from '@/pages/BaseLayout';
 import OAuth from '@/pages/Oauth';
-import { useLocales } from '@/config/i18n';
-import { usePreferences } from '@/context/PreferencesContext';
-import { useEffect } from 'react';
 
 function App() {
-  const { preferences } = usePreferences();
-  const { changeLanguage, currentLanguage } = useLocales();
-
-  useEffect(() => {
-    if (preferences.language && preferences.language !== currentLanguage) {
-      changeLanguage(preferences.language);
-    }
-  }, [preferences.language, currentLanguage, changeLanguage]);
-
   return (
     <AppTheme>
       <Routes>

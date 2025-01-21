@@ -1,5 +1,5 @@
 import { constants } from '@/config/constants';
-import { I18N_LANGUAGES } from '@/config/i18n';
+import { I18N_LANGUAGES, useLocales } from '@/config/i18n';
 import { CacheService, CacheServiceFactory } from '@/helpers/cache';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
@@ -52,10 +52,13 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
 
     loadPreferences();
   }, []);
-
+  const { changeLanguage, currentLanguage } = useLocales();
   useEffect(() => {
     if (!preferences.title) {
       preferences.title = defaultPreferences.title;
+    }
+    if (preferences.language && preferences.language !== currentLanguage) {
+      changeLanguage(preferences.language);
     }
 
     cacheService.save('preferences', JSON.stringify(preferences));
