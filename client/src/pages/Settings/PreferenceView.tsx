@@ -14,7 +14,6 @@ import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
 import i18next, { changeLanguage } from 'i18next';
-import { I18N_LANGUAGES } from '@/config/i18n';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -22,7 +21,7 @@ export default function PreferenceView() {
     duration: '30',
     seats: 1,
     title: '',
-    language: I18N_LANGUAGES.EN as string,
+    language: 'en',
   });
 
   // Dropdown options state
@@ -57,7 +56,7 @@ export default function PreferenceView() {
         title: title || '',
         duration: String(duration) || durations[0],
         seats: seats || 1,
-        language: language || (I18N_LANGUAGES.EN as string),
+        language: language || 'en',
       });
     };
 

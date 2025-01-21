@@ -1,36 +1,16 @@
-import en from '@/locales/en.json';
-import no from '@/locales/no.json';
-
+import { LOCALES, type LocaleType } from '@/config/locales';
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 
-type LanguageKeys = (typeof I18N_LANGUAGES)[keyof typeof I18N_LANGUAGES];
-type LocaleType = typeof en;
-
-export const I18N_LANGUAGES = {
-  EN: 'en',
-  NO: 'no',
-} as const;
-
-export const LOCALES: Record<LanguageKeys, LocaleType> = {
-  [I18N_LANGUAGES.EN]: en,
-  [I18N_LANGUAGES.NO]: no,
-};
-
-export const LANGUAGE_MAP: Record<LanguageKeys, string> = {
-  [I18N_LANGUAGES.EN]: 'English',
-  [I18N_LANGUAGES.NO]: 'Norwegian',
-};
-
 export const initI18n = () => {
   i18next.use(initReactI18next).init({
-    fallbackLng: I18N_LANGUAGES.EN,
-    resources: Object.entries(LOCALES).reduce(
-      (acc, [lang, translation]) => ({
-        ...acc,
-        [lang]: { translation },
-      }),
-      {},
+    fallbackLng: 'en',
+    resources: LOCALES.reduce(
+      (acc, { code, locale }) => {
+        acc[code] = { translation: locale };
+        return acc;
+      },
+      {} as Record<string, { translation: LocaleType }>,
     ),
   });
 };
