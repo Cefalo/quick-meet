@@ -67,7 +67,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault();
       const inputValue = event.target.value.trim();
-      console.log('Input value', inputValue);
       const existingEmails = value || [];
       if (inputValue.includes(',') || inputValue.includes(' ')) {
         const emails = inputValue
