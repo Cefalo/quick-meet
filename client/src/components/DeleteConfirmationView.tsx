@@ -7,6 +7,7 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import { EventResponse } from '@quickmeet/shared';
 import { chromeBackground, isChromeExt } from '@helpers/utility';
 import EventCard from './EventCard';
+import { useLocales } from '@/config/i18n';
 
 interface DeleteConfirmationViewProps {
   handleNegativeClick: () => void;
@@ -17,6 +18,8 @@ interface DeleteConfirmationViewProps {
 
 export default function DeleteConfirmationView({ event, open, handleNegativeClick, handlePositiveClick }: DeleteConfirmationViewProps) {
   if (!open) return <></>;
+
+  const { locale } = useLocales();
 
   const background: SxProps<Theme> = isChromeExt ? { ...chromeBackground } : { background: '#F8F8F8' };
   return (
@@ -57,7 +60,7 @@ export default function DeleteConfirmationView({ event, open, handleNegativeClic
         }}
       >
         <Typography variant="h4" fontWeight={700}>
-          Are you sure you want to permanently delete this event?
+          {locale.info.deleteEventConfirmation}
         </Typography>
         {event && (
           <Box
@@ -74,7 +77,7 @@ export default function DeleteConfirmationView({ event, open, handleNegativeClic
               borderRadius: 2,
             }}
           >
-            <EventCard event={event} hideMenu={true} handleEditClick={() => { }} onDelete={() => { }} />
+            <EventCard event={event} hideMenu={true} handleEditClick={() => {}} onDelete={() => {}} />
           </Box>
         )}
 
@@ -108,7 +111,7 @@ export default function DeleteConfirmationView({ event, open, handleNegativeClic
                 textTransform: 'none',
               }}
             >
-              Delete
+              {locale.buttonText.delete}
             </Typography>
           </Button>
 
@@ -136,7 +139,7 @@ export default function DeleteConfirmationView({ event, open, handleNegativeClic
             ]}
           >
             <Typography variant="subtitle2" fontWeight={700}>
-              Cancel
+              {locale.buttonText.cancel}
             </Typography>
           </Button>
         </Box>

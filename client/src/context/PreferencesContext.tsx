@@ -1,4 +1,5 @@
 import { constants } from '@/config/constants';
+import { useLocales } from '@/config/i18n';
 import { CacheService, CacheServiceFactory } from '@/helpers/cache';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
@@ -7,6 +8,7 @@ interface Preferences {
   seats: number;
   title?: string;
   floor?: string;
+  language?: string;
 }
 
 interface PreferencesContextType {
@@ -24,6 +26,7 @@ const defaultPreferences = {
   duration: 30,
   seats: 1,
   title: constants.defaultTitle,
+  language: 'en',
 };
 
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
@@ -32,8 +35,10 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
     duration: defaultPreferences.duration,
     seats: defaultPreferences.seats,
     title: defaultPreferences.title,
+    language: defaultPreferences.language,
   });
   const [loading, setLoading] = useState(true);
+  const { changeLanguage, currentLanguage } = useLocales();
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -48,10 +53,12 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
 
     loadPreferences();
   }, []);
-
   useEffect(() => {
     if (!preferences.title) {
       preferences.title = defaultPreferences.title;
+    }
+    if (preferences.language && preferences.language !== currentLanguage) {
+      changeLanguage(preferences.language);
     }
 
     cacheService.save('preferences', JSON.stringify(preferences));

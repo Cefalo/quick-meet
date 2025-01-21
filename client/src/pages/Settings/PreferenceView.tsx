@@ -1,18 +1,19 @@
-import { DropdownOption } from '@/components/Dropdown';
-import Dropdown from '@/components/Dropdown';
+import Dropdown, { DropdownOption } from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
+import { useLocales } from '@/config/i18n';
+import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
-import { createDropdownOptions, isChromeExt, populateDurationOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
-import { Box, Button, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { createDropdownOptions, createLanguageOptions, isChromeExt, populateDurationOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import TitleIcon from '@mui/icons-material/Title';
-import { useApi } from '@/context/ApiContext';
-
+import TranslateIcon from '@mui/icons-material/Translate';
+import { Box, Button, Typography } from '@mui/material';
+import i18next, { changeLanguage } from 'i18next';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -20,12 +21,14 @@ export default function PreferenceView() {
     duration: '30',
     seats: 1,
     title: '',
+    language: 'en',
   });
 
   // Dropdown options state
   const [floorOptions, setFloorOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
+  const [languageOptions, setLanguageOptions] = useState<DropdownOption[]>([]);
 
   // Utilities and services
   const api = useApi();
@@ -33,6 +36,9 @@ export default function PreferenceView() {
 
   // Context or global state
   const { preferences, setPreferences } = usePreferences();
+
+  // locale
+  const { locale } = useLocales();
 
   // Derived data
   const durations = populateDurationOptions();
@@ -45,13 +51,15 @@ export default function PreferenceView() {
       setFloorOptions(floorOptions);
       setRoomCapacityOptions(createDropdownOptions(capacities));
       setDurationOptions(createDropdownOptions(durations, 'time'));
+      setLanguageOptions(createLanguageOptions());
 
-      const { floor, duration, title, seats } = preferences;
+      const { floor, duration, title, seats, language } = preferences;
       setFormData({
         floor: floor || '',
         title: title || '',
         duration: String(duration) || durations[0],
         seats: seats || 1,
+        language: language || 'en',
       });
     };
 
@@ -93,9 +101,11 @@ export default function PreferenceView() {
       floor: formData.floor,
       title: formData.title,
       duration: Number(formData.duration),
+      language: formData.language,
     });
-
-    toast.success('Saved successfully!');
+    changeLanguage(formData.language).then(() => {
+      toast.success(i18next.t('success.savedSuccessfully'));
+    });
   };
 
   return (
@@ -127,7 +137,7 @@ export default function PreferenceView() {
             sx={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, height: '60px' }}
             id="floor"
             value={formData.floor}
-            placeholder={'Select preferred floor'}
+            placeholder={locale.placeholder.selectFloor}
             options={floorOptions}
             onChange={handleInputChange}
             icon={
@@ -147,7 +157,7 @@ export default function PreferenceView() {
             value={formData.duration}
             options={durationOptions}
             onChange={handleInputChange}
-            placeholder={'Select preferred meeting duration'}
+            placeholder={locale.placeholder.selectDuration}
             icon={
               <HourglassBottomRoundedIcon
                 sx={[
@@ -160,9 +170,9 @@ export default function PreferenceView() {
           />
 
           <Dropdown
-            sx={{ height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
+            sx={{ height: '60px' }}
             id="seats"
-            placeholder={'Select preferred room capacity'}
+            placeholder={locale.placeholder.selectRoomCapacity}
             value={formData.seats + ''}
             options={roomCapacityOptions}
             onChange={handleInputChange}
@@ -191,6 +201,24 @@ export default function PreferenceView() {
             id="title"
             placeholder="Add preferred title"
             onChange={handleInputChange}
+          />
+
+          <Dropdown
+            sx={{ height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
+            id="language"
+            placeholder={locale.placeholder.selectLanguage}
+            value={formData.language + ''}
+            options={languageOptions}
+            onChange={handleInputChange}
+            icon={
+              <TranslateIcon
+                sx={[
+                  (theme) => ({
+                    color: theme.palette.grey[50],
+                  }),
+                ]}
+              />
+            }
           />
         </Box>
       </Box>
@@ -222,7 +250,7 @@ export default function PreferenceView() {
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Save
+            {locale.buttonText.save}
           </Typography>
         </Button>
       </Box>
