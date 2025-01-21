@@ -50,13 +50,13 @@ export default function PreferenceView() {
       setDurationOptions(createDropdownOptions(durations, 'time'));
       setLanguageOptions(createDropdownOptions(populateLanguageOptions()));
 
-      const { floor, duration, title, seats } = preferences;
+      const { floor, duration, title, seats, language } = preferences;
       setFormData({
         floor: floor || '',
         title: title || '',
         duration: String(duration) || durations[0],
         seats: seats || 1,
-        language: 'en',
+        language: language || 'en',
       });
     };
 

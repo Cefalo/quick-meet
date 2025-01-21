@@ -2,7 +2,9 @@
   "buttonText": {
     "preferences": "Preferences",
     "support": "Support",
-    "save": "Save"
+    "save": "Save",
+    "newEvent": "New Event",
+    "myEvents": "My Events"
   },
   "error": {
     "invalidEmail": "Invalid email entered"

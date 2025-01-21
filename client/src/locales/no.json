@@ -2,7 +2,9 @@
   "buttonText": {
     "preferences": "Preferanser",
     "support": "Støtte",
-    "save": "Lagre"
+    "save": "Lagre",
+    "newEvent": "Nytt arrangement",
+    "myEvents": "Mine arrangementer"
   },
   "error": {
     "invalidEmail": "Ugyldig e-postadresse"

@@ -6,8 +6,8 @@ import { initReactI18next, useTranslation } from 'react-i18next';
 
 export const initI18n = () => {
   i18next.use(initReactI18next).init({
-    lng: 'en',
-    fallbackLng: 'en',
+    lng: 'no',
+    fallbackLng: 'no',
     debug: true,
     resources: {
       en: { translation: enLocales },

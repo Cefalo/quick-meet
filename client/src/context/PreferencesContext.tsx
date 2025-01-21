@@ -25,6 +25,7 @@ const defaultPreferences = {
   duration: 30,
   seats: 1,
   title: constants.defaultTitle,
+  language: 'en',
 };
 
 export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
@@ -33,6 +34,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
     duration: defaultPreferences.duration,
     seats: defaultPreferences.seats,
     title: defaultPreferences.title,
+    language: defaultPreferences.language,
   });
   const [loading, setLoading] = useState(true);
 
