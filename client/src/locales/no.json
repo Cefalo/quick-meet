@@ -8,5 +8,8 @@
   },
   "error": {
     "invalidEmail": "Ugyldig e-postadresse"
+  },
+  "success": {
+    "savedSuccessfully": "Lagret vellykket"
   }
 }

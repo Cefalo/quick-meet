@@ -13,8 +13,8 @@ import StairsIcon from '@mui/icons-material/Stairs';
 import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
-import { changeLanguage } from 'i18next';
-import { I18N_LANGUAGES } from '@/config/i18n';
+import i18next, { changeLanguage } from 'i18next';
+import { I18N_LANGUAGES, useLocales } from '@/config/i18n';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -101,9 +101,9 @@ export default function PreferenceView() {
       duration: Number(formData.duration),
       language: formData.language,
     });
-    changeLanguage(formData.language);
-
-    toast.success('Saved successfully!');
+    changeLanguage(formData.language).then(() => {
+      toast.success(i18next.t('success.savedSuccessfully'));
+    });
   };
 
   return (

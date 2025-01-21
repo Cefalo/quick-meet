@@ -8,5 +8,8 @@
   },
   "error": {
     "invalidEmail": "Invalid email entered"
+  },
+  "success": {
+    "savedSuccessfully": "Saved successfully"
   }
 }

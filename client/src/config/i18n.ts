@@ -4,12 +4,20 @@ import noLocales from '@/locales/no.json';
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 
+type LanguageKeys = (typeof I18N_LANGUAGES)[keyof typeof I18N_LANGUAGES];
+type LocaleType = typeof enLocales;
+
 export const I18N_LANGUAGES = {
   EN: 'en',
   NO: 'no',
 } as const;
 
-export const LANGUAGE_MAP: Record<(typeof I18N_LANGUAGES)[keyof typeof I18N_LANGUAGES], string> = {
+export const LOCALES: Record<LanguageKeys, LocaleType> = {
+  [I18N_LANGUAGES.EN]: enLocales,
+  [I18N_LANGUAGES.NO]: noLocales,
+};
+
+export const LANGUAGE_MAP: Record<LanguageKeys, string> = {
   [I18N_LANGUAGES.EN]: 'English',
   [I18N_LANGUAGES.NO]: 'Norwegian',
 };
@@ -17,17 +25,20 @@ export const LANGUAGE_MAP: Record<(typeof I18N_LANGUAGES)[keyof typeof I18N_LANG
 export const initI18n = () => {
   i18next.use(initReactI18next).init({
     fallbackLng: I18N_LANGUAGES.EN,
-    resources: {
-      [I18N_LANGUAGES.EN]: { translation: enLocales },
-      [I18N_LANGUAGES.NO]: { translation: noLocales },
-    },
+    resources: Object.entries(LOCALES).reduce(
+      (acc, [lang, translation]) => ({
+        ...acc,
+        [lang]: { translation },
+      }),
+      {},
+    ),
   });
 };
 
 export const useLocales = () => {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const locale = i18n.getResourceBundle(currentLanguage, 'translation');
+  const locale = i18n.getResourceBundle(currentLanguage, 'translation') as LocaleType;
 
   const changeLanguage = (language: string) => {
     i18n.changeLanguage(language);
