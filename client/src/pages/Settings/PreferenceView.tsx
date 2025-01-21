@@ -14,7 +14,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
 import i18next, { changeLanguage } from 'i18next';
-import { I18N_LANGUAGES, useLocales } from '@/config/i18n';
+import { I18N_LANGUAGES } from '@/config/i18n';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
