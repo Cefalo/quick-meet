@@ -66,6 +66,10 @@ export function populateRoomCapacity(max: number) {
   return options;
 }
 
+export function populateLanguageOptions(): string[] {
+  return ['en', 'no'];
+}
+
 export function toMinutesSinceMidnight(hours: number, minutes: number) {
   return hours * 60 + minutes;
 }

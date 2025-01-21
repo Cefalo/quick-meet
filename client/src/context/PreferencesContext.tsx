@@ -7,6 +7,7 @@ interface Preferences {
   seats: number;
   title?: string;
   floor?: string;
+  language?: string;
 }
 
 interface PreferencesContextType {
