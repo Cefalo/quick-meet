@@ -1,11 +1,11 @@
-import enLocales from '@/locales/en.json';
-import noLocales from '@/locales/no.json';
+import en from '@/locales/en.json';
+import no from '@/locales/no.json';
 
 import i18next from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 
 type LanguageKeys = (typeof I18N_LANGUAGES)[keyof typeof I18N_LANGUAGES];
-type LocaleType = typeof enLocales;
+type LocaleType = typeof en;
 
 export const I18N_LANGUAGES = {
   EN: 'en',
@@ -13,8 +13,8 @@ export const I18N_LANGUAGES = {
 } as const;
 
 export const LOCALES: Record<LanguageKeys, LocaleType> = {
-  [I18N_LANGUAGES.EN]: enLocales,
-  [I18N_LANGUAGES.NO]: noLocales,
+  [I18N_LANGUAGES.EN]: en,
+  [I18N_LANGUAGES.NO]: no,
 };
 
 export const LANGUAGE_MAP: Record<LanguageKeys, string> = {
