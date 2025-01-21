@@ -1,4 +1,9 @@
 {
+  "buttonText": {
+    "preferences": "Preferences",
+    "support": "Support",
+    "save": "Save"
+  },
   "error": {
     "invalidEmail": "Invalid email entered"
   }

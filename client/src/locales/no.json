@@ -1,5 +1,10 @@
 {
+  "buttonText": {
+    "preferences": "Preferences",
+    "support": "Support",
+    "save": "Save"
+  },
   "error": {
-    "invalidEmail": "Ugyldig e-postadresse oppgitt"
+    "invalidEmail": "Invalid email entered"
   }
 }

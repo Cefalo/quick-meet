@@ -11,6 +11,7 @@ import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import PreferenceView from '@/pages/Settings/PreferenceView';
 import SupportView from '@/pages/Settings/SupportView';
 import LogoutView from '@/pages/Settings/LogoutView';
+import { useLocales } from '@/config/i18n';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -57,6 +58,7 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 export default function Settings() {
   const [tabIndex, setTabIndex] = useState(0);
   const navigate = useNavigate();
+  const { locale } = useLocales();
 
   const handleTabChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
@@ -119,10 +121,10 @@ export default function Settings() {
           >
             <StyledToggleButtonGroup sx={{ mx: 0 }} value={tabIndex} exclusive onChange={handleTabChange} aria-label="event tabs" fullWidth={true}>
               <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
-                Preferences
+                {locale.buttonText.preferences}
               </StyledToggleButton>
               <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
-                Support
+                {locale.buttonText.support}
               </StyledToggleButton>
             </StyledToggleButtonGroup>
           </Box>
