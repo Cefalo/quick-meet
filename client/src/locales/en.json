@@ -4,12 +4,25 @@
     "support": "Support",
     "save": "Save",
     "newEvent": "New Event",
-    "myEvents": "My Events"
+    "myEvents": "My Events",
+    "bookNow": "Book Now"
   },
   "error": {
     "invalidEmail": "Invalid email entered"
   },
   "success": {
     "savedSuccessfully": "Saved successfully"
+  },
+  "info": {
+    "createMeeting": "Create meet link",
+    "defaultTitle": "Quick Meeting",
+    "noEvents": "No events to show"
+  },
+  "placeholder": {
+    "attendees": "Attendees",
+    "selectFloor": "Select preferred floor",
+    "selectDuration": "Select preferred meeting duration",
+    "selectRoomCapacity": "Select preferred room capacity",
+    "selectLanguage": "Select preferred language"
   }
 }

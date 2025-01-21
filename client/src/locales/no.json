@@ -4,12 +4,25 @@
     "support": "Støtte",
     "save": "Lagre",
     "newEvent": "Nytt arrangement",
-    "myEvents": "Mine arrangementer"
+    "myEvents": "Mine arrangementer",
+    "bookNow": "Bestill nå"
   },
   "error": {
     "invalidEmail": "Ugyldig e-postadresse"
   },
   "success": {
-    "savedSuccessfully": "Lagret vellykket"
+    "savedSuccessfully": "Lagt til med suksess"
+  },
+  "info": {
+    "createMeeting": "Lag møtelink",
+    "defaultTitle": "Raskt møte",
+    "noEvents": "Ingen arrangementer å vise"
+  },
+  "placeholder": {
+    "attendees": "Deltakere",
+    "selectFloor": "Velg ønsket etasje",
+    "selectDuration": "Velg ønsket møtetid",
+    "selectRoomCapacity": "Velg ønsket romkapasitet",
+    "selectLanguage": "Velg ønsket språk"
   }
 }
