@@ -29,66 +29,27 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       }
     }
   };
-  const extractEmails = (input: string[]) => {
-    return input
-      .join(' ')
-      .split(/\s|,/)
-      .map((email) => email.trim())
-      .filter((email) => email !== '');
-  };
-
-  const validateEmails = (emails: string[]) => {
-    const validEmails = emails.filter(isEmailValid);
-    const invalidEmails = emails.filter((email) => !isEmailValid(email));
-    return { validEmails, invalidEmails };
-  };
-
-  const handleInvalidEmails = (invalidEmails: string[]) => {
-    invalidEmails.forEach((email: string) => {
-      toast.error(`${email} is invalid.`);
-    });
-  };
 
   const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = extractEmails(emails);
-    const { validEmails, invalidEmails } = validateEmails(filteredEmails);
-    if (invalidEmails.length > 0) {
-      handleInvalidEmails(invalidEmails);
-    }
-    const uniqueEmails = [...new Set(validEmails)];
-    if (uniqueEmails.length >= 0) {
-      onChange(id, uniqueEmails);
+    const filteredEmails = emails
+      .join(' ')
+      .split(/\s+/)
+      .map((email) => email.trim())
+      .filter((email) => email !== '');
+    const uniqueEmails = [...new Set(filteredEmails)];
+    const validEmails: string[] = [],
+      invalidEmails: string[] = [];
+    uniqueEmails.forEach((email) => {
+      isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
+    });
+    invalidEmails.length == 1 ? toast.error('Invalid email entered.') : invalidEmails.length > 1 ? toast.error('Invalid emails entered.') : null;
+    if (validEmails.length >= 0) {
+      onChange(id, validEmails);
     }
     setTextInput('');
   };
-
-  const handleKeyDown = (event: any) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault();
-      const inputValue = event.target.value.trim();
-      const existingEmails = value || [];
-      if (inputValue.includes(',') || inputValue.includes(' ')) {
-        const emails = inputValue
-          .split(/[\s,]+/)
-          .map((email: string) => email.trim())
-          .filter((email: string) => email !== '');
-        emails.forEach((email: string) => {
-          if (!isEmailValid(email)) {
-            toast.error(`${email} is invalid.`);
-          } else {
-            onChange(id, [...existingEmails, email]);
-          }
-        });
-      } else if (isEmailValid(inputValue)) {
-        onChange(id, [...existingEmails, inputValue]);
-      }
-      setTextInput('');
-    }
-  };
-
   const debouncedInputChange = debounce(handleInputChange, 300);
-
   return (
     <Box
       display="flex"
@@ -168,7 +129,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               type={type}
               variant="standard"
               placeholder="Attendees"
-              onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
                   ...params.InputProps,
