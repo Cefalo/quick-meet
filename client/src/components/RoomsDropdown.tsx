@@ -2,6 +2,7 @@ import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '
 import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { IConferenceRoom } from '@quickmeet/shared';
+import { useLocales } from '@/config/i18n';
 
 interface DropdownProps {
   id: string;
@@ -30,6 +31,7 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
   };
+  const { locale } = useLocales();
 
   return (
     <Select
@@ -61,7 +63,7 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
                   }),
                 ]}
               >
-                No rooms available
+                {locale.info.noRooms}
               </Typography>
             </Box>
           );

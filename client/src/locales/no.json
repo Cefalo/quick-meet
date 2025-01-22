@@ -10,10 +10,17 @@
     "reportBug": "RAPPORTER EN FEIL",
     "requestFeature": "BE EN FUNKSJON",
     "confirm": "Bekrefte",
-    "cancel": "Kansellere"
+    "cancel": "Kansellere",
+    "delete": "Slett"
   },
   "error": {
-    "invalidEmail": "Ugyldig e-post angitt"
+    "invalidEmail": "Ugyldig e-post angitt",
+    "duplicateEmail": "Duplikat e-post oppgitt",
+    "failedToRetieveCallbackUrl": "Kunne ikke hente oauth tilbakeringingsadress",
+    "missingFields": "Skriv inn manglende felt",
+    "selectEventToDelete": "Velg arrangementet du vil slette",
+    "roomNotUpdated": "Rommet ble ikke oppdatert",
+    "loginNotComplete": "Kunne ikke fullføre forespørselen. Omdirigerer til påloggingssiden"
   },
   "success": {
     "savedSuccessfully": "Lagret vellykket"
@@ -21,7 +28,9 @@
   "info": {
     "createMeeting": "Opprett møtelink",
     "defaultTitle": "Rask møte",
+    "deleteEventConfirmation": "Er du sikker på at du vil slette denne hendelsen permanent?",
     "noEvents": "Ingen hendelser å vise",
+    "noRooms": "Ingen rom tilgjengelig",
     "logoutConfirmation": "Er du sikker på at du vil logge ut?",
     "logoutInfo": "Dette vil tilbakekalle applikasjonstillatelsene og vil kreve å godkjenne dem på nytt når du prøver å logge på igjen"
   },

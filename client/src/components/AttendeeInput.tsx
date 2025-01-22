@@ -56,12 +56,12 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       const existingEmails = value || [];
 
       if (existingEmails.find((email) => email === inputValue)) {
-        toast.error('Duplicate email entered');
+        toast.error(locale.error.duplicateEmail);
         return;
       }
 
       if (!isEmailValid(inputValue)) {
-        toast.error('Invalid email entered');
+        toast.error(locale.error.invalidEmail);
         return;
       }
 

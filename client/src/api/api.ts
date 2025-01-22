@@ -5,6 +5,7 @@ import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
 import { ROUTES } from '@/config/routes';
 import { NavigateFunction } from 'react-router-dom';
+import { useLocales } from '@/config/i18n';
 
 /**
  * @description Serves as the base API endpoint for the application. It provides the authorization token in every request
@@ -121,9 +122,10 @@ export default class Api {
   }
 
   async login() {
+    const { locale } = useLocales();
     const { data } = await this.getOAuthUrl(secrets.appEnvironment);
     if (!data) {
-      toast.error('Failed to retrieve oauth callback url');
+      toast.error(locale.error.failedToRetieveCallbackUrl);
       return;
     }
 
