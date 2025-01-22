@@ -5,7 +5,11 @@
     "save": "Lagre",
     "newEvent": "Nytt arrangement",
     "myEvents": "Mine arrangementer",
-    "bookNow": "Bestill nå"
+    "bookNow": "Bestill nå",
+    "reportBug": "RAPPORTER EN FEIL",
+    "requestFeature": "BE OM EN FUNKSJON",
+    "confirm": "Bekreft",
+    "cancel": "Avbryt"
   },
   "error": {
     "invalidEmail": "Ugyldig e-postadresse"
@@ -16,7 +20,9 @@
   "info": {
     "createMeeting": "Lag møtelink",
     "defaultTitle": "Raskt møte",
-    "noEvents": "Ingen arrangementer å vise"
+    "noEvents": "Ingen arrangementer å vise",
+    "logoutConfirmation": "Er du sikker på at du vil logge ut?",
+    "logoutInfo": "Dette vil tilbakekalle applikasjonstillatelsene og kreve at de godkjennes på nytt når du prøver å logge inn igjen"
   },
   "placeholder": {
     "attendees": "Deltakere",

@@ -26,6 +26,7 @@ import StyledTextField from '@/components/StyledTextField';
 import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import AttendeeInput from '@/components/AttendeeInput';
+import { useLocales } from '@/config/i18n';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -38,6 +39,9 @@ interface BookRoomViewProps {
 export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   // Context or global state
   const { preferences } = usePreferences();
+
+  // Locales
+  const { locale } = useLocales();
 
   // loading states
   const [bookClickLoading, setBookClickLoading] = useState(false);
@@ -328,7 +332,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
             >
               <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
               <Typography variant="subtitle1" ml={0.5}>
-                Create meet link
+                {locale.info.createMeeting}
               </Typography>
             </Box>
           </Box>
@@ -369,7 +373,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Book now
+            {locale.buttonText.bookNow}
           </Typography>
         </LoadingButton>
       </Box>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ROUTES } from '@/config/routes';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@/context/ApiContext';
+import { useLocales } from '@/config/i18n';
 
 interface LogoutViewProps {
   handleCancel: () => void;
@@ -13,6 +14,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
   const [loading, setLoading] = useState(false);
   const api = useApi();
   const navigate = useNavigate();
+  const { locale } = useLocales();
 
   const onConfirmClick = async () => {
     setLoading(true);
@@ -57,7 +59,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
             variant="h3"
             component={'div'}
           >
-            Are you sure you want to logout?
+            {locale.info.logoutConfirmation}
           </Typography>
           <Typography
             sx={[
@@ -72,7 +74,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
             variant="body1"
             component={'div'}
           >
-            This will revoke the application permissions and would require to approve them again when trying to log back in
+            {locale.info.logoutConfirmation}
           </Typography>
         </Box>
       </Box>
@@ -107,7 +109,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Confirm
+            {locale.buttonText.confirm}
           </Typography>
         </LoadingButton>
 
@@ -131,7 +133,7 @@ export default function LogoutView({ handleCancel }: LogoutViewProps) {
           }}
         >
           <Typography variant="subtitle2" fontWeight={700}>
-            Cancel
+            {locale.buttonText.cancel}
           </Typography>
         </Button>
       </Box>

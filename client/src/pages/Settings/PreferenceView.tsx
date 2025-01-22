@@ -14,6 +14,7 @@ import TitleIcon from '@mui/icons-material/Title';
 import { useApi } from '@/context/ApiContext';
 import TranslateIcon from '@mui/icons-material/Translate';
 import i18next, { changeLanguage } from 'i18next';
+import { useLocales } from '@/config/i18n';
 export default function PreferenceView() {
   // Form state
   const [formData, setFormData] = useState({
@@ -36,6 +37,9 @@ export default function PreferenceView() {
 
   // Context or global state
   const { preferences, setPreferences } = usePreferences();
+
+  // locale
+  const { locale } = useLocales();
 
   // Derived data
   const durations = populateDurationOptions();
@@ -134,7 +138,7 @@ export default function PreferenceView() {
             sx={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, height: '60px' }}
             id="floor"
             value={formData.floor}
-            placeholder={'Select preferred floor'}
+            placeholder={locale.placeholder.selectFloor}
             options={floorOptions}
             onChange={handleInputChange}
             icon={
@@ -154,7 +158,7 @@ export default function PreferenceView() {
             value={formData.duration}
             options={durationOptions}
             onChange={handleInputChange}
-            placeholder={'Select preferred meeting duration'}
+            placeholder={locale.placeholder.selectDuration}
             icon={
               <HourglassBottomRoundedIcon
                 sx={[
@@ -169,7 +173,7 @@ export default function PreferenceView() {
           <Dropdown
             sx={{ height: '60px' }}
             id="seats"
-            placeholder={'Select preferred room capacity'}
+            placeholder={locale.placeholder.selectRoomCapacity}
             value={formData.seats + ''}
             options={roomCapacityOptions}
             onChange={handleInputChange}
@@ -203,7 +207,7 @@ export default function PreferenceView() {
           <Dropdown
             sx={{ height: '60px', borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
             id="language"
-            placeholder={'Select preferred language'}
+            placeholder={locale.placeholder.selectLanguage}
             value={formData.language + ''}
             options={languageOptions}
             onChange={handleInputChange}

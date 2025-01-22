@@ -5,7 +5,11 @@
     "save": "Save",
     "newEvent": "New Event",
     "myEvents": "My Events",
-    "bookNow": "Book Now"
+    "bookNow": "Book Now",
+    "reportBug": "REPORT A BUG",
+    "requestFeature": "REQUEST A FEATURE",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "error": {
     "invalidEmail": "Invalid email entered"
@@ -16,7 +20,9 @@
   "info": {
     "createMeeting": "Create meet link",
     "defaultTitle": "Quick Meeting",
-    "noEvents": "No events to show"
+    "noEvents": "No events to show",
+    "logoutConfirmation": "Are you sure you want to logout?",
+    "logoutInfo": "This will revoke the application permissions and would require to approve them again when trying to log back in"
   },
   "placeholder": {
     "attendees": "Attendees",

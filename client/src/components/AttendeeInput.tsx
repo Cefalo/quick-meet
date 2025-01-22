@@ -150,7 +150,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               onChange={(e) => setTextInput(e.target.value)}
               type={type}
               variant="standard"
-              placeholder="Attendees"
+              placeholder={locale.placeholder.attendees}
               onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
