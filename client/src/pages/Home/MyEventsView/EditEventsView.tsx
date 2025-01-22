@@ -28,6 +28,7 @@ import { usePreferences } from '@/context/PreferencesContext';
 import StyledTextField from '@/components/StyledTextField';
 import { useApi } from '@/context/ApiContext';
 import AttendeeInput from '@/components/AttendeeInput';
+import { useLocales } from '@/config/i18n';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -195,6 +196,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   if (!open) return <></>;
 
   const background = isChromeExt ? chromeBackground : { background: 'linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.6) 100%)' };
+
+  const { locale } = useLocales();
 
   return (
     <Box
@@ -408,7 +411,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Save changes
+            {locale.buttonText.saveChanges}
           </Typography>
         </LoadingButton>
 
@@ -432,7 +435,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           }}
         >
           <Typography variant="subtitle2" fontWeight={700}>
-            Cancel
+            {locale.buttonText.cancel}
           </Typography>
         </Button>
       </Box>

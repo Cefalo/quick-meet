@@ -251,7 +251,7 @@ export default function PreferenceView() {
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Save
+            {locale.buttonText.save}
           </Typography>
         </Button>
       </Box>
