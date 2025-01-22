@@ -29,10 +29,12 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       }
     }
   };
-  const extractEmails = (input: string[]) => {
-    return input
+
+  const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
+    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
+    const filteredEmails = emails
       .join(' ')
-      .split(/\s|,/)
+      .split(/\s+/)
       .map((email) => email.trim())
       .filter((email) => email !== '');
   };
