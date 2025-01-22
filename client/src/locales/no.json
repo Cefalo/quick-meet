@@ -2,32 +2,32 @@
   "buttonText": {
     "preferences": "Preferanser",
     "support": "Støtte",
-    "save": "Lagre",
-    "newEvent": "Nytt arrangement",
-    "myEvents": "Mine arrangementer",
+    "save": "Spare",
+    "newEvent": "Ny begivenhet",
+    "myEvents": "Mine hendelser",
     "bookNow": "Bestill nå",
     "reportBug": "RAPPORTER EN FEIL",
-    "requestFeature": "BE OM EN FUNKSJON",
-    "confirm": "Bekreft",
-    "cancel": "Avbryt"
+    "requestFeature": "BE EN FUNKSJON",
+    "confirm": "Bekrefte",
+    "cancel": "Kansellere"
   },
   "error": {
-    "invalidEmail": "Ugyldig e-postadresse"
+    "invalidEmail": "Ugyldig e-post angitt"
   },
   "success": {
-    "savedSuccessfully": "Lagt til med suksess"
+    "savedSuccessfully": "Lagret vellykket"
   },
   "info": {
-    "createMeeting": "Lag møtelink",
-    "defaultTitle": "Raskt møte",
-    "noEvents": "Ingen arrangementer å vise",
+    "createMeeting": "Opprett møtelink",
+    "defaultTitle": "Rask møte",
+    "noEvents": "Ingen hendelser å vise",
     "logoutConfirmation": "Er du sikker på at du vil logge ut?",
-    "logoutInfo": "Dette vil tilbakekalle applikasjonstillatelsene og kreve at de godkjennes på nytt når du prøver å logge inn igjen"
+    "logoutInfo": "Dette vil tilbakekalle applikasjonstillatelsene og vil kreve å godkjenne dem på nytt når du prøver å logge på igjen"
   },
   "placeholder": {
     "attendees": "Deltakere",
     "selectFloor": "Velg ønsket etasje",
-    "selectDuration": "Velg ønsket møtetid",
+    "selectDuration": "Velg ønsket møtevarighet",
     "selectRoomCapacity": "Velg ønsket romkapasitet",
     "selectLanguage": "Velg ønsket språk"
   }
