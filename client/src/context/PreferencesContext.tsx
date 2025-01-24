@@ -38,6 +38,7 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
     language: defaultPreferences.language,
   });
   const [loading, setLoading] = useState(true);
+  const { changeLanguage, currentLanguage } = useLocales();
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -52,7 +53,6 @@ export const PreferencesProvider = ({ children }: PreferencesProviderProps) => {
 
     loadPreferences();
   }, []);
-  const { changeLanguage, currentLanguage } = useLocales();
   useEffect(() => {
     if (!preferences.title) {
       preferences.title = defaultPreferences.title;
