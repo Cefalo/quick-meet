@@ -37,13 +37,17 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       .split(/\s+/)
       .map((email) => email.trim())
       .filter((email) => email !== '');
+
     const uniqueEmails = [...new Set(filteredEmails)];
-    const validEmails: string[] = [],
-      invalidEmails: string[] = [];
+    const validEmails: string[] = [];
+    const invalidEmails: string[] = [];
+
     uniqueEmails.forEach((email) => {
       isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
     });
-    invalidEmails.length == 1 ? toast.error('Invalid email entered.') : invalidEmails.length > 1 ? toast.error('Invalid emails entered.') : null;
+
+    invalidEmails.length > 0 && toast.error('Invalid email(s) entered.');
+
     if (validEmails.length >= 0) {
       onChange(id, validEmails);
     }
