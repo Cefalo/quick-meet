@@ -12,8 +12,8 @@ import {
   DeleteResponse,
   EventResponse,
   EventUpdateResponse,
-  IConferenceRoom,
   IPeopleInformation,
+  IAvailableRooms,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
@@ -46,12 +46,12 @@ export class CalenderController {
     @_OAuth2Client() client: OAuth2Client,
     @Req() req: _Request,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
-  ): Promise<ApiResponse<IConferenceRoom[]>> {
+  ): Promise<ApiResponse<IAvailableRooms>> {
     const domain = req.hd;
     let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     if (!seats && eventId) {
-      return createResponse([]);
+      return createResponse({ others: [], preferred: [] });
     }
 
     const startDate = new Date(startTime);
