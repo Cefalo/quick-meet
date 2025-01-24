@@ -27,5 +27,9 @@
   ],
   "devDependencies": {
     "npm-run-all2": "^7.0.1"
+  },
+  "dependencies": {
+    "@mui/x-date-pickers": "^7.24.0",
+    "dayjs": "^1.11.13"
   }
 }

@@ -1,8 +1,9 @@
-import { Box, Checkbox, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import AttendeeInput from '@/components/AttendeeInput';
+import StyledTextField from '@/components/StyledTextField';
+import { useApi } from '@/context/ApiContext';
+import { usePreferences } from '@/context/PreferencesContext';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
-import LoadingButton from '@mui/lab/LoadingButton';
+import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import {
   convertToRFC3339,
   createDropdownOptions,
@@ -13,20 +14,22 @@ import {
   populateTimeOptions,
   renderError,
 } from '@helpers/utility';
-import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import { BookRoomDto, EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
-import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
-import { usePreferences } from '@/context/PreferencesContext';
-import StyledTextField from '@/components/StyledTextField';
 import TitleIcon from '@mui/icons-material/Title';
-import { useApi } from '@/context/ApiContext';
-import AttendeeInput from '@/components/AttendeeInput';
-
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Box, Checkbox, Typography } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
+import { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
 };
@@ -59,6 +62,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     conference: false,
     room: '',
   });
+
+  const [date, setDate] = useState(dayjs());
 
   // Utilities and hooks
   const navigate = useNavigate();
@@ -121,10 +126,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-
-    const date = new Date(Date.now()).toISOString().split('T')[0];
-    const formattedStartTime = convertToRFC3339(date, startTime);
-
+    const currentDate = date.toISOString().split('T')[0];
+    const formattedStartTime = convertToRFC3339(currentDate, startTime);
     setRoomLoading(true);
 
     if (abortControllerRef.current) {
@@ -175,8 +178,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       return;
     }
 
-    const date = new Date(Date.now()).toISOString().split('T')[0];
-    const formattedStartTime = convertToRFC3339(date, startTime);
+    const formattedStartTime = convertToRFC3339(date.toISOString().split('T')[0], startTime);
     const { floor, title: preferredTitle } = preferences;
 
     const payload: BookRoomDto = {
@@ -223,30 +225,71 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       >
         <Box
           sx={{
-            px: 1,
-            pt: 1,
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'row',
+            backgroundColor: (theme) => theme.palette.common.white,
+            border: 'none',
+            width: '100%',
           }}
         >
-          <Dropdown
-            id="startTime"
-            options={timeOptions}
-            value={formData.startTime}
-            onChange={handleInputChange}
-            sx={{
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-            }}
-            icon={
-              <AccessTimeFilledRoundedIcon
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[50],
-                  }),
-                ]}
+          <Box sx={{ width: '50%' }}>
+            <Dropdown
+              id="startTime"
+              options={timeOptions}
+              value={formData.startTime}
+              onChange={handleInputChange}
+              sx={{
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+              }}
+              icon={
+                <AccessTimeFilledRoundedIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                />
+              }
+            />
+          </Box>
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                defaultValue={date}
+                onChange={(newDate) => {
+                  if (newDate) {
+                    setDate(newDate);
+                  }
+                }}
+                slotProps={{
+                  inputAdornment: {
+                    position: 'start',
+                  },
+                }}
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      border: 'none',
+                    },
+                  },
+                  '.MuiInputBase-input': {
+                    color: (theme) => theme.palette.common.black,
+                    fontFamily: 'inherit',
+                    fontSize: '1.125rem',
+                    fontWeight: 400,
+                  },
+                  '.MuiSvgIcon-root': {
+                    color: (theme) => theme.palette.grey[50],
+                  },
+                  ml: 0.2,
+                }}
               />
-            }
-          />
-
+            </LocalizationProvider>
+          </Box>
+        </Box>
+        <Box>
           <Box sx={{ display: 'flex' }}>
             <Dropdown
               id="duration"
