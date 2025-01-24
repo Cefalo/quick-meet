@@ -1,12 +1,11 @@
-import { TextField, Chip, Box, Autocomplete, debounce } from '@mui/material';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import { useState } from 'react';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
-import toast from 'react-hot-toast';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import { Autocomplete, Box, Chip, debounce, TextField, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import { Typography } from '@mui/material';
 import type { IPeopleInformation } from '@quickmeet/shared';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface AttendeeInputProps {
   id: string;
@@ -33,44 +32,28 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
   const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
-    if (filteredEmails.length > 0) {
-      const lastValue = filteredEmails[filteredEmails.length - 1].trim();
-      if (isEmailValid(lastValue)) {
-        onChange(id, filteredEmails);
-        setTextInput('');
-      } else {
-        toast.error('Invalid email entered');
-      }
-    } else {
-      onChange(id, filteredEmails);
-      setTextInput('');
+    const filteredEmails = emails
+      .join(' ')
+      .split(/\s+/)
+      .map((email) => email.trim())
+      .filter((email) => email !== '');
+
+    const uniqueEmails = [...new Set(filteredEmails)];
+    const validEmails: string[] = [];
+    const invalidEmails: string[] = [];
+
+    uniqueEmails.forEach((email) => {
+      isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
+    });
+
+    invalidEmails.length > 0 && toast.error('Invalid email(s) entered.');
+
+    if (validEmails.length >= 0) {
+      onChange(id, validEmails);
     }
+    setTextInput('');
   };
-
-  const handleKeyDown = (event: any) => {
-    if (event.key === ' ') {
-      event.preventDefault();
-      const inputValue = event.target.value.trim();
-      const existingEmails = value || [];
-
-      if (existingEmails.find((email) => email === inputValue)) {
-        toast.error('Duplicate email entered');
-        return;
-      }
-
-      if (!isEmailValid(inputValue)) {
-        toast.error('Invalid email entered');
-        return;
-      }
-
-      onChange(id, [...existingEmails, inputValue]);
-      setTextInput('');
-    }
-  };
-
   const debouncedInputChange = debounce(handleInputChange, 300);
-
   return (
     <Box
       display="flex"
@@ -150,7 +133,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               type={type}
               variant="standard"
               placeholder="Attendees"
-              onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
                   ...params.InputProps,
