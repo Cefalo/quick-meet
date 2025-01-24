@@ -11,6 +11,7 @@ import { FormData } from '@helpers/types';
 import { ROUTES } from '@config/routes';
 import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useLocales } from '@/config/i18n';
 
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,7 @@ export default function MyEventsView() {
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
   const api = useApi();
   const { preferences } = usePreferences();
+  const { locale } = useLocales();
 
   useEffect(() => {
     const query = {
@@ -62,7 +64,7 @@ export default function MyEventsView() {
     setLoading(true);
 
     if (!deleteEventId) {
-      toast.error('Please select the event to delete');
+      toast.error(locale.error.selectEventToDelete);
       return;
     }
 
@@ -84,7 +86,7 @@ export default function MyEventsView() {
 
   const onEditConfirmed = async (data: FormData) => {
     if (!data || !data.eventId || !data.room) {
-      toast.error('Room was not updated');
+      toast.error(locale.error.roomNotUpdated);
       return;
     }
 
@@ -112,7 +114,7 @@ export default function MyEventsView() {
 
     const res = await api.updateEvent(eventId, payload);
     if (res?.redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
+      toast.error(locale.error.loginNotComplete);
       setTimeout(() => {
         navigate(ROUTES.signIn);
       }, 1000);

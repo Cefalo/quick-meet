@@ -1,3 +1,4 @@
+import { useLocales } from '@/config/i18n';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
@@ -18,6 +19,7 @@ interface AttendeeInputProps {
 export default function AttendeeInput({ id, onChange, value, type }: AttendeeInputProps) {
   const [options, setOptions] = useState<IPeopleInformation[]>([]);
   const [textInput, setTextInput] = useState('');
+  const { locale } = useLocales();
 
   const api = useApi();
 
@@ -46,7 +48,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
     });
 
-    invalidEmails.length > 0 && toast.error('Invalid email(s) entered.');
+    invalidEmails.length > 0 && toast.error(locale.error.invalidEmail);
 
     if (validEmails.length >= 0) {
       onChange(id, validEmails);
@@ -132,7 +134,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               onChange={(e) => setTextInput(e.target.value)}
               type={type}
               variant="standard"
-              placeholder="Attendees"
+              placeholder={locale.placeholder.attendees}
               slotProps={{
                 input: {
                   ...params.InputProps,

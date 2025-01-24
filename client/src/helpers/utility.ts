@@ -4,6 +4,8 @@ import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '@config/routes';
 import { secrets } from '@config/secrets';
 import Api from '@/api/api';
+import { LOCALES } from '@/config/locales';
+import { useLocales } from '@/config/i18n';
 
 /**
  * Returns an array of time strings formatted as HH:mm in 12 hrs format with 15mins interval
@@ -128,8 +130,16 @@ export const createDropdownOptions = (options: string[], type: 'time' | 'default
   return (options || []).map((option) => ({ value: option, text: type === 'time' ? formatMinsToHM(Number(option), 'm') : option }));
 };
 
+export const createLanguageOptions = () => {
+  return LOCALES.map(({ code, name }) => ({
+    value: code,
+    text: name,
+  }));
+};
+
 export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunction) => {
   const { status, statusCode, message, redirect } = err;
+  const { locale } = useLocales();
   if (status === 'error') {
     if (statusCode === 401) {
       try {
@@ -137,7 +147,7 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
       } catch (error) {}
       navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
-      toast.error('Input missing fields');
+      toast.error(locale.error.missingFields);
     } else if (redirect) {
       navigate(ROUTES.signIn);
     } else {
