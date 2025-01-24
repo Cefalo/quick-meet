@@ -1,7 +1,11 @@
-import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
+import AttendeeInput from '@/components/AttendeeInput';
+import StyledTextField from '@/components/StyledTextField';
+import { useLocales } from '@/config/i18n';
+import { useApi } from '@/context/ApiContext';
+import { usePreferences } from '@/context/PreferencesContext';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
-import { useEffect, useRef, useState } from 'react';
-import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
+import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
+import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import {
   chromeBackground,
   convertToLocaleTime,
@@ -14,21 +18,21 @@ import {
   populateTimeOptions,
   renderError,
 } from '@helpers/utility';
-import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
-import { LoadingButton } from '@mui/lab';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
+import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
-import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
-import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
-import { EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
+import { LoadingButton } from '@mui/lab';
+import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en-gb';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePreferences } from '@/context/PreferencesContext';
-import StyledTextField from '@/components/StyledTextField';
-import { useApi } from '@/context/ApiContext';
-import AttendeeInput from '@/components/AttendeeInput';
-import { useLocales } from '@/config/i18n';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -81,6 +85,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   // Form data state
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
+  const [date, setDate] = useState(dayjs());
+
   // Utilities and hooks
   const api = useApi();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -115,8 +121,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-    const date = new Date(Date.now()).toISOString().split('T')[0];
-    const formattedStartTime = convertToRFC3339(date, startTime);
+    const currentDate = date.toISOString().split('T')[0];
+    const formattedStartTime = convertToRFC3339(currentDate, startTime);
 
     setRoomLoading(true);
 
@@ -276,42 +282,78 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               borderRadius: 2,
             }}
           >
-            <Dropdown
-              id="startTime"
-              options={timeOptions}
-              value={formData.startTime}
-              onChange={handleInputChange}
+            <Box
               sx={{
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'row',
+                backgroundColor: (theme) => theme.palette.common.white,
+                border: 'none',
+                width: '100%',
               }}
-              icon={
-                <AccessTimeFilledRoundedIcon
-                  sx={[
-                    (theme) => ({
-                      color: theme.palette.grey[50],
-                    }),
-                  ]}
+            >
+              <Box sx={{ width: '50%' }}>
+                <Dropdown
+                  id="startTime"
+                  options={timeOptions}
+                  value={formData.startTime}
+                  onChange={handleInputChange}
+                  sx={{
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10,
+                  }}
+                  icon={
+                    <AccessTimeFilledRoundedIcon
+                      sx={[
+                        (theme) => ({
+                          color: theme.palette.grey[50],
+                        }),
+                      ]}
+                    />
+                  }
                 />
-              }
-            />
-            <Box sx={{ display: 'flex' }}>
-              <Dropdown
-                id="duration"
-                options={durationOptions}
-                value={formData.duration.toString()}
-                onChange={handleInputChange}
-                icon={
-                  <HourglassBottomRoundedIcon
-                    sx={[
-                      (theme) => ({
-                        color: theme.palette.grey[50],
-                      }),
-                    ]}
+              </Box>
+              <Box sx={{ flex: 1, display: 'flex' }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'en-gb'}>
+                  <DatePicker
+                    defaultValue={date}
+                    onChange={(newDate) => {
+                      if (newDate) {
+                        setDate(newDate);
+                      }
+                    }}
+                    slotProps={{
+                      inputAdornment: {
+                        position: 'start',
+                        sx: {
+                          input: {
+                            cursor: 'pointer',
+                          },
+                        },
+                      },
+                    }}
+                    sx={{
+                      '.MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          border: 'none',
+                        },
+                      },
+                      '.MuiInputBase-input': {
+                        color: (theme) => theme.palette.common.black,
+                        fontFamily: 'inherit',
+                        fontSize: '1.125rem',
+                        fontWeight: 400,
+                      },
+                      '.MuiSvgIcon-root': {
+                        color: (theme) => theme.palette.grey[50],
+                      },
+                      '.MuiButtonBase-root': { cursor: 'pointer' },
+                    }}
                   />
-                }
-              />
-
+                </LocalizationProvider>
+              </Box>
+            </Box>
+            <Box>
               <Dropdown
                 id="seats"
                 options={roomCapacityOptions}

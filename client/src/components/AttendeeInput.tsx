@@ -39,27 +39,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       .split(/\s+/)
       .map((email) => email.trim())
       .filter((email) => email !== '');
-  };
-
-  const validateEmails = (emails: string[]) => {
-    const validEmails = emails.filter(isEmailValid);
-    const invalidEmails = emails.filter((email) => !isEmailValid(email));
-    return { validEmails, invalidEmails };
-  };
-
-  const handleInvalidEmails = (invalidEmails: string[]) => {
-    invalidEmails.forEach((email: string) => {
-      toast.error(`${email} is invalid.`);
-    });
-  };
-
-  const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
-    const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = emails
-      .join(' ')
-      .split(/\s+/)
-      .map((email) => email.trim())
-      .filter((email) => email !== '');
 
     const uniqueEmails = [...new Set(filteredEmails)];
     const validEmails: string[] = [];
