@@ -135,7 +135,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               type={type}
               variant="standard"
               placeholder={locale.placeholder.attendees}
-              onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
                   ...params.InputProps,
