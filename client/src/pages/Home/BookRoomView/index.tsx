@@ -27,6 +27,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
+import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -64,6 +65,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   });
 
   const [date, setDate] = useState(dayjs());
+  const userLocale = navigator.language;
 
   // Utilities and hooks
   const navigate = useNavigate();
@@ -254,8 +256,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
               }
             />
           </Box>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Box sx={{ flex: 1, display: 'flex' }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'en-gb'}>
               <DatePicker
                 defaultValue={date}
                 onChange={(newDate) => {
@@ -266,6 +268,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
                 slotProps={{
                   inputAdornment: {
                     position: 'start',
+                    sx: {
+                      input: {
+                        cursor: 'pointer',
+                      },
+                    },
                   },
                 }}
                 sx={{
@@ -283,7 +290,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
                   '.MuiSvgIcon-root': {
                     color: (theme) => theme.palette.grey[50],
                   },
-                  ml: 0.2,
+                  '.MuiButtonBase-root': { cursor: 'pointer' },
                 }}
               />
             </LocalizationProvider>
