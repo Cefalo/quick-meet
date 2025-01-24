@@ -14,7 +14,7 @@
     "delete": "Slett"
   },
   "error": {
-    "invalidEmail": "Ugyldig e-post angitt",
+    "invalidEmail": "Ugyldig(e) e-post(er) angitt.",
     "duplicateEmail": "Duplikat e-post oppgitt",
     "failedToRetieveCallbackUrl": "Kunne ikke hente oauth tilbakeringingsadress",
     "missingFields": "Skriv inn manglende felt",

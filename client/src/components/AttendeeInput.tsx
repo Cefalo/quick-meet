@@ -34,44 +34,28 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
   const handleSelectionChange = (_: React.SyntheticEvent, newValue: Array<string | IPeopleInformation>) => {
     const emails = newValue.map((option) => (typeof option === 'object' && option.email ? option.email : (option as string)));
-    const filteredEmails = emails.filter((email) => emails.indexOf(email) === emails.lastIndexOf(email));
-    if (filteredEmails.length > 0) {
-      const lastValue = filteredEmails[filteredEmails.length - 1].trim();
-      if (isEmailValid(lastValue)) {
-        onChange(id, filteredEmails);
-        setTextInput('');
-      } else {
-        toast.error(locale.error.invalidEmail);
-      }
-    } else {
-      onChange(id, filteredEmails);
-      setTextInput('');
+    const filteredEmails = emails
+      .join(' ')
+      .split(/\s+/)
+      .map((email) => email.trim())
+      .filter((email) => email !== '');
+
+    const uniqueEmails = [...new Set(filteredEmails)];
+    const validEmails: string[] = [];
+    const invalidEmails: string[] = [];
+
+    uniqueEmails.forEach((email) => {
+      isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
+    });
+
+    invalidEmails.length > 0 && toast.error(locale.error.invalidEmail);
+
+    if (validEmails.length >= 0) {
+      onChange(id, validEmails);
     }
+    setTextInput('');
   };
-
-  const handleKeyDown = (event: any) => {
-    if (event.key === ' ') {
-      event.preventDefault();
-      const inputValue = event.target.value.trim();
-      const existingEmails = value || [];
-
-      if (existingEmails.find((email) => email === inputValue)) {
-        toast.error(locale.error.duplicateEmail);
-        return;
-      }
-
-      if (!isEmailValid(inputValue)) {
-        toast.error(locale.error.invalidEmail);
-        return;
-      }
-
-      onChange(id, [...existingEmails, inputValue]);
-      setTextInput('');
-    }
-  };
-
   const debouncedInputChange = debounce(handleInputChange, 300);
-
   return (
     <Box
       display="flex"
@@ -151,7 +135,6 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
               type={type}
               variant="standard"
               placeholder={locale.placeholder.attendees}
-              onKeyDown={handleKeyDown}
               slotProps={{
                 input: {
                   ...params.InputProps,

@@ -14,7 +14,7 @@
     "delete": "Delete"
   },
   "error": {
-    "invalidEmail": "Invalid email entered",
+    "invalidEmail": "Invalid email(s) entered.",
     "duplicateEmail": "Duplicate email entered",
     "failedToRetieveCallbackUrl": "Failed to retrieve oauth callback url",
     "missingFields": "Input missing fields",
