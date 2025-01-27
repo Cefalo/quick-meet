@@ -1,17 +1,20 @@
-import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import toast from 'react-hot-toast';
-import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
-import EventCard from '@components/EventCard';
-import DeleteConfirmationView from '@components/DeleteConfirmationView';
-import EditEventsView from './EditEventsView';
-import { FormData } from '@helpers/types';
-import { ROUTES } from '@config/routes';
 import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
-
+import DeleteConfirmationView from '@components/DeleteConfirmationView';
+import EventCard from '@components/EventCard';
+import { ROUTES } from '@config/routes';
+import { FormData } from '@helpers/types';
+import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
+import Button from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
+import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import EditEventsView from './EditEventsView';
 export default function MyEventsView() {
   const [loading, setLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
@@ -27,7 +30,7 @@ export default function MyEventsView() {
   useEffect(() => {
     const query = {
       startTime: new Date().toISOString(),
-      endTime: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+      endTime: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
       timeZone: getTimeZoneString(),
     };
 
@@ -98,7 +101,6 @@ export default function MyEventsView() {
 
     const date = new Date(Date.now()).toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(date, startTime);
-
     const payload: BookRoomDto = {
       startTime: formattedStartTime,
       duration: Number(duration),
@@ -147,6 +149,25 @@ export default function MyEventsView() {
     setEditView(null);
   };
 
+  const uniqueDates = React.useMemo(() => {
+    return Array.from(new Set(events.map((event) => event.start?.slice(0, 10)))).sort();
+  }, [events]);
+  const [activeStep, setActiveStep] = React.useState(0);
+  const theme = useTheme();
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+  const filteredEvents = React.useMemo(() => {
+    return events.filter((event) => event.start?.slice(0, 10) === uniqueDates[activeStep]);
+  }, [events, uniqueDates, activeStep]);
+
+  console.log('Unique Dates:', uniqueDates);
+  console.log('Active Step:', activeStep);
+  console.log('Filtered Events:', filteredEvents);
+
   if (loading) {
     return (
       <Box mx={3}>
@@ -185,9 +206,91 @@ export default function MyEventsView() {
         overflow: 'hidden',
         justifyContent: 'center',
         flexDirection: 'column',
+        px: 2,
       }}
     >
-      {events.length === 0 ? (
+      {/* Date Navigator */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2,
+        }}
+      >
+        {/* Back Button */}
+        <Button
+          size="small"
+          onClick={handleBack}
+          disabled={activeStep === 0}
+          disableElevation
+          variant="text"
+          sx={{
+            boxShadow: 'none',
+            '&:hover, &:focus, &:active': {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              color: theme.palette.primary.main,
+            },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+
+            padding: 0,
+            minWidth: 'auto',
+            color: theme.palette.primary.main,
+          }}
+        >
+          {theme.direction === 'rtl' ? <KeyboardArrowRight sx={{ fontSize: '2.5rem' }} /> : <KeyboardArrowLeft sx={{ fontSize: '2.5rem' }} />}
+        </Button>
+        <Typography
+          variant="h7"
+          align="center"
+          sx={[
+            (theme) => ({
+              textAlign: 'center',
+              flex: 1,
+              color: theme.palette.common.black,
+              fontWeight: 400,
+              fontFamily: 'sans-serif',
+            }),
+          ]}
+        >
+          {uniqueDates[activeStep]
+            ? new Date(uniqueDates[activeStep]).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : 'No Date Selected'}
+        </Typography>
+
+        {/* Next Button */}
+        <Button
+          size="small"
+          onClick={handleNext}
+          disabled={activeStep === uniqueDates.length - 1}
+          disableElevation
+          variant="text"
+          sx={{
+            boxShadow: 'none',
+            '&:hover, &:focus, &:active': {
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              color: theme.palette.primary.main,
+            },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            minWidth: 'auto',
+            color: theme.palette.primary.main,
+          }}
+        >
+          {theme.direction === 'rtl' ? <KeyboardArrowLeft sx={{ fontSize: '2.5rem' }} /> : <KeyboardArrowRight sx={{ fontSize: '2.5rem' }} />}
+        </Button>
+      </Box>
+      {events.filter((event) => event.start?.slice(0, 10) === uniqueDates[activeStep]).length === 0 ? (
         <Typography mt={3} variant="h6">
           No events to show
         </Typography>
@@ -206,7 +309,7 @@ export default function MyEventsView() {
             zIndex: 100,
           }}
         >
-          {events.map((event, i) => (
+          {filteredEvents.map((event, i) => (
             <React.Fragment key={i}>
               <EventCard
                 key={i}
