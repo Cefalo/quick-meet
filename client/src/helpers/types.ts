@@ -1,3 +1,5 @@
+import { RoomsDropdownOption } from '@/components/RoomsDropdown';
+
 export interface FormData {
   startTime: string;
   duration: number;
@@ -8,4 +10,9 @@ export interface FormData {
   attendees?: string[];
   conference?: boolean;
   eventId?: string;
+}
+
+export interface IAvailableRoomsDropdownOption {
+  preferred: RoomsDropdownOption[];
+  others: RoomsDropdownOption[];
 }

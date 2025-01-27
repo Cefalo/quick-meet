@@ -3,7 +3,7 @@ import { isEmailValid } from '@/helpers/utility';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import { Autocomplete, Box, Chip, debounce, TextField, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
-import type { IPeopleInformation } from '@quickmeet/shared';
+import { IPeopleInformation } from '@quickmeet/shared';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
