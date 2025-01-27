@@ -8,6 +8,7 @@ import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import {
   chromeBackground,
+  convertToLocaleDate,
   convertToLocaleTime,
   convertToRFC3339,
   createDropdownOptions,
@@ -21,6 +22,7 @@ import {
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
+import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import { LoadingButton } from '@mui/lab';
@@ -85,7 +87,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   // Form data state
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
-  const [date, setDate] = useState(dayjs());
+  const [date, setDate] = useState(dayjs(event.start!));
 
   // Utilities and hooks
   const api = useApi();
@@ -121,8 +123,9 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-    const currentDate = date.toISOString().split('T')[0];
+    const currentDate = convertToLocaleDate(new Date(date.toISOString()).toISOString());
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
+
     setRoomLoading(true);
 
     if (abortControllerRef.current) {
@@ -205,7 +208,14 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   }
 
   const onSaveClick = () => {
-    onEditConfirmed(formData);
+    const currentDate = convertToLocaleDate(new Date(date.toISOString()).toISOString());
+    const formattedStartTime = convertToRFC3339(currentDate, formData.startTime);
+    const updatedEvent = {
+      ...formData,
+      startTime: formattedStartTime,
+    };
+    setFormData(updatedEvent);
+    onEditConfirmed(updatedEvent);
   };
 
   if (loading) return <></>;
@@ -314,7 +324,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               <Box sx={{ flex: 1, display: 'flex' }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'en-gb'}>
                   <DatePicker
-                    defaultValue={date}
+                    defaultValue={dayjs(event.start!)}
                     onChange={(newDate) => {
                       if (newDate) {
                         setDate(newDate);
@@ -351,7 +361,23 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 </LocalizationProvider>
               </Box>
             </Box>
-            <Box>
+
+            <Box sx={{ display: 'flex' }}>
+              <Dropdown
+                id="duration"
+                options={durationOptions}
+                value={formData.duration.toString()}
+                onChange={handleInputChange}
+                icon={
+                  <HourglassBottomRoundedIcon
+                    sx={[
+                      (theme) => ({
+                        color: theme.palette.grey[50],
+                      }),
+                    ]}
+                  />
+                }
+              />
               <Dropdown
                 id="seats"
                 options={roomCapacityOptions}

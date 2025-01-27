@@ -134,6 +134,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     const { floor } = preferences;
     const currentDate = date.toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
+
     setRoomLoading(true);
 
     if (abortControllerRef.current) {
