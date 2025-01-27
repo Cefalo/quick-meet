@@ -65,7 +65,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   });
 
   const [date, setDate] = useState(dayjs());
-  const userLocale = navigator.language;
 
   // Utilities and hooks
   const navigate = useNavigate();

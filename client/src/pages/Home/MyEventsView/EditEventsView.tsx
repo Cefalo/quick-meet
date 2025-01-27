@@ -121,7 +121,6 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     const { floor } = preferences;
     const currentDate = date.toISOString().split('T')[0];
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
-
     setRoomLoading(true);
 
     if (abortControllerRef.current) {
@@ -130,7 +129,6 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
     abortControllerRef.current = new AbortController();
     const res = await api.getAvailableRooms(abortControllerRef.current.signal, formattedStartTime, duration, getTimeZoneString(), seats, floor, event.eventId);
-
     setRoomLoading(false);
 
     if (res.status === 'ignore') {
