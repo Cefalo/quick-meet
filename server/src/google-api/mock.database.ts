@@ -106,6 +106,23 @@ export class CalenderMockDb {
   getDirectoryPeople(query: string) {
     const people: people_v1.Schema$Person[] = [
       {
+        names: [
+          {
+            metadata: {
+              primary: true,
+            },
+            displayName: 'Example User',
+          },
+        ],
+        photos: [
+          {
+            metadata: {
+              primary: true,
+            },
+            url: 'https://example.com/photo.jpg',
+          },
+        ],
+
         emailAddresses: [
           {
             metadata: {
@@ -117,6 +134,22 @@ export class CalenderMockDb {
         ],
       },
       {
+        names: [
+          {
+            metadata: {
+              primary: true,
+            },
+            displayName: 'John Doe',
+          },
+        ],
+        photos: [
+          {
+            metadata: {
+              primary: true,
+            },
+            url: 'https://example.com/photo.jpg',
+          },
+        ],
         emailAddresses: [
           {
             metadata: {
@@ -128,6 +161,22 @@ export class CalenderMockDb {
         ],
       },
       {
+        names: [
+          {
+            metadata: {
+              primary: true,
+            },
+            displayName: 'Jane Doe',
+          },
+        ],
+        photos: [
+          {
+            metadata: {
+              primary: true,
+            },
+            url: 'https://example.com/photo.jpg',
+          },
+        ],
         emailAddresses: [
           {
             metadata: {
@@ -139,6 +188,22 @@ export class CalenderMockDb {
         ],
       },
       {
+        names: [
+          {
+            metadata: {
+              primary: true,
+            },
+            displayName: 'Sam Lee',
+          },
+        ],
+        photos: [
+          {
+            metadata: {
+              primary: true,
+            },
+            url: 'https://example.com/photo.jpg',
+          },
+        ],
         emailAddresses: [
           {
             metadata: {
@@ -150,6 +215,22 @@ export class CalenderMockDb {
         ],
       },
       {
+        names: [
+          {
+            metadata: {
+              primary: true,
+            },
+            displayName: 'Test User',
+          },
+        ],
+        photos: [
+          {
+            metadata: {
+              primary: true,
+            },
+            url: 'https://example.com/photo.jpg',
+          },
+        ],
         emailAddresses: [
           {
             metadata: {
