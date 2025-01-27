@@ -1,9 +1,9 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, StatusTypes, IAvailableRooms } from '@quickmeet/shared';
-import axios, { AxiosInstance } from 'axios';
-import { toast } from 'react-hot-toast';
+import { ROUTES } from '@/config/routes';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
-import { ROUTES } from '@/config/routes';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IAvailableRooms, IConferenceRoom, StatusTypes } from '@quickmeet/shared';
+import axios, { AxiosInstance } from 'axios';
+import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 
 /**
@@ -141,7 +141,7 @@ export default class Api {
     }
   }
 
-  async getRooms(startTime: string, endTime: string, timeZone: string) {
+  async getRooms(signal: AbortSignal, startTime: string, endTime: string, timeZone: string) {
     try {
       const res = await this.client.get('/api/events', {
         params: {
@@ -149,6 +149,7 @@ export default class Api {
           endTime,
           timeZone,
         },
+        signal,
       });
 
       return res.data as ApiResponse<EventResponse[]>;

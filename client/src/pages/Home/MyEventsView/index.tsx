@@ -1,17 +1,14 @@
 import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
+import DateNavigator from '@/pages/Home/MyEventsView/DateNavigator';
 import DeleteConfirmationView from '@components/DeleteConfirmationView';
 import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
-import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { getTimeZoneString, renderError } from '@helpers/utility';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
-import Button from '@mui/material/Button';
-import { useTheme } from '@mui/material/styles';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import EditEventsView from './EditEventsView';
@@ -27,14 +24,23 @@ export default function MyEventsView() {
   const api = useApi();
   const { preferences } = usePreferences();
 
-  useEffect(() => {
-    const query = {
-      startTime: new Date().toISOString(),
-      endTime: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-      timeZone: getTimeZoneString(),
-    };
+  const [currentDate, setCurrentDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-    api.getRooms(query.startTime, query.endTime, query.timeZone).then((res) => {
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const query = {
+        startTime: new Date(new Date(currentDate).setHours(0, 0, 0, 0)).toISOString(),
+        endTime: new Date(new Date(currentDate).setHours(23, 59, 59, 999)).toISOString(),
+        timeZone: getTimeZoneString(),
+      };
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
+      const res = await api.getRooms(abortControllerRef.current.signal, query.startTime, query.endTime, query.timeZone);
       const { data, status } = res;
       setLoading(false);
 
@@ -43,11 +49,23 @@ export default function MyEventsView() {
       }
 
       if (!data?.length) {
+        setEvents([]);
         return;
       }
 
       setEvents(data);
-    });
+    };
+
+    setLoading(true);
+    fetchRooms();
+  }, [currentDate]);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   const handleDeleteClick = (id: string) => {
@@ -99,10 +117,8 @@ export default function MyEventsView() {
       return;
     }
 
-    const date = new Date(Date.now()).toISOString().split('T')[0];
-    const formattedStartTime = convertToRFC3339(date, startTime);
     const payload: BookRoomDto = {
-      startTime: formattedStartTime,
+      startTime: startTime,
       duration: Number(duration),
       timeZone: getTimeZoneString(),
       seats: Number(seats),
@@ -149,35 +165,17 @@ export default function MyEventsView() {
     setEditView(null);
   };
 
-  const uniqueDates = React.useMemo(() => {
-    return Array.from(new Set(events.map((event) => event.start?.slice(0, 10)))).sort();
-  }, [events]);
-  const [activeStep, setActiveStep] = React.useState(0);
-  const theme = useTheme();
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handleNextDate = async () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setCurrentDate(newDate.toISOString());
   };
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+
+  const handlePrevDate = async () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setCurrentDate(newDate.toISOString());
   };
-  const filteredEvents = React.useMemo(() => {
-    return events.filter((event) => event.start?.slice(0, 10) === uniqueDates[activeStep]);
-  }, [events, uniqueDates, activeStep]);
-
-  console.log('Unique Dates:', uniqueDates);
-  console.log('Active Step:', activeStep);
-  console.log('Filtered Events:', filteredEvents);
-
-  if (loading) {
-    return (
-      <Box mx={3}>
-        <Stack spacing={2} mt={3}>
-          <Skeleton animation="wave" variant="rounded" height={80} />
-          <Skeleton animation="wave" variant="rounded" height={80} />
-        </Stack>
-      </Box>
-    );
-  }
 
   if (deleteEventViewOpen) {
     const event = events.find((e) => e.eventId === deleteEventId);
@@ -210,41 +208,8 @@ export default function MyEventsView() {
       }}
     >
       {/* Date Navigator */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 2,
-        }}
-      >
-        {/* Back Button */}
-        <Button
-          size="small"
-          onClick={handleBack}
-          disabled={activeStep === 0}
-          disableElevation
-          variant="text"
-          sx={{
-            boxShadow: 'none',
-            '&:hover, &:focus, &:active': {
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              color: theme.palette.primary.main,
-            },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-
-            padding: 0,
-            minWidth: 'auto',
-            color: theme.palette.primary.main,
-          }}
-        >
-          {theme.direction === 'rtl' ? <KeyboardArrowRight sx={{ fontSize: '2.5rem' }} /> : <KeyboardArrowLeft sx={{ fontSize: '2.5rem' }} />}
-        </Button>
+      <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
         <Typography
-          variant="h7"
           align="center"
           sx={[
             (theme) => ({
@@ -252,81 +217,66 @@ export default function MyEventsView() {
               flex: 1,
               color: theme.palette.common.black,
               fontWeight: 400,
-              fontFamily: 'sans-serif',
+              fontSize: '1.1rem',
             }),
           ]}
         >
-          {uniqueDates[activeStep]
-            ? new Date(uniqueDates[activeStep]).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
-            : 'No Date Selected'}
+          {new Date(currentDate).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
         </Typography>
+      </DateNavigator>
 
-        {/* Next Button */}
-        <Button
-          size="small"
-          onClick={handleNext}
-          disabled={activeStep === uniqueDates.length - 1}
-          disableElevation
-          variant="text"
-          sx={{
-            boxShadow: 'none',
-            '&:hover, &:focus, &:active': {
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              color: theme.palette.primary.main,
-            },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0,
-            minWidth: 'auto',
-            color: theme.palette.primary.main,
-          }}
-        >
-          {theme.direction === 'rtl' ? <KeyboardArrowLeft sx={{ fontSize: '2.5rem' }} /> : <KeyboardArrowRight sx={{ fontSize: '2.5rem' }} />}
-        </Button>
-      </Box>
-      {events.filter((event) => event.start?.slice(0, 10) === uniqueDates[activeStep]).length === 0 ? (
-        <Typography mt={3} variant="h6">
-          No events to show
-        </Typography>
-      ) : (
-        <Box
-          sx={{
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-            pb: 1,
-            px: 1.5,
-            mx: 2,
-            mt: 1,
-            bgcolor: 'white',
-            zIndex: 100,
-          }}
-        >
-          {filteredEvents.map((event, i) => (
-            <React.Fragment key={i}>
-              <EventCard
-                key={i}
-                sx={{
-                  pt: 2,
-                  pb: 3,
-                }}
-                event={event}
-                handleEditClick={handleEditClick}
-                disabled={loading}
-                onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
-                hideMenu={!event.isEditable}
-              />
-              {i !== events.length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
+      {loading ? (
+        <Box mx={3}>
+          <Stack spacing={2} mt={3}>
+            <Skeleton animation="wave" variant="rounded" height={80} />
+            <Skeleton animation="wave" variant="rounded" height={80} />
+          </Stack>
         </Box>
+      ) : (
+        <>
+          {events.length == 0 ? (
+            <Typography mt={3} variant="h6">
+              No events to show
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                borderBottomLeftRadius: 10,
+                borderBottomRightRadius: 10,
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+                pb: 1,
+                px: 1.5,
+                mx: 2,
+                mt: 1,
+                bgcolor: 'white',
+                zIndex: 100,
+              }}
+            >
+              {events.map((event, i) => (
+                <React.Fragment key={i}>
+                  <EventCard
+                    key={i}
+                    sx={{
+                      pt: 2,
+                      pb: 3,
+                    }}
+                    event={event}
+                    handleEditClick={handleEditClick}
+                    disabled={loading}
+                    onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
+                    hideMenu={!event.isEditable}
+                  />
+                  {i !== events.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

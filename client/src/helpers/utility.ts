@@ -1,9 +1,9 @@
+import Api from '@/api/api';
+import { ROUTES } from '@config/routes';
+import { secrets } from '@config/secrets';
 import { ApiResponse } from '@quickmeet/shared';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
-import { ROUTES } from '@config/routes';
-import { secrets } from '@config/secrets';
-import Api from '@/api/api';
 
 /**
  * Returns an array of time strings formatted as HH:mm in 12 hrs format with 15mins interval
@@ -124,6 +124,20 @@ export function convertToLocaleTime(dateStr?: string) {
   return date.toLocaleTimeString('en-US', options);
 }
 
+export function convertToLocaleDate(dateStr?: string) {
+  if (!dateStr) return '-';
+
+  const date = new Date(dateStr);
+
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+
+  return date.toLocaleDateString('en-US', options);
+}
+
 export const createDropdownOptions = (options: string[], type: 'time' | 'default' = 'default') => {
   return (options || []).map((option) => ({ value: option, text: type === 'time' ? formatMinsToHM(Number(option), 'm') : option }));
 };
@@ -134,7 +148,7 @@ export const renderError = async (err: ApiResponse<any>, navigate: NavigateFunct
     if (statusCode === 401) {
       try {
         await new Api().logout();
-      } catch (error) {}
+      } catch (error) { }
       navigate(ROUTES.signIn);
     } else if (statusCode === 400) {
       toast.error('Input missing fields');
