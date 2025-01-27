@@ -1,19 +1,27 @@
-import { Box, MenuItem, Select, SelectChangeEvent, Skeleton, Typography } from '@mui/material';
+import { Box, ListSubheader, MenuItem, Select, SelectChangeEvent, Skeleton, styled, Typography } from '@mui/material';
 import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { IConferenceRoom } from '@quickmeet/shared';
 import { useLocales } from '@/config/i18n';
+import { IAvailableRoomsDropdownOption } from '@/helpers/types';
+import { usePreferences } from '@/context/PreferencesContext';
 
 interface DropdownProps {
   id: string;
   sx?: any;
-  options?: RoomsDropdownOption[];
+  options: IAvailableRoomsDropdownOption;
   value?: string;
   disabled?: boolean;
   onChange: (id: string, value: string) => void;
   icon?: ReactElement;
   placeholder?: string;
   loading?: boolean;
+  currentRoom?: IConferenceRoom;
+}
+
+interface StyledMenuItemProps {
+  i: number;
+  option: RoomsDropdownOption;
   currentRoom?: IConferenceRoom;
 }
 
@@ -25,8 +33,148 @@ export interface RoomsDropdownOption {
   isBusy?: boolean;
 }
 
+const CustomMenuItem = ({ i, option, currentRoom }: StyledMenuItemProps) => {
+  return (
+    <MenuItem value={option.value} key={i}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
+      >
+        {/* Left section */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{
+              textDecoration: option.isBusy ? 'line-through' : 'inherit',
+            }}
+          >
+            {option.text}
+          </Typography>
+          {currentRoom && option.value === currentRoom.email && <CheckCircleIcon color="success" sx={{ ml: 1 }} />}
+        </Box>
+
+        {/* Right section */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={[
+              (theme) => ({
+                color: theme.palette.grey[200],
+              }),
+            ]}
+          >
+            {option.seats} {option.seats > 1 ? 'persons' : 'person'}
+          </Typography>
+          <Typography variant="body2">{option.floor}</Typography>
+        </Box>
+      </Box>
+    </MenuItem>
+  );
+};
+
+const StyledHintTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.grey[500],
+  fontStyle: 'italic',
+  fontWeight: 400,
+}));
+
+const RenderNoRooms = ({ icon }: { icon?: ReactElement }) => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      {icon && icon}
+
+      <StyledHintTypography ml={2} variant="subtitle2">
+        No rooms available
+      </StyledHintTypography>
+    </Box>
+  );
+};
+
+const RenderPlaceholder = ({ icon, loading, placeholder }: { icon?: ReactElement; loading?: boolean; placeholder?: string }) => {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      {icon && icon}
+      {loading ? (
+        <Skeleton
+          animation="wave"
+          sx={{
+            width: '100%',
+            mx: 2,
+            borderRadius: 0.5,
+          }}
+        />
+      ) : (
+        <StyledHintTypography ml={2} variant="subtitle2">
+          {placeholder}
+        </StyledHintTypography>
+      )}
+    </Box>
+  );
+};
+
+const RenderSelectText = ({ icon, loading, selectedOption }: { icon?: ReactElement; loading?: boolean; selectedOption?: RoomsDropdownOption }) => {
+  return (
+    <Box
+      sx={{
+        alignItems: 'center',
+        display: 'flex',
+      }}
+    >
+      {icon && icon}
+      {loading ? (
+        <Skeleton
+          animation="wave"
+          sx={{
+            width: '100%',
+            mx: 2,
+            borderRadius: 0.5,
+          }}
+        />
+      ) : (
+        <Typography
+          variant="subtitle1"
+          sx={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            ml: 2,
+          }}
+        >
+          {selectedOption ? selectedOption.text : ''}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
 export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, options, onChange, icon, placeholder, loading }: DropdownProps) {
   const height = '58px';
+  const { preferences } = usePreferences();
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
@@ -42,103 +190,16 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
       variant="standard"
       disabled={disabled || false}
       renderValue={(selected) => {
-        if (!loading && options?.length === 0) {
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {icon && icon}
-
-              <Typography
-                variant="subtitle2"
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[500],
-                    fontStyle: 'italic',
-                    ml: 2,
-                    fontWeight: 400,
-                  }),
-                ]}
-              >
-                {locale.info.noRooms}
-              </Typography>
-            </Box>
-          );
+        if (!loading && options.others.length === 0 && options.preferred.length === 0) {
+          return <RenderNoRooms icon={icon} />;
         }
-        const selectedOption = options?.find((option) => option.value === selected);
 
+        const selectedOption = [...options.preferred, ...options.others].find((option) => option.value === selected);
         if (placeholder && selected.length === 0) {
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {icon && icon}
-              {loading ? (
-                <Skeleton
-                  animation="wave"
-                  sx={{
-                    width: '100%',
-                    mx: 2,
-                    borderRadius: 0.5,
-                  }}
-                />
-              ) : (
-                <Typography
-                  variant="subtitle2"
-                  sx={[
-                    (theme) => ({
-                      color: theme.palette.grey[500],
-                      fontStyle: 'italic',
-                      ml: 2,
-                      fontWeight: 400,
-                    }),
-                  ]}
-                >
-                  {placeholder}
-                </Typography>
-              )}
-            </Box>
-          );
+          return <RenderPlaceholder icon={icon} loading={loading} placeholder={placeholder} />;
         }
 
-        return (
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-            }}
-          >
-            {icon && icon}
-            {loading ? (
-              <Skeleton
-                animation="wave"
-                sx={{
-                  width: '100%',
-                  mx: 2,
-                  borderRadius: 0.5,
-                }}
-              />
-            ) : (
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  ml: 2,
-                }}
-              >
-                {selectedOption ? selectedOption.text : ''}
-              </Typography>
-            )}
-          </Box>
-        );
+        return <RenderSelectText icon={icon} loading={loading} selectedOption={selectedOption} />;
       }}
       disableUnderline={true}
       sx={[
@@ -156,60 +217,27 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
       ]}
     >
       {placeholder && (
-        <MenuItem disabled value="" sx={{ pt: 0 }}>
+        <MenuItem disabled value="" sx={{ pt: 1 }}>
           <em>{placeholder}</em>
         </MenuItem>
       )}
-      {options?.map((option, i) => (
-        <MenuItem value={option.value} key={i}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-            }}
-          >
-            {/* Left section */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  textDecoration: option.isBusy ? 'line-through' : 'inherit',
-                }}
-              >
-                {option.text}
-              </Typography>
-              {currentRoom && option.value === currentRoom.email && <CheckCircleIcon color="success" sx={{ ml: 1 }} />}
-            </Box>
 
-            {/* Right section */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={[
-                  (theme) => ({
-                    color: theme.palette.grey[200],
-                  }),
-                ]}
-              >
-                {option.seats} {option.seats > 1 ? 'persons' : 'person'}
-              </Typography>
-              <Typography variant="body2">{option.floor}</Typography>
-            </Box>
-          </Box>
-        </MenuItem>
+      {options.preferred.length === 0 && preferences.floor && (
+        <StyledHintTypography sx={{ my: 0.5 }}>No rooms available according to your preferences</StyledHintTypography>
+      )}
+
+      {options.preferred.map((option, i) => (
+        <CustomMenuItem key={i} currentRoom={currentRoom} option={option} i={i} />
+      ))}
+
+      {options.others.length > 0 && (
+        <ListSubheader>
+          <StyledHintTypography sx={{ my: 0.5 }}>Others</StyledHintTypography>
+        </ListSubheader>
+      )}
+
+      {options.others.map((option, i) => (
+        <CustomMenuItem key={i} currentRoom={currentRoom} option={option} i={i} />
       ))}
     </Select>
   );

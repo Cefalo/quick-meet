@@ -3,7 +3,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Inject, Inj
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
 import { AuthService } from '../auth/auth.service';
-import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation } from '@quickmeet/shared';
+import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation, IAvailableRooms } from '@quickmeet/shared';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 
 @Injectable()
@@ -123,29 +123,42 @@ export class CalenderService {
     minSeats: number,
     floor?: string,
     eventId?: string,
-  ): Promise<IConferenceRoom[]> {
+  ): Promise<IAvailableRooms> {
     const filteredRoomEmails: string[] = [];
+    const otherRoomEmails: string[] = [];
+    const isPreferredRoom: Record<string, boolean> = {};
+
     const rooms = await this.authService.getDirectoryResources(client, domain);
     for (const room of rooms) {
-      if (room.seats >= Number(minSeats) && (floor === undefined || floor === '' || room.floor === floor)) {
-        filteredRoomEmails.push(room.email);
+      if (room.seats >= Number(minSeats)) {
+        if (floor === undefined || floor === '' || room.floor === floor) {
+          filteredRoomEmails.push(room.email);
+          isPreferredRoom[room.email] = true;
+        } else {
+          otherRoomEmails.push(room.email);
+          isPreferredRoom[room.email] = false;
+        }
       }
     }
 
-    if (filteredRoomEmails.length === 0) {
-      return [];
+    if (filteredRoomEmails.length === 0 && otherRoomEmails.length === 0) {
+      return { preferred: [], others: [] };
     }
 
-    const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, filteredRoomEmails);
+    const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [...filteredRoomEmails, ...otherRoomEmails]);
 
-    const availableRooms: IConferenceRoom[] = [];
+    const availableRooms: IAvailableRooms = { others: [], preferred: [] };
     let room: IConferenceRoom = null;
 
     for (const roomEmail of Object.keys(calenders)) {
       const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
       if (isAvailable) {
         room = rooms.find((room) => room.email === roomEmail);
-        availableRooms.push(room);
+        if (isPreferredRoom[room.email]) {
+          availableRooms.preferred.push(room);
+        } else {
+          availableRooms.others.push(room);
+        }
       }
     }
 
@@ -180,7 +193,11 @@ export class CalenderService {
         }
 
         if (isEventRoomAvailable) {
-          availableRooms.unshift(currentRoom);
+          if (isPreferredRoom[room.email]) {
+            availableRooms.preferred.unshift(currentRoom);
+          } else {
+            availableRooms.others.unshift(currentRoom);
+          }
         }
       }
     }

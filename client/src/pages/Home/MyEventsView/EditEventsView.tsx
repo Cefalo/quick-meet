@@ -21,8 +21,8 @@ import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
-import { FormData } from '@helpers/types';
-import { EventResponse, IConferenceRoom } from '@quickmeet/shared';
+import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
+import { EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import { usePreferences } from '@/context/PreferencesContext';
 import StyledTextField from '@/components/StyledTextField';
@@ -72,7 +72,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
-  const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
+  const [availableRoomOptions, setAvailableRoomOptions] = useState<IAvailableRoomsDropdownOption>({ others: [], preferred: [] });
 
   // Loading and advanced options state
   const [roomLoading, setRoomLoading] = useState(false);
@@ -137,37 +137,49 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
       return renderError(res, navigate);
     }
 
-    const data = res.data as IConferenceRoom[];
-    let roomOptions: RoomsDropdownOption[] = [];
+    const data = res.data as IAvailableRooms;
 
-    if (!data || data.length === 0) {
-      setAvailableRoomOptions(roomOptions);
+    let preferredRoomOptions: RoomsDropdownOption[] = [];
+    let unPreferredRoomOptions: RoomsDropdownOption[] = [];
+
+    if (!data || [...data.preferred, ...data.others].length === 0) {
+      setAvailableRoomOptions({ others: unPreferredRoomOptions, preferred: preferredRoomOptions });
       return;
     }
 
     if (currentRoom) {
-      const filteredRooms = data.filter((item) => item.email !== currentRoom.email);
-      roomOptions = createRoomDropdownOptions(filteredRooms);
+      const filteredPreferredRooms = data.preferred.filter((item) => item.email !== currentRoom.email);
+      const filteredUnPreferredRooms = data.preferred.filter((item) => item.email !== currentRoom.email);
 
-      const isCurrentRoomAvailable = data.some((room) => room.email === currentRoom.email);
+      preferredRoomOptions = createRoomDropdownOptions(filteredPreferredRooms);
+      unPreferredRoomOptions = createRoomDropdownOptions(filteredUnPreferredRooms);
+
+      const isCurrentRoomAvailable = [...data.preferred, ...data.others].some((room) => room.email === currentRoom.email);
       const currentRoomOption = createRoomDropdownOptions([currentRoom])[0];
 
       if (!isCurrentRoomAvailable) {
         currentRoomOption.isBusy = true;
       }
 
-      roomOptions.unshift(currentRoomOption);
+      if (data.preferred.find((d) => d.email === currentRoom.email)) {
+        preferredRoomOptions.unshift(currentRoomOption);
+      } else {
+        unPreferredRoomOptions.unshift(currentRoomOption);
+      }
     } else {
-      roomOptions = createRoomDropdownOptions(data);
+      preferredRoomOptions = createRoomDropdownOptions(data.preferred);
+      unPreferredRoomOptions = createRoomDropdownOptions(data.others);
+      const roomEmail = data.preferred[0].email || data.others[0].email;
+
       setFormData((prev) => {
         return {
           ...prev,
-          room: roomOptions[0].value,
+          room: roomEmail,
         };
       });
     }
 
-    setAvailableRoomOptions(roomOptions);
+    setAvailableRoomOptions({ others: unPreferredRoomOptions, preferred: preferredRoomOptions });
   }
 
   async function setPreferences() {
@@ -319,12 +331,12 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
             <RoomsDropdown
               id="room"
               options={availableRoomOptions}
-              value={formData.room || (availableRoomOptions.length > 0 ? availableRoomOptions[0].value : '')}
+              value={formData.room || (availableRoomOptions.preferred?.[0] || availableRoomOptions.others?.[0])?.value || ''}
+              disabled={![...availableRoomOptions.preferred, ...availableRoomOptions.others].length}
+              placeholder={[...availableRoomOptions.preferred, ...availableRoomOptions.others].length === 0 ? 'No rooms are available' : 'Select your room'}
               loading={roomLoading}
               currentRoom={currentRoom}
-              disabled={!availableRoomOptions.length}
               onChange={handleInputChange}
-              placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
               icon={
                 <MeetingRoomRoundedIcon
                   sx={[

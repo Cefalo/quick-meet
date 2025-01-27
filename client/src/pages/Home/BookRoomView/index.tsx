@@ -16,8 +16,8 @@ import {
 import toast from 'react-hot-toast';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
-import { FormData } from '@helpers/types';
-import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
+import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
+import { BookRoomDto, EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
@@ -53,13 +53,14 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
   const [durationOptions, setDurationOptions] = useState<DropdownOption[]>([]);
   const [roomCapacityOptions, setRoomCapacityOptions] = useState<DropdownOption[]>([]);
-  const [availableRoomOptions, setAvailableRoomOptions] = useState<RoomsDropdownOption[]>([]);
+  const [availableRoomOptions, setAvailableRoomOptions] = useState<IAvailableRoomsDropdownOption>({ others: [], preferred: [] });
 
   // form data
   const [formData, setFormData] = useState<FormData>({
     startTime: '',
     duration: Number(preferences.duration),
     seats: preferences.seats,
+    conference: false,
   });
 
   // Utilities and hooks
@@ -146,13 +147,18 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       return renderError(res, navigate);
     }
 
-    const data = res.data as IConferenceRoom[];
-    let roomEmail: string | undefined;
-    let roomOptions: RoomsDropdownOption[] = [];
+    const data = res.data as IAvailableRooms;
 
-    if (data.length > 0) {
-      roomEmail = data[0].email;
-      roomOptions = createRoomDropdownOptions(data);
+    console.log(data);
+
+    let roomEmail: string | undefined;
+    let preferredRoomOptions: RoomsDropdownOption[] = [];
+    let unPreferredRoomOptions: RoomsDropdownOption[] = [];
+
+    if (data.preferred.length > 0 || data.others.length > 0) {
+      roomEmail = data.preferred[0].email || data.others[0].email;
+      preferredRoomOptions = createRoomDropdownOptions(data.preferred);
+      unPreferredRoomOptions = createRoomDropdownOptions(data.others);
     }
 
     setFormData({
@@ -160,7 +166,10 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       room: roomEmail,
     });
 
-    setAvailableRoomOptions(roomOptions);
+    setAvailableRoomOptions({
+      preferred: preferredRoomOptions,
+      others: unPreferredRoomOptions,
+    });
   }
 
   async function onBookClick() {
@@ -200,7 +209,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
     toast.success(`${roomName} has been booked!`);
 
-    setAvailableRoomOptions([]);
+    setAvailableRoomOptions({ others: [], preferred: [] });
     onRoomBooked();
   }
 
@@ -280,11 +289,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
           <RoomsDropdown
             id="room"
             options={availableRoomOptions}
-            value={formData.room || (availableRoomOptions.length > 0 ? availableRoomOptions[0].value : '')}
+            value={formData.room || (availableRoomOptions.preferred?.[0] || availableRoomOptions.others?.[0])?.value || ''}
             loading={roomLoading}
-            disabled={!availableRoomOptions.length}
+            disabled={![...availableRoomOptions.preferred, ...availableRoomOptions.others].length}
             onChange={handleInputChange}
-            placeholder={availableRoomOptions.length === 0 ? 'No rooms are available' : 'Select your room'}
+            placeholder={[...availableRoomOptions.preferred, ...availableRoomOptions.others].length === 0 ? 'No rooms are available' : 'Select your room'}
             icon={
               <MeetingRoomRoundedIcon
                 sx={[

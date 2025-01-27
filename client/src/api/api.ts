@@ -1,4 +1,4 @@
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IConferenceRoom, StatusTypes } from '@quickmeet/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, StatusTypes, IAvailableRooms } from '@quickmeet/shared';
 import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
 import { secrets } from '@config/secrets';
@@ -135,7 +135,7 @@ export default class Api {
       const params: GetAvailableRoomsQueryDto = { startTime, duration, timeZone, seats, floor, eventId };
       const res = await this.client.get('/api/rooms/available', { params, signal });
 
-      return res.data as ApiResponse<IConferenceRoom[]>;
+      return res.data as ApiResponse<IAvailableRooms>;
     } catch (error: any) {
       return this.handleError(error);
     }
