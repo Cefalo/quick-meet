@@ -149,7 +149,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
     if (currentRoom) {
       const filteredPreferredRooms = data.preferred.filter((item) => item.email !== currentRoom.email);
-      const filteredUnPreferredRooms = data.preferred.filter((item) => item.email !== currentRoom.email);
+      const filteredUnPreferredRooms = data.others.filter((item) => item.email !== currentRoom.email);
 
       preferredRoomOptions = createRoomDropdownOptions(filteredPreferredRooms);
       unPreferredRoomOptions = createRoomDropdownOptions(filteredUnPreferredRooms);
@@ -169,7 +169,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     } else {
       preferredRoomOptions = createRoomDropdownOptions(data.preferred);
       unPreferredRoomOptions = createRoomDropdownOptions(data.others);
-      const roomEmail = data.preferred[0].email || data.others[0].email;
+      const roomEmail = (data.preferred?.[0] || data.others?.[0])?.email;
 
       setFormData((prev) => {
         return {

@@ -193,7 +193,7 @@ export class CalenderService {
         }
 
         if (isEventRoomAvailable) {
-          if (isPreferredRoom[room.email]) {
+          if (isPreferredRoom[currentRoom.email]) {
             availableRooms.preferred.unshift(currentRoom);
           } else {
             availableRooms.others.unshift(currentRoom);
