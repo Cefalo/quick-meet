@@ -3,7 +3,6 @@ import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { IConferenceRoom } from '@quickmeet/shared';
 import { IAvailableRoomsDropdownOption } from '@/helpers/types';
-import { usePreferences } from '@/context/PreferencesContext';
 
 interface DropdownProps {
   id: string;
@@ -18,12 +17,6 @@ interface DropdownProps {
   currentRoom?: IConferenceRoom;
 }
 
-interface StyledMenuItemProps {
-  i: number;
-  option: RoomsDropdownOption;
-  currentRoom?: IConferenceRoom;
-}
-
 export interface RoomsDropdownOption {
   text: string;
   value: string; // the main value used for api calls
@@ -32,9 +25,9 @@ export interface RoomsDropdownOption {
   isBusy?: boolean;
 }
 
-const CustomMenuItem = ({ i, option, currentRoom }: StyledMenuItemProps) => {
+const renderMenuItem = (option: RoomsDropdownOption, currentRoom?: IConferenceRoom) => {
   return (
-    <MenuItem value={option.value} key={i}>
+    <MenuItem value={option.value} key={option.value}>
       <Box
         sx={{
           display: 'flex',
@@ -173,7 +166,6 @@ const RenderSelectText = ({ icon, loading, selectedOption }: { icon?: ReactEleme
 
 export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, options, onChange, icon, placeholder, loading }: DropdownProps) {
   const height = '58px';
-  const { preferences } = usePreferences();
 
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
@@ -220,23 +212,14 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
         </MenuItem>
       )}
 
-      {options.preferred.length === 0 && preferences.floor && (
-        <StyledHintTypography sx={{ my: 0.5 }}>No rooms available according to your preferences</StyledHintTypography>
-      )}
-
-      {options.preferred.map((option, i) => (
-        <CustomMenuItem key={i} currentRoom={currentRoom} option={option} i={i} />
-      ))}
+      {options.preferred.map((option) => renderMenuItem(option, currentRoom))}
 
       {options.others.length > 0 && (
         <ListSubheader>
-          <StyledHintTypography sx={{ my: 0.5 }}>Others</StyledHintTypography>
+          <StyledHintTypography sx={{ my: 0.5 }}>Less preferred rooms</StyledHintTypography>
         </ListSubheader>
       )}
-
-      {options.others.map((option, i) => (
-        <CustomMenuItem key={i} currentRoom={currentRoom} option={option} i={i} />
-      ))}
+      {options.others.map((option) => renderMenuItem(option, currentRoom))}
     </Select>
   );
 }

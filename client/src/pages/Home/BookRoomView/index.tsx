@@ -57,6 +57,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     duration: Number(preferences.duration),
     seats: preferences.seats,
     conference: false,
+    room: '',
   });
 
   // Utilities and hooks
@@ -145,14 +146,12 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
 
     const data = res.data as IAvailableRooms;
 
-    console.log(data);
-
     let roomEmail: string | undefined;
     let preferredRoomOptions: RoomsDropdownOption[] = [];
     let unPreferredRoomOptions: RoomsDropdownOption[] = [];
 
     if (data.preferred.length > 0 || data.others.length > 0) {
-      roomEmail = data.preferred[0].email || data.others[0].email;
+      roomEmail = (data.preferred?.[0] || data.others?.[0])?.email;
       preferredRoomOptions = createRoomDropdownOptions(data.preferred);
       unPreferredRoomOptions = createRoomDropdownOptions(data.others);
     }
