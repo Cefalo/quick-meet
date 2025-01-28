@@ -46,13 +46,21 @@ const calcDuration = (start: string, end: string) => {
   return duration;
 };
 
+const createPeopleInformation = (attendees: string[]) => {
+  return attendees.map((attendee) => ({
+    email: attendee,
+    name: attendee.split('@')[0],
+    photo: '',
+  })) as IPeopleInformation[];
+};
+
 const initFormData = (event: EventResponse) => {
   return {
     startTime: convertToLocaleTime(event.start!),
     duration: calcDuration(event.start!, event.end!),
     seats: event.seats,
     room: event.roomEmail,
-    attendees: event.attendees,
+    attendees: createPeopleInformation(event.attendees || []),
     title: event.summary,
     conference: Boolean(event.meet),
     eventId: event.eventId,
