@@ -4,10 +4,10 @@ import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
-import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import {
   convertToRFC3339,
   createDropdownOptions,
+  getAttendeeEmails,
   getTimeZoneString,
   isChromeExt,
   populateDurationOptions,
@@ -17,13 +17,14 @@ import {
 } from '@helpers/utility';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
+import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
+import { BookRoomDto, EventResponse, IConferenceRoom, IAvailableRooms, IPeopleInformation } from '@quickmeet/shared';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Box, Checkbox, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { BookRoomDto, EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
@@ -90,7 +91,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     }
   }, [initialPageLoad, date, formData.startTime, formData.duration, formData.seats]);
 
-  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+  const handleInputChange = (id: string, value: string | number | string[] | IPeopleInformation[] | boolean) => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
@@ -202,6 +203,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   async function onBookClick() {
     setBookClickLoading(true);
     const { startTime, duration, seats, conference, attendees, title, room } = formData;
+    const attendeesEmails = getAttendeeEmails(attendees as IPeopleInformation[]);
 
     if (!room) {
       return;
@@ -219,7 +221,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       createConference: conference,
       title: title || preferredTitle,
       room: room,
-      attendees,
+      attendees: attendeesEmails,
     };
 
     const res = await api.createEvent(payload);

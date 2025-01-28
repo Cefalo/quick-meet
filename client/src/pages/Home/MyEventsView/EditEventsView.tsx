@@ -24,13 +24,13 @@ import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRound
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
-import { EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
 import { LoadingButton } from '@mui/lab';
 import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
+import { EventResponse, IConferenceRoom, IAvailableRooms, IPeopleInformation } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
@@ -110,7 +110,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     }
   }, [date, formData.startTime, formData.duration, formData.seats, roomCapacityOptions]);
 
-  const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
+  const handleInputChange = (id: string, value: string | number | string[] | IPeopleInformation[] | boolean) => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,

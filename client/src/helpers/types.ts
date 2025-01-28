@@ -1,4 +1,5 @@
 import { RoomsDropdownOption } from '@/components/RoomsDropdown';
+import type { IPeopleInformation } from '@quickmeet/shared';
 
 export interface FormData {
   startTime: string;
@@ -7,7 +8,7 @@ export interface FormData {
   room?: string;
   floor?: string;
   title?: string;
-  attendees?: string[];
+  attendees?: IPeopleInformation[];
   conference?: boolean;
   eventId?: string;
   date?: string;

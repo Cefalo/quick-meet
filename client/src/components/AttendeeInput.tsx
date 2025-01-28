@@ -11,7 +11,7 @@ interface AttendeeInputProps {
   id: string;
   value?: any[];
   disabled?: boolean;
-  onChange: (id: string, value: string[]) => void;
+  onChange: (id: string, value: IPeopleInformation[]) => void;
   type?: string;
 }
 
@@ -39,17 +39,22 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       .filter((email) => email !== '');
 
     const uniqueEmails = [...new Set(filteredEmails)];
-    const validEmails: string[] = [];
+    const validPeoples: IPeopleInformation[] = [];
     const invalidEmails: string[] = [];
 
     uniqueEmails.forEach((email) => {
-      isEmailValid(email) ? validEmails.push(email) : invalidEmails.push(email);
+      if (isEmailValid(email)) {
+        const existingPerson = newValue.find((option) => typeof option === 'object' && option.email === email) as IPeopleInformation;
+        existingPerson ? validPeoples.push(existingPerson) : validPeoples.push({ name: email, email, photo: '' });
+      } else {
+        invalidEmails.push(email);
+      }
     });
 
     invalidEmails.length > 0 && toast.error('Invalid email(s) entered.');
 
-    if (validEmails.length >= 0) {
-      onChange(id, validEmails);
+    if (validPeoples.length >= 0) {
+      onChange(id, validPeoples);
     }
     setTextInput('');
   };
@@ -120,10 +125,10 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
             },
           }}
           onInputChange={debouncedInputChange}
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((email: string, index: number) => {
+          renderTags={(value: readonly IPeopleInformation[], getTagProps) =>
+            value.map((option, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip variant="filled" label={email} key={key} {...tagProps} />;
+              return <Chip avatar={<Avatar alt={option.email} src={option.photo} />} variant="outlined" label={option.name} key={key} {...tagProps} />;
             })
           }
           renderInput={(params) => (
