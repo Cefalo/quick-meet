@@ -208,11 +208,9 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   }
 
   const onSaveClick = () => {
-    const currentDate = convertToLocaleDate(new Date(date.toISOString()).toISOString());
-    const formattedStartTime = convertToRFC3339(currentDate, formData.startTime);
     const updatedEvent = {
       ...formData,
-      startTime: formattedStartTime,
+      date: date.toISOString(),
     };
     setFormData(updatedEvent);
     onEditConfirmed(updatedEvent);

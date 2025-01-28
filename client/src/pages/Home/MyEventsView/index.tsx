@@ -7,7 +7,7 @@ import DeleteConfirmationView from '@components/DeleteConfirmationView';
 import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
-import { getTimeZoneString, renderError } from '@helpers/utility';
+import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import React, { useEffect, useRef, useState } from 'react';
@@ -114,14 +114,22 @@ export default function MyEventsView() {
 
     setEditLoading(true);
 
-    const { startTime, duration, seats, conference, attendees, title, room, eventId } = data;
+    const { startTime, date, duration, seats, conference, attendees, title, room, eventId } = data;
 
     if (!room) {
       return;
     }
 
+    if (!date) {
+      toast.error('No date selected');
+      return;
+    }
+
+    const eventDate = date.split('T')[0];
+    const formattedStartTime = convertToRFC3339(eventDate, startTime);
+
     const payload: BookRoomDto = {
-      startTime: startTime,
+      startTime: formattedStartTime,
       duration: Number(duration),
       timeZone: getTimeZoneString(),
       seats: Number(seats),
