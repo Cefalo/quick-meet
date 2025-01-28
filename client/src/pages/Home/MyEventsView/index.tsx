@@ -9,7 +9,7 @@ import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
-import { BookRoomDto, EventResponse, IConferenceRoom, type IPeopleInformation } from '@quickmeet/shared';
+import { BookRoomDto, EventResponse, IConferenceRoom, IPeopleInformation } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
 import { convertToRFC3339, getAttendeeEmails, getTimeZoneString, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
@@ -158,7 +158,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       createConference: conference,
       title: title || preferences.title,
       room: room,
-      attendees: attendeesEmails,
+      attendees: attendees,
     };
 
     const res = await api.updateEvent(eventId, payload);

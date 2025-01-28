@@ -48,7 +48,7 @@ export class CalenderController {
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IAvailableRooms>> {
     const domain = req.hd;
-    let { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
+    const { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     if (!seats && eventId) {
       return createResponse({ others: [], preferred: [] });
