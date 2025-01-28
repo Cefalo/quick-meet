@@ -47,7 +47,12 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
     uniqueEmails.forEach((email) => {
       if (isEmailValid(email)) {
         const existingPerson = newValue.find((option) => typeof option === 'object' && option.email === email) as IPeopleInformation;
-        existingPerson ? validPeoples.push(existingPerson) : validPeoples.push({ name: email, email, photo: '' });
+        if (existingPerson) {
+          validPeoples.push(existingPerson);
+        } else {
+          const firstPartOfEmail = email.split('@')[0];
+          validPeoples.push({ name: firstPartOfEmail, email, photo: '' });
+        }
       } else {
         invalidEmails.push(email);
       }
