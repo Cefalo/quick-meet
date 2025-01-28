@@ -1,7 +1,7 @@
 import Api from '@/api/api';
 import { ROUTES } from '@config/routes';
 import { secrets } from '@config/secrets';
-import { ApiResponse } from '@quickmeet/shared';
+import { ApiResponse, IPeopleInformation } from '@quickmeet/shared';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 
@@ -192,3 +192,7 @@ export const chromeBackground = {
 const params = new URLSearchParams(window.location.search);
 
 export const isChromeExt = Boolean(params.get('chrome')) || secrets.appEnvironment === 'chrome';
+
+export const getAttendeeEmails = (attendees: IPeopleInformation[]) => {
+  return (attendees || []).map((attendee) => attendee.email).filter((email): email is string => email !== undefined);
+};
