@@ -7,12 +7,12 @@ import DeleteConfirmationView from '@components/DeleteConfirmationView';
 import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
-import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import { Box, Divider, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
-import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
+import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
+import { BookRoomDto, EventResponse, IConferenceRoom, type IPeopleInformation } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
+import { convertToRFC3339, getAttendeeEmails, getTimeZoneString, renderError } from '@helpers/utility';
+import toast from 'react-hot-toast';
 import EditEventsView from './EditEventsView';
 import dayjs from 'dayjs';
 import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
@@ -136,6 +136,8 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
 
     const { startTime, date, duration, seats, conference, attendees, title, room, eventId } = data;
 
+    const attendeesEmails = getAttendeeEmails(attendees as IPeopleInformation[]);
+
     if (!room) {
       return;
     }
@@ -156,7 +158,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       createConference: conference,
       title: title || preferences.title,
       room: room,
-      attendees,
+      attendees: attendeesEmails,
     };
 
     const res = await api.updateEvent(eventId, payload);
