@@ -7,7 +7,6 @@ import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import {
   convertToRFC3339,
   createDropdownOptions,
-  getAttendeeEmails,
   getTimeZoneString,
   isChromeExt,
   populateDurationOptions,
@@ -203,8 +202,6 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   async function onBookClick() {
     setBookClickLoading(true);
     const { startTime, duration, seats, conference, attendees, title, room } = formData;
-    const attendeesEmails = getAttendeeEmails(attendees as IPeopleInformation[]);
-
     if (!room) {
       return;
     }
@@ -221,7 +218,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       createConference: conference,
       title: title || preferredTitle,
       room: room,
-      attendees: attendeesEmails,
+      attendees: attendees || [],
     };
 
     const res = await api.createEvent(payload);

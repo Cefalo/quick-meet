@@ -1,11 +1,6 @@
 import { Transform } from 'class-transformer';
-import {
-  IsOptional,
-  IsString,
-  IsNumber,
-  IsArray,
-  IsBoolean,
-} from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsArray, IsBoolean, IsObject } from 'class-validator';
+import type { IPeopleInformation } from 'interfaces';
 
 export class BookRoomDto {
   @IsString()
@@ -40,6 +35,6 @@ export class BookRoomDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  attendees?: string[];
+  @IsObject({ each: true })
+  attendees?: IPeopleInformation[];
 }

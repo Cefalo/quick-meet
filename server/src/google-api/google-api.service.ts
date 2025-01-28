@@ -201,6 +201,7 @@ export class GoogleApiService implements IGoogleApiService {
 
   async deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void> {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [err, _]: [GaxiosError, GaxiosResponse<void>] = await to(
       calendar.events.delete({
         calendarId: 'primary',

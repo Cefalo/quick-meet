@@ -22,15 +22,15 @@ export class CalenderService {
     organizerEmail: string,
     createConference?: boolean,
     eventTitle?: string,
-    attendees?: string[],
+    attendees?: IPeopleInformation[],
   ): Promise<EventResponse> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
 
     const attendeeList = [];
     if (attendees?.length) {
       for (const attendee of attendees) {
-        if (validateEmail(attendee)) {
-          attendeeList.push({ email: attendee });
+        if (validateEmail(attendee.email)) {
+          attendeeList.push({ email: attendee.email });
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
         }
@@ -76,6 +76,7 @@ export class CalenderService {
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp
+          attendees: JSON.stringify(attendees),
         },
       },
       ...conference,
@@ -243,12 +244,19 @@ export class CalenderService {
 
     for (const event of events) {
       let room: IConferenceRoom | null = null;
+      const attendessInformations = event.extendedProperties?.private?.attendees ? JSON.parse(event.extendedProperties.private.attendees) : [];
 
-      const attendees: string[] = [];
+      const attendees: IPeopleInformation[] = [];
       if (event.attendees) {
         for (const attendee of event.attendees) {
           if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
-            attendees.push(attendee.email);
+            const person = attendessInformations.find((person) => person.email === attendee.email);
+            if (person) {
+              attendees.push(person);
+            } else {
+              const emailParts = attendee.email.split('@');
+              attendees.push({ email: attendee.email, name: emailParts[0] || attendee.email, photo: '' });
+            }
           } else if (attendee.resource) {
             room = rooms.find((_room) => _room.email === attendee.email);
           }
@@ -303,11 +311,12 @@ export class CalenderService {
     userEmail: string,
     createConference?: boolean,
     eventTitle?: string,
-    attendees?: string[],
+    attendees?: IPeopleInformation[],
     room?: string,
   ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms = await this.authService.getDirectoryResources(client, domain);
+    const attendeesEmails = attendees?.map((attendee) => attendee.email) || [];
 
     if (event.organizer.email !== userEmail) {
       throw new ForbiddenException('Not allowed to update this event');
@@ -352,20 +361,20 @@ export class CalenderService {
     }
 
     if (pickedRoom) {
-      attendees.push(pickedRoom.email);
+      attendeesEmails.push(pickedRoom.email);
     }
 
-    attendees.push(event.organizer.email);
+    attendeesEmails.push(event.organizer.email);
 
     const attendeeList = [];
     if (attendees?.length) {
       for (const attendee of attendees) {
-        if (validateEmail(attendee)) {
+        if (validateEmail(attendee.email)) {
           const existingAttendee = event.attendees?.find((a) => a.email === attendee);
           if (existingAttendee) {
-            attendeeList.push(existingAttendee);
+            attendeeList.push({ email: attendee.email });
           } else {
-            attendeeList.push({ email: attendee });
+            attendeeList.push({ email: attendee.email });
           }
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
@@ -407,17 +416,14 @@ export class CalenderService {
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp to order events
+          attendees: JSON.stringify(attendees),
         },
       },
       ...conference,
     };
 
     const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
-    const attendeeEmails = result.attendees
-      .filter((attendee) => !attendee.email.endsWith('resource.calendar.google.com') && !attendee.organizer)
-      .map((attendee) => attendee.email);
-
-    console.log('Room has been updated', result);
+    const updatedAttendees = result.extendedProperties.private.attendees ? JSON.parse(result.extendedProperties.private.attendees) : [];
 
     const eventResponse: EventResponse = {
       eventId: updatedEvent.id,
@@ -429,7 +435,7 @@ export class CalenderService {
       roomEmail: pickedRoom.email,
       roomId: pickedRoom.id,
       seats: pickedRoom.seats,
-      attendees: attendeeEmails,
+      attendees: updatedAttendees,
       isEditable: true,
       floor: pickedRoom.floor,
     };

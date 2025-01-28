@@ -39,17 +39,17 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
       .filter((email) => email !== '');
 
     const uniqueEmails = [...new Set(filteredEmails)];
-    const validPeoples: IPeopleInformation[] = [];
+    const validPeople: IPeopleInformation[] = [];
     const invalidEmails: string[] = [];
 
     uniqueEmails.forEach((email) => {
       if (isEmailValid(email)) {
         const existingPerson = newValue.find((option) => typeof option === 'object' && option.email === email) as IPeopleInformation;
         if (existingPerson) {
-          validPeoples.push(existingPerson);
+          validPeople.push(existingPerson);
         } else {
           const firstPartOfEmail = email.split('@')[0];
-          validPeoples.push({ name: firstPartOfEmail, email, photo: '' });
+          validPeople.push({ name: firstPartOfEmail, email, photo: '' });
         }
       } else {
         invalidEmails.push(email);
@@ -58,8 +58,8 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
 
     invalidEmails.length > 0 && toast.error('Invalid email(s) entered.');
 
-    if (validPeoples.length >= 0) {
-      onChange(id, validPeoples);
+    if (validPeople.length >= 0) {
+      onChange(id, validPeople);
     }
     setTextInput('');
   };
@@ -133,7 +133,25 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           renderTags={(value: readonly IPeopleInformation[], getTagProps) =>
             value.map((option, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip avatar={<Avatar alt={option.email} src={option.photo} />} variant="outlined" label={option.name} key={key} {...tagProps} />;
+              return (
+                <Chip
+                  avatar={
+                    <Avatar
+                      alt={option.email}
+                      src={option.photo}
+                      sx={[
+                        (theme) => ({
+                          bgcolor: theme.palette.grey[50],
+                        }),
+                      ]}
+                    />
+                  }
+                  variant="outlined"
+                  label={option.name}
+                  key={key}
+                  {...tagProps}
+                />
+              );
             })
           }
           renderInput={(params) => (
