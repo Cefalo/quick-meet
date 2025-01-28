@@ -176,7 +176,12 @@ export class CalenderService {
         const currentRoom = extractRoomByEmail(rooms, roomEmail.email);
 
         const { timeZone } = event.start;
+        
 
+        // if startTime's date is different from event.start's dateTime, just check `this.isRoomAvailable()`
+        // else
+
+        // todo: fatin
         let isEventRoomAvailable = true;
         if (requestStart < currentStartTime) {
           const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, roomEmail.email, timeZone);
@@ -308,6 +313,8 @@ export class CalenderService {
       throw new NotFoundException('Incorrect room picked!');
     }
 
+    // todo: fatin
+
     // if selected room email is same as event's room
     if (event.attendees?.some((attendee) => attendee.email === room)) {
       const currentStartTime = new Date(event.start.dateTime).getTime();
@@ -315,6 +322,9 @@ export class CalenderService {
 
       const newStartTime = new Date(startTime).getTime();
       const newEndTime = new Date(endTime).getTime();
+
+      // if startTime's date is different from event.start's dateTime, just check `this.isRoomAvailable()`
+      // else
 
       const { timeZone } = event.start;
 

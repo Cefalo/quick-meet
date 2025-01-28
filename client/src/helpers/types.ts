@@ -10,6 +10,7 @@ export interface FormData {
   attendees?: string[];
   conference?: boolean;
   eventId?: string;
+  date?: string;
 }
 
 export interface IAvailableRoomsDropdownOption {
