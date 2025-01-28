@@ -1,17 +1,17 @@
-import { OAuth2Client } from 'google-auth-library';
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
-import { AuthService } from '../auth/auth.service';
 import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation, IAvailableRooms } from '@quickmeet/shared';
+import { OAuth2Client } from 'google-auth-library';
 import { GoogleApiService } from 'src/google-api/google-api.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class CalenderService {
   constructor(
     private authService: AuthService,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
-  ) {}
+  ) { }
 
   async createEvent(
     client: OAuth2Client,
@@ -176,7 +176,6 @@ export class CalenderService {
         const currentRoom = extractRoomByEmail(rooms, roomEmail.email);
 
         const { timeZone } = event.start;
-        
 
         // if startTime's date is different from event.start's dateTime, just check `this.isRoomAvailable()`
         // else
@@ -214,7 +213,7 @@ export class CalenderService {
     const calenders = await this.googleApiService.getCalenderSchedule(client, start, end, timeZone, [roomEmail]);
 
     const availableRooms: IConferenceRoom[] = [];
-    let room: IConferenceRoom = null;
+    const room: IConferenceRoom = null;
 
     for (const roomEmail of Object.keys(calenders)) {
       const isAvailable = isRoomAvailable(calenders[roomEmail].busy, new Date(start), new Date(end));
@@ -239,7 +238,7 @@ export class CalenderService {
     for (const event of events) {
       let room: IConferenceRoom | null = null;
 
-      let attendees: string[] = [];
+      const attendees: string[] = [];
       if (event.attendees) {
         for (const attendee of event.attendees) {
           if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
@@ -313,9 +312,6 @@ export class CalenderService {
       throw new NotFoundException('Incorrect room picked!');
     }
 
-    // todo: fatin
-
-    // if selected room email is same as event's room
     if (event.attendees?.some((attendee) => attendee.email === room)) {
       const currentStartTime = new Date(event.start.dateTime).getTime();
       const currentEndTime = new Date(event.end.dateTime).getTime();
@@ -323,22 +319,28 @@ export class CalenderService {
       const newStartTime = new Date(startTime).getTime();
       const newEndTime = new Date(endTime).getTime();
 
-      // if startTime's date is different from event.start's dateTime, just check `this.isRoomAvailable()`
-      // else
-
       const { timeZone } = event.start;
+      const originalEventDate = new Date(event.start.dateTime).toDateString();
+      const newEventDate = new Date(startTime).toDateString();
 
-      if (newStartTime < currentStartTime) {
-        const isAvailable = await this.isRoomAvailable(client, startTime, event.start.dateTime, room, timeZone);
+      if (originalEventDate !== newEventDate) {
+        const isAvailable = await this.isRoomAvailable(client, startTime, endTime, pickedRoom.email, timeZone);
         if (!isAvailable) {
           throw new ConflictException('Room is not available within the set duration');
         }
-      }
+      } else {
+        if (newStartTime < currentStartTime) {
+          const isAvailable = await this.isRoomAvailable(client, startTime, event.start.dateTime, room, timeZone);
+          if (!isAvailable) {
+            throw new ConflictException('Room is not available within the set duration');
+          }
+        }
 
-      if (newEndTime > currentEndTime) {
-        const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, endTime, room, timeZone);
-        if (!isAvailable) {
-          throw new ConflictException('Room is not available within the set duration');
+        if (newEndTime > currentEndTime) {
+          const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, endTime, room, timeZone);
+          if (!isAvailable) {
+            throw new ConflictException('Room is not available within the set duration');
+          }
         }
       }
     }
