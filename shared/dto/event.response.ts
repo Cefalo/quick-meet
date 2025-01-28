@@ -1,3 +1,5 @@
+import type { IPeopleInformation } from 'interfaces';
+
 export interface EventResponse {
   eventId?: string;
   summary?: string;
@@ -9,7 +11,7 @@ export interface EventResponse {
   roomEmail?: string;
   roomId?: string;
   seats?: number;
-  attendees?: string[];
+  attendees?: IPeopleInformation[];
   createdAt?: number;
   isEditable?: boolean;
 }
