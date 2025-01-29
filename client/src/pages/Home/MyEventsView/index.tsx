@@ -14,7 +14,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import EditEventsView from './EditEventsView';
-export default function MyEventsView() {
+
+interface MyEventsViewProps {
+  redirectedDate?: string;
+}
+
+export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const [loading, setLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [events, setEvents] = useState<EventResponse[]>([]);
@@ -27,11 +32,11 @@ export default function MyEventsView() {
   const { preferences } = usePreferences();
   const { locale } = useLocales();
 
-  const [currentDate, setCurrentDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+  const [currentDate, setCurrentDate] = useState(redirectedDate || new Date().toISOString());
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchEvents = async () => {
       const query = {
         startTime: new Date(new Date(currentDate).setHours(0, 0, 0, 0)).toISOString(),
         endTime: new Date(new Date(currentDate).setHours(23, 59, 59, 999)).toISOString(),
@@ -43,7 +48,7 @@ export default function MyEventsView() {
       }
 
       abortControllerRef.current = new AbortController();
-      const res = await api.getRooms(abortControllerRef.current.signal, query.startTime, query.endTime, query.timeZone);
+      const res = await api.getEvents(abortControllerRef.current.signal, query.startTime, query.endTime, query.timeZone);
       const { data, status } = res;
       setLoading(false);
 
@@ -60,7 +65,7 @@ export default function MyEventsView() {
     };
 
     setLoading(true);
-    fetchRooms();
+    fetchEvents();
   }, [currentDate]);
 
   useEffect(() => {
@@ -153,7 +158,10 @@ export default function MyEventsView() {
       return;
     }
 
-    setEvents((prevEvents) => prevEvents.map((event) => (event.eventId === data.eventId ? res.data : event)));
+    setEvents((prevEvents) =>
+      prevEvents.map((event) => (event.eventId === data.eventId ? res.data : event)).filter((event) => event.start.split('T')[0] === currentDate.split('T')[0]),
+    );
+
     toast.success('Room has been updated');
     setEditView(null);
     setEditLoading(false);
