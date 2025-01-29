@@ -28,6 +28,7 @@ import { Box, Checkbox, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { BookRoomDto, EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
@@ -103,6 +104,34 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     }));
   };
 
+  const getNearestTime = (timeOptions: string[]) => {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+    let nearestTime = timeOptions[0];
+    let smallestDifference = 1440;
+
+    timeOptions.forEach((option) => {
+      const [time, modifier] = option.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+
+      if (modifier === 'PM' && hours !== 12) hours += 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+
+      const optionTimeInMinutes = hours * 60 + minutes;
+      const difference = Math.abs(optionTimeInMinutes - currentTimeInMinutes);
+
+      if (difference < smallestDifference) {
+        smallestDifference = difference;
+        nearestTime = option;
+      }
+    });
+
+    return nearestTime;
+  };
+
   async function initializeDropdowns() {
     const res = await api.getMaxSeatCount();
     if (res.status === 'error') {
@@ -118,10 +147,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setRoomCapacityOptions(createDropdownOptions(capacities));
 
     const { duration, seats } = preferences;
-
+    console.log(timeOptions);
+    console.log('Nearest Time ', getNearestTime(timeOptions));
     setFormData((p) => ({
       ...p,
-      startTime: timeOptions[0],
+      startTime: getNearestTime(timeOptions),
       seats: seats || Number(capacities[0]),
       duration: duration || Number(durations[0]),
     }));
