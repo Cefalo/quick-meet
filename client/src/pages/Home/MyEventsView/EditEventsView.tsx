@@ -110,7 +110,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
     if (roomCapacityOptions.length > 0) {
       setAvailableRooms();
     }
-  }, [formData.startTime, formData.duration, formData.seats, roomCapacityOptions]);
+  }, [date, formData.startTime, formData.duration, formData.seats, roomCapacityOptions]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({

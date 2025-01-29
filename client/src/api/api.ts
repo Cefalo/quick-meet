@@ -141,7 +141,7 @@ export default class Api {
     }
   }
 
-  async getRooms(signal: AbortSignal, startTime: string, endTime: string, timeZone: string) {
+  async getEvents(signal: AbortSignal, startTime: string, endTime: string, timeZone: string) {
     try {
       const res = await this.client.get('/api/events', {
         params: {

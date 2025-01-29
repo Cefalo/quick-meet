@@ -36,7 +36,7 @@ const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
 };
 
 interface BookRoomViewProps {
-  onRoomBooked: () => void;
+  onRoomBooked: (date?: string) => void;
 }
 
 export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
@@ -89,7 +89,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     if (initialPageLoad && formData.startTime) {
       setAvailableRooms();
     }
-  }, [initialPageLoad, formData.startTime, formData.duration, formData.seats]);
+  }, [initialPageLoad, date, formData.startTime, formData.duration, formData.seats]);
 
   const handleInputChange = (id: string, value: string | number | string[] | boolean) => {
     setFormData((prevData) => ({
@@ -237,7 +237,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     toast.success(`${roomName} has been booked!`);
 
     setAvailableRoomOptions({ others: [], preferred: [] });
-    onRoomBooked();
+    onRoomBooked(date.toISOString());
   }
 
   if (loading) return <></>;

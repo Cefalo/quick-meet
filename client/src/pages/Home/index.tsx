@@ -42,6 +42,7 @@ const ExtensionRedirectPrompt = () => {
 export default function Home() {
   const [tabIndex, setTabIndex] = useState(0);
   const { state } = useLocation();
+  const [redirectedDate, setRedirectedDate] = useState<string | undefined>();
   const [extensionRedirectMessage, setExtensionRedirectMessage] = useState(null);
 
   useEffect(() => {
@@ -49,8 +50,9 @@ export default function Home() {
     setExtensionRedirectMessage(message);
   }, []);
 
-  const onRoomBooked = () => {
+  const onRoomBooked = (date?: string) => {
     setTabIndex(1);
+    setRedirectedDate(date);
   };
 
   const handleTabChange = (newValue: number) => {
@@ -86,7 +88,7 @@ export default function Home() {
         />
       </Box>
       {tabIndex === 0 && <BookRoomView onRoomBooked={onRoomBooked} />}
-      {tabIndex === 1 && <MyEventsView />}
+      {tabIndex === 1 && <MyEventsView redirectedDate={redirectedDate} />}
     </Box>
   );
 }
