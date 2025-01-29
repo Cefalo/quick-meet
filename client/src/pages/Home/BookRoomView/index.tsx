@@ -4,6 +4,7 @@ import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import Dropdown, { DropdownOption } from '@components/Dropdown';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
+import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import {
   convertToRFC3339,
   createDropdownOptions,
@@ -16,16 +17,15 @@ import {
 } from '@helpers/utility';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
-import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
-import { BookRoomDto, EventResponse, IConferenceRoom, IAvailableRooms } from '@quickmeet/shared';
-import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRounded';
+import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Box, Checkbox, Typography } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { BookRoomDto, EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
@@ -98,6 +98,34 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     }));
   };
 
+  const getNearestTime = (timeOptions: string[]) => {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+    let nearestTime = timeOptions[0];
+    let smallestDifference = 1440;
+
+    timeOptions.forEach((option) => {
+      const [time, modifier] = option.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+
+      if (modifier === 'PM' && hours !== 12) hours += 12;
+      if (modifier === 'AM' && hours === 12) hours = 0;
+
+      const optionTimeInMinutes = hours * 60 + minutes;
+      const difference = Math.abs(optionTimeInMinutes - currentTimeInMinutes);
+
+      if (difference < smallestDifference) {
+        smallestDifference = difference;
+        nearestTime = option;
+      }
+    });
+
+    return nearestTime;
+  };
+
   async function initializeDropdowns() {
     const res = await api.getMaxSeatCount();
     if (res.status === 'error') {
@@ -113,10 +141,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setRoomCapacityOptions(createDropdownOptions(capacities));
 
     const { duration, seats } = preferences;
-
+    console.log(timeOptions);
+    console.log('Nearest Time ', getNearestTime(timeOptions));
     setFormData((p) => ({
       ...p,
-      startTime: timeOptions[0],
+      startTime: getNearestTime(timeOptions),
       seats: seats || Number(capacities[0]),
       duration: duration || Number(durations[0]),
     }));
