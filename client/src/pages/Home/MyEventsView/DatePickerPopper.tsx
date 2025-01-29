@@ -66,10 +66,15 @@ function DatePickerShortcuts(props: PickersShortcutsProps<dayjs.Dayjs | null>) {
   );
 }
 
-const DatePickerPopper = () => {
-  const [currentDate, setCurrentDate] = useState<dayjs.Dayjs>(dayjs());
+interface DatePickerPopperProps {
+  currentDate: dayjs.Dayjs;
+  setCurrentDate: React.Dispatch<React.SetStateAction<dayjs.Dayjs>>;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate }: DatePickerPopperProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [open, setOpen] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -85,15 +90,16 @@ const DatePickerPopper = () => {
           <Fade {...TransitionProps} timeout={350}>
             <Box
               sx={{
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                borderRadius: '8px',
+                boxShadow: (theme) => theme.shadows[8],
               }}
             >
               <StaticDatePicker
-                onChange={(newDate) => {
-                  if (newDate) {
-                    setCurrentDate(newDate);
-                    setOpen(false);
+                onChange={(newDate, context) => {
+                  if (!context?.shortcut) {
+                    if (newDate) {
+                      setCurrentDate(newDate);
+                      setOpen(false);
+                    }
                   }
                 }}
                 value={currentDate}
@@ -118,15 +124,6 @@ const DatePickerPopper = () => {
                     borderBottomLeftRadius: 20,
                     borderBottomRightRadius: 20,
                   },
-                  '.MuiInputBase-input': {
-                    color: (theme) => theme.palette.common.black,
-                    fontFamily: 'inherit',
-                    fontSize: '1.1rem',
-                    fontWeight: 400,
-                    cursor: 'default',
-                    p: 0,
-                  },
-                  '.MuiButtonBase-root': { cursor: 'pointer' },
                 }}
               />
             </Box>

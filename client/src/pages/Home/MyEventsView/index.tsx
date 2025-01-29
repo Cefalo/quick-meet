@@ -93,6 +93,8 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const api = useApi();
   const { preferences } = usePreferences();
 
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+
   const [currentDate, setCurrentDate] = useState<dayjs.Dayjs>(dayjs(redirectedDate) || dayjs());
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -286,7 +288,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       }}
     >
       <Box>
-        <DatePickerPopper />
+        <DatePickerPopper currentDate={currentDate} setCurrentDate={setCurrentDate} open={datePickerOpen} setOpen={setDatePickerOpen} />
         {/* Date Navigator */}
         <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
           <DatePicker
