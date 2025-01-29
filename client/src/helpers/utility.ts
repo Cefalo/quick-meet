@@ -12,7 +12,7 @@ import { NavigateFunction } from 'react-router-dom';
  */
 export function populateTimeOptions(start?: string) {
   const timeOptions = [];
-  const now = start ? new Date(start) : new Date();
+  const now = start ? new Date(new Date(start).setHours(0, 0, 0, 0)) : new Date(new Date().setHours(0, 0, 0, 0));
   let currentHours = now.getHours();
   let currentMinutes = Math.floor(now.getMinutes() / 15) * 15;
 
