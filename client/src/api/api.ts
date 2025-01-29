@@ -1,7 +1,7 @@
 import { ROUTES } from '@/config/routes';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IAvailableRooms, IConferenceRoom, StatusTypes } from '@quickmeet/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IAvailableRooms, StatusTypes } from '@quickmeet/shared';
 import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
