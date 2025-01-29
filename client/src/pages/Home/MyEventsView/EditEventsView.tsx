@@ -316,6 +316,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               </Box>
               <Box sx={{ flex: 1, display: 'flex' }}>
                 <DatePicker
+                  disablePast
                   defaultValue={dayjs(event.start!)}
                   onChange={(newDate) => {
                     if (newDate) {
