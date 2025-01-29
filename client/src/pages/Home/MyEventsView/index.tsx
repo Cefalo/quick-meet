@@ -8,17 +8,79 @@ import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
 import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Chip, Divider, List, ListItem, Skeleton, Stack, Typography } from '@mui/material';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import EditEventsView from './EditEventsView';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, PickersShortcutsProps, PickersShortcutsItem } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
 
 interface MyEventsViewProps {
   redirectedDate?: string;
+}
+
+// https://mui.com/x/react-date-pickers/shortcuts/
+const shortcutItems: PickersShortcutsItem<unknown>[] = [
+  {
+    label: 'Reset',
+    getValue: () => {
+      return dayjs(new Date());
+    },
+  },
+];
+
+function DatePickerShortcuts(props: PickersShortcutsProps<dayjs.Dayjs | null>) {
+  const { items, onChange, isValid, changeImportance = 'accept' } = props;
+
+  if (items == null || items.length === 0) {
+    return null;
+  }
+
+  const resolvedItems = items.map((item) => {
+    const newValue = item.getValue({ isValid });
+
+    return {
+      label: item.label,
+      onClick: () => {
+        onChange(newValue, changeImportance, item);
+      },
+      disabled: !isValid(newValue),
+    };
+  });
+
+  return (
+    <Box
+      sx={{
+        gridRow: 1,
+        gridColumn: 2,
+      }}
+    >
+      <List
+        dense
+        sx={(theme) => ({
+          display: 'flex',
+          px: theme.spacing(1),
+          '& .MuiListItem-root': {
+            pl: 0,
+            pr: theme.spacing(1),
+            py: 0,
+          },
+        })}
+      >
+        {resolvedItems.map((item) => {
+          return (
+            <ListItem key={item.label}>
+              <Chip {...item} />
+            </ListItem>
+          );
+        })}
+      </List>
+      <Divider />
+    </Box>
+  );
 }
 
 export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
@@ -227,6 +289,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       }}
     >
       <Box>
+        <DatePickerPopper />
         {/* Date Navigator */}
         <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
           <DatePicker
@@ -237,6 +300,9 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
               }
             }}
             value={currentDate}
+            slots={{
+              shortcuts: DatePickerShortcuts,
+            }}
             slotProps={{
               inputAdornment: {
                 position: 'start',
@@ -248,6 +314,10 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
               },
               field: {
                 readOnly: true,
+              },
+              shortcuts: {
+                items: shortcutItems,
+                changeImportance: 'set',
               },
             }}
             sx={{

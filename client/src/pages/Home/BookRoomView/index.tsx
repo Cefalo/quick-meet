@@ -290,6 +290,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
           </Box>
           <Box sx={{ flex: 1, display: 'flex' }}>
             <DatePicker
+              disablePast
               defaultValue={date}
               onChange={(newDate) => {
                 if (newDate) {
