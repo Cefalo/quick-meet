@@ -6,6 +6,8 @@ import { secrets } from './config/secrets';
 import './styles.css';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ApiProvider } from '@/context/ApiContext';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -13,7 +15,9 @@ root.render(
     <BrowserRouter basename={secrets.appEnvironment === 'chrome' ? '/index.html' : ''}>
       <PreferencesProvider>
         <ApiProvider>
-          <App />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <App />
+          </LocalizationProvider>
         </ApiProvider>
       </PreferencesProvider>
     </BrowserRouter>
