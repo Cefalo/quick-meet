@@ -22,9 +22,7 @@ import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Box, Checkbox, Typography } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { BookRoomDto, EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
@@ -285,43 +283,41 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
             />
           </Box>
           <Box sx={{ flex: 1, display: 'flex' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'en-gb'}>
-              <DatePicker
-                defaultValue={date}
-                onChange={(newDate) => {
-                  if (newDate) {
-                    setDate(newDate);
-                  }
-                }}
-                slotProps={{
-                  inputAdornment: {
-                    position: 'start',
-                    sx: {
-                      input: {
-                        cursor: 'pointer',
-                      },
+            <DatePicker
+              defaultValue={date}
+              onChange={(newDate) => {
+                if (newDate) {
+                  setDate(newDate);
+                }
+              }}
+              slotProps={{
+                inputAdornment: {
+                  position: 'start',
+                  sx: {
+                    input: {
+                      cursor: 'pointer',
                     },
                   },
-                }}
-                sx={{
-                  '.MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      border: 'none',
-                    },
+                },
+              }}
+              sx={{
+                '.MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    border: 'none',
                   },
-                  '.MuiInputBase-input': {
-                    color: (theme) => theme.palette.common.black,
-                    fontFamily: 'inherit',
-                    fontSize: '1.125rem',
-                    fontWeight: 400,
-                  },
-                  '.MuiSvgIcon-root': {
-                    color: (theme) => theme.palette.grey[50],
-                  },
-                  '.MuiButtonBase-root': { cursor: 'pointer' },
-                }}
-              />
-            </LocalizationProvider>
+                },
+                '.MuiInputBase-input': {
+                  color: (theme) => theme.palette.common.black,
+                  fontFamily: 'inherit',
+                  fontSize: '1.125rem',
+                  fontWeight: 400,
+                },
+                '.MuiSvgIcon-root': {
+                  color: (theme) => theme.palette.grey[50],
+                },
+                '.MuiButtonBase-root': { cursor: 'pointer' },
+              }}
+            />
           </Box>
         </Box>
         <Box>
