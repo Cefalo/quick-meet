@@ -11,7 +11,7 @@ export class CalenderService {
   constructor(
     private authService: AuthService,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
-  ) { }
+  ) {}
 
   async createEvent(
     client: OAuth2Client,
@@ -176,23 +176,29 @@ export class CalenderService {
         const currentRoom = extractRoomByEmail(rooms, roomEmail.email);
 
         const { timeZone } = event.start;
+        const originalEventDate = new Date(event.start.dateTime).toDateString();
+        const newEventDate = new Date(start).toDateString();
 
-        // if startTime's date is different from event.start's dateTime, just check `this.isRoomAvailable()`
-        // else
-
-        // todo: fatin
         let isEventRoomAvailable = true;
-        if (requestStart < currentStartTime) {
-          const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, roomEmail.email, timeZone);
+
+        if (originalEventDate !== newEventDate) {
+          const isAvailable = await this.isRoomAvailable(client, start, end, roomEmail.email, timeZone);
           if (!isAvailable) {
             isEventRoomAvailable = false;
           }
-        }
+        } else {
+          if (requestStart < currentStartTime) {
+            const isAvailable = await this.isRoomAvailable(client, start, event.start.dateTime, roomEmail.email, timeZone);
+            if (!isAvailable) {
+              isEventRoomAvailable = false;
+            }
+          }
 
-        if (requestEnd > currentEndTime) {
-          const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, end, roomEmail.email, timeZone);
-          if (!isAvailable) {
-            isEventRoomAvailable = false;
+          if (requestEnd > currentEndTime) {
+            const isAvailable = await this.isRoomAvailable(client, event.end.dateTime, end, roomEmail.email, timeZone);
+            if (!isAvailable) {
+              isEventRoomAvailable = false;
+            }
           }
         }
 
