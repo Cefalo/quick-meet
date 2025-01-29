@@ -14,6 +14,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import EditEventsView from './EditEventsView';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 interface MyEventsViewProps {
   redirectedDate?: string;
@@ -32,14 +34,14 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const { preferences } = usePreferences();
   const { locale } = useLocales();
 
-  const [currentDate, setCurrentDate] = useState(redirectedDate || new Date().toISOString());
+  const [currentDate, setCurrentDate] = useState<dayjs.Dayjs>(dayjs(redirectedDate) || dayjs());
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       const query = {
-        startTime: new Date(new Date(currentDate).setHours(0, 0, 0, 0)).toISOString(),
-        endTime: new Date(new Date(currentDate).setHours(23, 59, 59, 999)).toISOString(),
+        startTime: currentDate.startOf('day').toISOString(),
+        endTime: currentDate.endOf('day').toISOString(),
         timeZone: getTimeZoneString(),
       };
 
@@ -159,7 +161,9 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     }
 
     setEvents((prevEvents) =>
-      prevEvents.map((event) => (event.eventId === data.eventId ? res.data : event)).filter((event) => event.start.split('T')[0] === currentDate.split('T')[0]),
+      prevEvents
+        .map((event) => (event.eventId === data.eventId ? res.data : event))
+        .filter((event) => event.start.split('T')[0] === currentDate.toISOString().split('T')[0]),
     );
 
     toast.success('Room has been updated');
@@ -185,15 +189,11 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   };
 
   const handleNextDate = async () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 1);
-    setCurrentDate(newDate.toISOString());
+    setCurrentDate(currentDate.add(1, 'day'));
   };
 
   const handlePrevDate = async () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 1);
-    setCurrentDate(newDate.toISOString());
+    setCurrentDate(currentDate.subtract(1, 'day'));
   };
 
   if (deleteEventViewOpen) {
@@ -226,27 +226,52 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
         px: 2,
       }}
     >
-      {/* Date Navigator */}
-      <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
-        <Typography
-          align="center"
-          sx={[
-            (theme) => ({
-              textAlign: 'center',
-              flex: 1,
-              color: theme.palette.common.black,
-              fontWeight: 400,
-              fontSize: '1.1rem',
-            }),
-          ]}
-        >
-          {new Date(currentDate).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </Typography>
-      </DateNavigator>
+      <Box>
+        {/* Date Navigator */}
+        <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
+          <DatePicker
+            format="MMMM DD, YYYY"
+            onChange={(newDate) => {
+              if (newDate) {
+                setCurrentDate(newDate);
+              }
+            }}
+            value={currentDate}
+            slotProps={{
+              inputAdornment: {
+                position: 'start',
+                sx: {
+                  input: {
+                    cursor: 'pointer',
+                  },
+                },
+              },
+              field: {
+                readOnly: true,
+              },
+            }}
+            sx={{
+              '.MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: 'none',
+                },
+              },
+              '.MuiInputBase-input': {
+                color: (theme) => theme.palette.common.black,
+                fontFamily: 'inherit',
+                fontSize: '1.1rem',
+                fontWeight: 400,
+                cursor: 'default',
+                p: 0,
+              },
+              '.MuiSvgIcon-root': {
+                color: (theme) => theme.palette.grey[50],
+              },
+              '.MuiButtonBase-root': { cursor: 'pointer' },
+            }}
+          />
+        </DateNavigator>
+      </Box>
 
       {loading ? (
         <Box mx={3}>

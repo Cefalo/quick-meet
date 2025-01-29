@@ -27,7 +27,6 @@ import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import { LoadingButton } from '@mui/lab';
 import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { EventResponse, IAvailableRooms, IConferenceRoom } from '@quickmeet/shared';
@@ -320,43 +319,41 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 />
               </Box>
               <Box sx={{ flex: 1, display: 'flex' }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'en-gb'}>
-                  <DatePicker
-                    defaultValue={dayjs(event.start!)}
-                    onChange={(newDate) => {
-                      if (newDate) {
-                        setDate(newDate);
-                      }
-                    }}
-                    slotProps={{
-                      inputAdornment: {
-                        position: 'start',
-                        sx: {
-                          input: {
-                            cursor: 'pointer',
-                          },
+                <DatePicker
+                  defaultValue={dayjs(event.start!)}
+                  onChange={(newDate) => {
+                    if (newDate) {
+                      setDate(newDate);
+                    }
+                  }}
+                  slotProps={{
+                    inputAdornment: {
+                      position: 'start',
+                      sx: {
+                        input: {
+                          cursor: 'pointer',
                         },
                       },
-                    }}
-                    sx={{
-                      '.MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          border: 'none',
-                        },
+                    },
+                  }}
+                  sx={{
+                    '.MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        border: 'none',
                       },
-                      '.MuiInputBase-input': {
-                        color: (theme) => theme.palette.common.black,
-                        fontFamily: 'inherit',
-                        fontSize: '1.125rem',
-                        fontWeight: 400,
-                      },
-                      '.MuiSvgIcon-root': {
-                        color: (theme) => theme.palette.grey[50],
-                      },
-                      '.MuiButtonBase-root': { cursor: 'pointer' },
-                    }}
-                  />
-                </LocalizationProvider>
+                    },
+                    '.MuiInputBase-input': {
+                      color: (theme) => theme.palette.common.black,
+                      fontFamily: 'inherit',
+                      fontSize: '1.125rem',
+                      fontWeight: 400,
+                    },
+                    '.MuiSvgIcon-root': {
+                      color: (theme) => theme.palette.grey[50],
+                    },
+                    '.MuiButtonBase-root': { cursor: 'pointer' },
+                  }}
+                />
               </Box>
             </Box>
 
