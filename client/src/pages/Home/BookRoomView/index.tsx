@@ -147,8 +147,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     setRoomCapacityOptions(createDropdownOptions(capacities));
 
     const { duration, seats } = preferences;
-    console.log(timeOptions);
-    console.log('Nearest Time ', getNearestTime(timeOptions));
+
     setFormData((p) => ({
       ...p,
       startTime: getNearestTime(timeOptions),
