@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { CalenderController } from './calender.controller';
 import { CalenderService } from './calender.service';
@@ -9,6 +9,6 @@ import { GoogleApiModule } from '../google-api/google-api.module';
   imports: [AuthModule, GoogleApiModule],
   controllers: [CalenderController],
   exports: [CalenderService],
-  providers: [CalenderService, JwtService],
+  providers: [CalenderService, JwtService, Logger],
 })
 export class CalenderModule {}

@@ -4,7 +4,6 @@ import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import { Autocomplete, Box, Chip, debounce, TextField, Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { IPeopleInformation } from '@quickmeet/shared';
-import { capitalize } from 'lodash';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -148,7 +147,7 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
                     />
                   }
                   variant="outlined"
-                  label={capitalize(option.name)}
+                  label={option.name}
                   key={key}
                   {...tagProps}
                 />

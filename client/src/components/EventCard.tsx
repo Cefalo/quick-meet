@@ -121,10 +121,10 @@ interface EventCardProps {
   disabled?: boolean;
   isEditable?: boolean;
 
-  onDelete: (id?: string) => void;
-  handleEditClick: (id: string) => void;
-  handleAcceptClick: (eventId: string) => void;
-  handleRejectClick: (eventId: string) => void;
+  onDelete?: (id?: string) => void;
+  handleEditClick?: (id: string) => void;
+  handleAcceptClick?: (eventId: string) => void;
+  handleRejectClick?: (eventId: string) => void;
 }
 
 interface ChipData {
@@ -166,24 +166,24 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
   };
 
   const onEditClick = () => {
-    handleEditClick(event.eventId!);
+    handleEditClick && handleEditClick(event.eventId!);
     setAnchorEl(null);
   };
 
   const onAcceptClick = () => {
     console.log('hhj');
 
-    handleAcceptClick(event.eventId!);
+    handleAcceptClick && handleAcceptClick(event.eventId!);
     setAnchorEl(null);
   };
 
   const onRejectClick = () => {
-    handleRejectClick(event.eventId!);
+    handleRejectClick && handleRejectClick(event.eventId!);
     setAnchorEl(null);
   };
 
   const handleDeleteClick = () => {
-    onDelete(event!.eventId);
+    onDelete && onDelete(event!.eventId);
     setAnchorEl(null);
   };
 

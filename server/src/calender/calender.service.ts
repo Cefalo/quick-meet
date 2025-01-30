@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
 import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation, IAvailableRooms } from '@quickmeet/shared';
@@ -11,6 +11,7 @@ export class CalenderService {
   constructor(
     private authService: AuthService,
     @Inject('GoogleApiService') private readonly googleApiService: GoogleApiService,
+    private logger: Logger,
   ) {}
 
   async createEvent(
@@ -26,11 +27,11 @@ export class CalenderService {
   ): Promise<EventResponse> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
 
-    const attendeeList = [];
+    const filteredAttendees: IPeopleInformation[] = [];
     if (attendees?.length) {
       for (const attendee of attendees) {
         if (validateEmail(attendee.email)) {
-          attendeeList.push({ email: attendee.email });
+          filteredAttendees.push({ email: attendee.email, photo: attendee.photo.length > 1024 ? '' : attendee.photo, name: attendee.name });
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
         }
@@ -71,12 +72,13 @@ export class CalenderService {
       end: {
         dateTime: endTime,
       },
-      attendees: [...attendeeList, { email: pickedRoom.email }, { email: organizerEmail, organizer: true, responseStatus: 'accepted' }],
+      attendees: [...filteredAttendees, { email: pickedRoom.email }, { email: organizerEmail, organizer: true, responseStatus: 'accepted' }],
       colorId: '3',
+      // https://developers.google.com/calendar/api/guides/extended-properties
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp
-          attendees: JSON.stringify(attendees),
+          attendees: JSON.stringify(filteredAttendees),
         },
       },
       ...conference,
@@ -258,9 +260,10 @@ export class CalenderService {
 
             if (!person) {
               const emailParts = attendee.email.split('@');
-              person = { email: attendee.email, name: emailParts[0] || attendee.email, photo: '' };
+              person = { email: attendee.email, name: emailParts[0], photo: '' };
             }
 
+            // current user's response status
             if (userEmail === attendee.email) {
               responseStatus = attendee.responseStatus;
             }
@@ -319,14 +322,14 @@ export class CalenderService {
     startTime: string,
     endTime: string,
     userEmail: string,
+    room?: string,
     createConference?: boolean,
     eventTitle?: string,
     attendees?: IPeopleInformation[],
-    room?: string,
+    responseStatus?: string,
   ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms = await this.authService.getDirectoryResources(client, domain);
-    const attendeesEmails = attendees?.map((attendee) => attendee.email) || [];
 
     if (event.organizer.email !== userEmail) {
       throw new ForbiddenException('Not allowed to update this event');
@@ -337,6 +340,7 @@ export class CalenderService {
       throw new NotFoundException('Incorrect room picked!');
     }
 
+    // check if event room is available
     if (event.attendees?.some((attendee) => attendee.email === room)) {
       const currentStartTime = new Date(event.start.dateTime).getTime();
       const currentEndTime = new Date(event.end.dateTime).getTime();
@@ -370,21 +374,23 @@ export class CalenderService {
       }
     }
 
-    if (pickedRoom) {
-      attendeesEmails.push(pickedRoom.email);
-    }
+    attendees.push({ email: event.organizer.email });
 
-    attendeesEmails.push(event.organizer.email);
-
-    const attendeeList = [];
+    const filteredAttendees: IPeopleInformation[] = [];
     if (attendees?.length) {
       for (const attendee of attendees) {
         if (validateEmail(attendee.email)) {
-          const existingAttendee = event.attendees?.find((a) => a.email === attendee);
+          const existingAttendee = event.attendees?.find((a) => a.email === attendee.email);
           if (existingAttendee) {
-            attendeeList.push({ email: attendee.email });
+            if (userEmail === attendee.email && responseStatus) {
+              existingAttendee.responseStatus = responseStatus;
+            }
+
+            filteredAttendees.push({ ...attendee, ...existingAttendee });
           } else {
-            attendeeList.push({ email: attendee.email });
+            // if photo url length exceeds 1024, remove it since google silently truncates these in extendedProperties
+            // https://developers.google.com/calendar/api/guides/extended-properties#limits
+            filteredAttendees.push({ email: attendee.email, name: attendee.name, photo: attendee.photo.length > 1024 ? '' : attendee.photo });
           }
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
@@ -421,19 +427,25 @@ export class CalenderService {
       end: {
         dateTime: endTime,
       },
-      attendees: [...attendeeList, { email: pickedRoom.email }],
+      attendees: [...filteredAttendees, { email: pickedRoom.email }],
       colorId: '3',
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp to order events
-          attendees: JSON.stringify(attendees),
+          attendees: JSON.stringify(filteredAttendees), // Adding attendee information (name, photos etc) to be used later
         },
       },
       ...conference,
     };
 
     const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
-    const updatedAttendees = result.extendedProperties.private.attendees ? JSON.parse(result.extendedProperties.private.attendees) : [];
+
+    let updatedAttendees: IPeopleInformation[] = result.extendedProperties.private.attendees ? JSON.parse(result.extendedProperties.private.attendees) : [];
+    updatedAttendees = updatedAttendees.filter(
+      (attendee) => !attendee.email.endsWith('resource.calendar.google.com') && attendee.email !== event.organizer.email,
+    );
+
+    this.logger.log('[UpdateEvent] Room has been updated' + JSON.stringify(result));
 
     const eventResponse: EventResponse = {
       eventId: updatedEvent.id,
