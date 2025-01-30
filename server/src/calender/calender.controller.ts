@@ -124,10 +124,10 @@ export class CalenderController {
       startTime,
       endTime,
       userEmail,
+      room,
       createConference,
       title,
       attendees,
-      room,
     );
     return createResponse(updatedEvent, 'Event has been updated!');
   }
