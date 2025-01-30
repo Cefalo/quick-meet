@@ -40,8 +40,10 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      const isToday = currentDate.isSame(new Date(), 'day');
+
       const query = {
-        startTime: currentDate.startOf('day').toISOString(),
+        startTime: isToday ? new Date().toISOString() : currentDate.startOf('day').toISOString(),
         endTime: currentDate.endOf('day').toISOString(),
         timeZone: getTimeZoneString(),
       };
@@ -241,17 +243,15 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       >
         {/* Date Navigator */}
         <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
-          <Tooltip title={'Open up the calender'}>
-            <Typography
-              sx={{
-                cursor: 'pointer',
-              }}
-              onClick={handleDatePopperClick}
-              variant="subtitle1"
-            >
-              {currentDate.format('ddd MMM D, YYYY')}
-            </Typography>
-          </Tooltip>
+          <Typography
+            sx={{
+              cursor: 'pointer',
+            }}
+            onClick={handleDatePopperClick}
+            variant="subtitle1"
+          >
+            {currentDate.format('ddd MMM D, YYYY')}
+          </Typography>
         </DateNavigator>
       </Box>
 
