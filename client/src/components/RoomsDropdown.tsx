@@ -1,9 +1,8 @@
-import { Box, ListSubheader, MenuItem, Select, SelectChangeEvent, Skeleton, styled, Typography } from '@mui/material';
-import { ReactElement } from 'react';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { IConferenceRoom } from '@quickmeet/shared';
-import { useLocales } from '@/config/i18n';
 import { IAvailableRoomsDropdownOption } from '@/helpers/types';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Box, ListSubheader, MenuItem, Select, SelectChangeEvent, Skeleton, styled, Typography } from '@mui/material';
+import { IConferenceRoom } from '@quickmeet/shared';
+import { ReactElement } from 'react';
 
 interface DropdownProps {
   id: string;
@@ -171,7 +170,6 @@ export default function RoomsDropdown({ sx, id, disabled, currentRoom, value, op
   const handleChange = (event: SelectChangeEvent) => {
     onChange(id, event.target.value);
   };
-  const { locale } = useLocales();
 
   return (
     <Select
