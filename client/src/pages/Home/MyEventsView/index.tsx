@@ -7,9 +7,9 @@ import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
 import { Box, Divider, Skeleton, Stack, Typography } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
-import { BookRoomDto, EventResponse, IConferenceRoom, IPeopleInformation } from '@quickmeet/shared';
+import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
-import { convertToRFC3339, getAttendeeEmails, getTimeZoneString, renderError } from '@helpers/utility';
+import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
 import toast from 'react-hot-toast';
 import EditEventsView from './EditEventsView';
 import dayjs from 'dayjs';
@@ -132,8 +132,6 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     setEditLoading(true);
 
     const { startTime, date, duration, seats, conference, attendees, title, room, eventId } = data;
-
-    const attendeesEmails = getAttendeeEmails(attendees as IPeopleInformation[]);
 
     if (!room) {
       return;
