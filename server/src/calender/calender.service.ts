@@ -239,24 +239,33 @@ export class CalenderService {
   async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
+    let responseStatus: string;
 
     const formattedEvents = [];
 
     for (const event of events) {
       let room: IConferenceRoom | null = null;
-      const attendessInformations = event.extendedProperties?.private?.attendees ? JSON.parse(event.extendedProperties.private.attendees) : [];
+      const attendeeInformation: IPeopleInformation[] = event.extendedProperties?.private?.attendees
+        ? JSON.parse(event.extendedProperties.private.attendees)
+        : [];
 
       const attendees: IPeopleInformation[] = [];
+
       if (event.attendees) {
         for (const attendee of event.attendees) {
           if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
-            const person = attendessInformations.find((person) => person.email === attendee.email);
-            if (person) {
-              attendees.push(person);
-            } else {
+            let person = attendeeInformation.find((person: IPeopleInformation) => person.email === attendee.email);
+
+            if (!person) {
               const emailParts = attendee.email.split('@');
-              attendees.push({ email: attendee.email, name: emailParts[0] || attendee.email, photo: '' });
+              person = { email: attendee.email, name: emailParts[0] || attendee.email, photo: '' };
             }
+
+            if (userEmail === attendee.email) {
+              responseStatus = attendee.responseStatus;
+            }
+
+            attendees.push(person);
           } else if (attendee.resource) {
             room = rooms.find((_room) => _room.email === attendee.email);
           }
@@ -281,6 +290,7 @@ export class CalenderService {
         end: event.end.dateTime,
         createdAt: event.extendedProperties?.private?.createdAt ? new Date(event.extendedProperties.private.createdAt).getTime() : Date.now(),
         isEditable: event.organizer.email === userEmail,
+        responseStatus: responseStatus,
       };
 
       formattedEvents.push(_event);

@@ -14,4 +14,5 @@ export interface EventResponse {
   attendees?: IPeopleInformation[];
   createdAt?: number;
   isEditable?: boolean;
+  responseStatus?: string;
 }
