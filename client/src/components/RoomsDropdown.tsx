@@ -3,6 +3,7 @@ import { ReactElement } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { IConferenceRoom } from '@quickmeet/shared';
 import { IAvailableRoomsDropdownOption } from '@/helpers/types';
+import { useLocales } from '@/config/i18n';
 
 interface DropdownProps {
   id: string;
@@ -86,6 +87,7 @@ const StyledHintTypography = styled(Typography)(({ theme }) => ({
 }));
 
 const RenderNoRooms = ({ icon }: { icon?: ReactElement }) => {
+  const { locale } = useLocales();
   return (
     <Box
       sx={{
@@ -96,7 +98,7 @@ const RenderNoRooms = ({ icon }: { icon?: ReactElement }) => {
       {icon && icon}
 
       <StyledHintTypography ml={2} variant="subtitle2">
-        No rooms available
+        {locale.info.noRooms}
       </StyledHintTypography>
     </Box>
   );

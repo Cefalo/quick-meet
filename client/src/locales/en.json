@@ -1,0 +1,45 @@
+{
+  "buttonText": {
+    "preferences": "Preferences",
+    "support": "Support",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "newEvent": "New Event",
+    "myEvents": "My Events",
+    "bookNow": "Book Now",
+    "reportBug": "REPORT A BUG",
+    "requestFeature": "REQUEST A FEATURE",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "error": {
+    "invalidEmail": "Invalid email entered",
+    "duplicateEmail": "Duplicate email entered",
+    "failedToRetieveCallbackUrl": "Failed to retrieve oauth callback url",
+    "missingFields": "Input missing fields",
+    "selectEventToDelete": "Please select the event to delete",
+    "roomNotUpdated": "Room was not updated",
+    "loginNotComplete": "Couldn't complete request. Redirecting to login page"
+  },
+  "success": {
+    "savedSuccessfully": "Saved successfully"
+  },
+  "info": {
+    "createMeeting": "Create meet link",
+    "defaultTitle": "Quick Meeting",
+    "deleteEventConfirmation": "Are you sure you want to permanently delete this event?",
+    "noEvents": "No events to show",
+    "noRooms": "No rooms available",
+    "logoutConfirmation": "Are you sure you want to logout?",
+    "logoutInfo": "This will revoke the application permissions and would require to approve them again when trying to log back in"
+  },
+  "placeholder": {
+    "attendees": "Attendees",
+    "selectFloor": "Select preferred floor",
+    "selectDuration": "Select preferred meeting duration",
+    "selectRoomCapacity": "Select preferred room capacity",
+    "selectLanguage": "Select preferred language",
+    "invalidEmail": "Invalid email entered"
+  }
+}

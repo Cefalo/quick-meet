@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import EditEventsView from './EditEventsView';
 import dayjs from 'dayjs';
 import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
+import { useLocales } from '@/config/i18n';
 
 interface MyEventsViewProps {
   redirectedDate?: string;
@@ -30,6 +31,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
   const api = useApi();
   const { preferences } = usePreferences();
+  const { locale } = useLocales();
 
   const [datePickerOpen, setDatePickerOpen] = useState<boolean>(false);
 
@@ -103,7 +105,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     setLoading(true);
 
     if (!deleteEventId) {
-      toast.error('Please select the event to delete');
+      toast.error(locale.error.selectEventToDelete);
       return;
     }
 
@@ -125,7 +127,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
 
   const onEditConfirmed = async (data: FormData) => {
     if (!data || !data.eventId || !data.room) {
-      toast.error('Room was not updated');
+      toast.error(locale.error.roomNotUpdated);
       return;
     }
 
@@ -158,7 +160,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
 
     const res = await api.updateEvent(eventId, payload);
     if (res?.redirect) {
-      toast.error("Couldn't complete request. Redirecting to login page");
+      toast.error(locale.error.loginNotComplete);
       setTimeout(() => {
         navigate(ROUTES.signIn);
       }, 1000);
@@ -266,7 +268,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
         <>
           {events.length == 0 ? (
             <Typography mt={3} variant="h6">
-              No events to show
+              {locale.info.noEvents}
             </Typography>
           ) : (
             <Box
