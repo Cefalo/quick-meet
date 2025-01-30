@@ -11,6 +11,7 @@ COPY server/package.json /app/server/
 
 # Install dependencies using npm workspaces
 COPY package.json /app/
+COPY package-lock.json /app/
 RUN npm install
 
 # Stage 2: Build Shared, Server, and Client

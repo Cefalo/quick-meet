@@ -17,7 +17,7 @@ root.render(
     <BrowserRouter basename={secrets.appEnvironment === 'chrome' ? '/index.html' : ''}>
       <PreferencesProvider>
         <ApiProvider>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
             <App />
           </LocalizationProvider>
         </ApiProvider>
