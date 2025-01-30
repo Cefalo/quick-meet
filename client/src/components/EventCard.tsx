@@ -1,7 +1,6 @@
 import { Typography, Chip, IconButton, Box, styled, Theme, SxProps, Menu, MenuItem, Tooltip } from '@mui/material';
 import InsertLinkRoundedIcon from '@mui/icons-material/InsertLinkRounded';
 import React, { useEffect, useState } from 'react';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { EventResponse } from '@quickmeet/shared';
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
@@ -12,6 +11,9 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import PendingIcon from '@mui/icons-material/Pending';
 import toast from 'react-hot-toast';
 
 const ListItem = styled('li')(({ theme }) => ({
@@ -120,11 +122,11 @@ interface EventCardProps {
   event: EventResponse;
   disabled?: boolean;
   isEditable?: boolean;
+  hideMenu?: boolean;
 
   onDelete?: (id?: string) => void;
   handleEditClick?: (id: string) => void;
-  handleAcceptClick?: (eventId: string) => void;
-  handleRejectClick?: (eventId: string) => void;
+  handleEventResponse?: (eventId: string, response: string) => void;
 }
 
 interface ChipData {
@@ -140,13 +142,27 @@ interface ChipData {
   action?: () => void;
 }
 
-const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRejectClick, handleAcceptClick }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEventResponse, hideMenu }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const [menuItems, setMenuItems] = useState<JSX.Element[]>([]);
+  const [responseIcon, setResponseIcon] = useState<JSX.Element>(<CheckCircleIcon fontSize="small" color="success" />);
   const open = Boolean(anchorEl);
 
   useEffect(() => {
+    setOngoingEvent();
+
+    const chips: ChipData[] = createChips(event);
+    setChips(chips);
+
+    createMenuItems();
+
+    createResponseIcon();
+  }, [event]);
+
+  const setOngoingEvent = () => {
     const startInMs = new Date(event.start!).getTime();
     const endInMs = new Date(event.end!).getTime();
     const currentTimeInMs = Date.now();
@@ -156,34 +172,87 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
     } else {
       setIsOngoingEvent(false);
     }
+  };
 
-    const chips: ChipData[] = createChips(event);
-    setChips(chips);
-  }, [event]);
+  const createResponseIcon = () => {
+    if (event.responseStatus === 'accepted') {
+      setResponseIcon(
+        <CheckCircleIcon
+          color="success"
+          sx={{
+            fontSize: '16px',
+          }}
+        />,
+      );
+    } else if (event.responseStatus === 'declined') {
+      setResponseIcon(
+        <CancelIcon
+          sx={{
+            fontSize: '16px',
+          }}
+          color="error"
+        />,
+      );
+    } else {
+      setResponseIcon(
+        <PendingIcon
+          sx={{
+            fontSize: '16px',
+          }}
+          color="warning"
+        />,
+      );
+    }
+  };
+
+  const createMenuItems = () => {
+    const menuItems: JSX.Element[] = [];
+    if (isEditable) {
+      menuItems.push(
+        <MenuItem key="edit" onClick={onEditClick}>
+          Edit
+        </MenuItem>,
+      );
+      menuItems.push(
+        <MenuItem key="delete" onClick={handleDeleteClick}>
+          Delete
+        </MenuItem>,
+      );
+    } else {
+      menuItems.push(
+        <MenuItem disabled={event.responseStatus === 'accepted'} onClick={onAcceptClick} key="accept">
+          Accept
+        </MenuItem>,
+        <MenuItem disabled={event.responseStatus === 'declined'} onClick={onRejectClick} key="reject">
+          Reject
+        </MenuItem>,
+      );
+    }
+
+    setMenuItems(menuItems);
+  };
 
   const handleOptionsMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const onEditClick = () => {
-    handleEditClick && handleEditClick(event.eventId!);
+    typeof handleEditClick === 'function' && handleEditClick(event.eventId!);
     setAnchorEl(null);
   };
 
   const onAcceptClick = () => {
-    console.log('hhj');
-
-    handleAcceptClick && handleAcceptClick(event.eventId!);
+    typeof handleEventResponse === 'function' && handleEventResponse(event.eventId!, 'accepted');
     setAnchorEl(null);
   };
 
   const onRejectClick = () => {
-    handleRejectClick && handleRejectClick(event.eventId!);
+    typeof handleEventResponse === 'function' && handleEventResponse(event.eventId!, 'declined');
     setAnchorEl(null);
   };
 
   const handleDeleteClick = () => {
-    onDelete && onDelete(event!.eventId);
+    typeof onDelete === 'function' && onDelete(event.eventId);
     setAnchorEl(null);
   };
 
@@ -193,7 +262,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
         ...sx,
       }}
     >
-      <Box display={'flex'} alignItems="flex-start" pl={2}>
+      <Box display={'flex'} alignItems="flex-start" px={1}>
         <Typography
           variant="h5"
           component="div"
@@ -202,35 +271,44 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
               textAlign: 'left',
               color: event.summary ?? theme.palette.grey[400],
               fontStyle: event.summary ?? 'italic',
+              display: 'flex',
+              alignItems: 'center',
             }),
           ]}
         >
-          {event?.summary || 'No title'}
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            {event?.summary || 'No title'}
+            <Tooltip title={event.responseStatus === 'needsAction' ? 'Pending invitation' : event.responseStatus === 'accepted' ? 'Accepted' : 'Declined'}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>{responseIcon}</Box>
+            </Tooltip>
+          </Box>
         </Typography>
-        <Tooltip title={event.responseStatus === 'needsAction' ? 'Pending invitation' : 'Accepted'}>
-          <FiberManualRecordIcon fontSize="small" sx={{ pl: 1 }} color={event.responseStatus === 'needsAction' ? 'warning' : 'success'} />
-        </Tooltip>
+
         <Box flexGrow={1} />
 
         {/* Options menu */}
 
-        {isOngoingEvent ? (
-          <Chip label="Ongoing" size="small" variant="outlined" deleteIcon={<MoreHorizIcon />} onDelete={handleOptionsMenuClick} />
-        ) : (
+        {!hideMenu && (
           <>
-            {
-              <IconButton
-                aria-label="more"
-                id="basic-button"
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleOptionsMenuClick}
-                sx={{ p: 0, mr: 1 }}
-              >
-                <MoreHorizIcon />
-              </IconButton>
-            }
+            {isOngoingEvent ? (
+              <Chip label="Ongoing" size="small" variant="outlined" deleteIcon={<MoreHorizIcon />} onDelete={handleOptionsMenuClick} />
+            ) : (
+              <>
+                {
+                  <IconButton
+                    aria-label="more"
+                    id="basic-button"
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleOptionsMenuClick}
+                    sx={{ p: 0, mr: 1 }}
+                  >
+                    <MoreHorizIcon />
+                  </IconButton>
+                }
+              </>
+            )}
           </>
         )}
 
@@ -258,19 +336,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
             },
           }}
         >
-          {isEditable && (
-            <>
-              <MenuItem onClick={onEditClick}>Edit</MenuItem>
-              <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
-            </>
-          )}
-
-          {!isEditable && (
-            <>
-              <MenuItem onClick={onAcceptClick}>Accept</MenuItem>
-              <MenuItem onClick={onRejectClick}>Reject</MenuItem>
-            </>
-          )}
+          {menuItems.map((item) => item)}
         </Menu>
       </Box>
 
@@ -284,7 +350,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRej
           p: 0,
           m: 0,
           mt: 1,
-          px: 2,
+          px: 1,
         }}
       >
         {chips.map((chip, i) => {

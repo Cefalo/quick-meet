@@ -178,6 +178,16 @@ export default class Api {
     }
   }
 
+  async updateEventResponse(eventId: string, response: string) {
+    try {
+      const res = await this.client.put('/api/event/response', { eventId, response });
+
+      return res.data as ApiResponse<EventResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
   async deleteEvent(eventId: string) {
     try {
       const res = await this.client.delete(`/api/event?id=${eventId}`);

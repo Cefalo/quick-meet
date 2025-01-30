@@ -1,5 +1,5 @@
 import { OAuth2Client } from 'google-auth-library';
-import { Body, Controller, Delete, Get, Post, Put, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Post, Put, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CalenderService } from './calender.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { _OAuth2Client } from '../auth/decorators';
@@ -129,6 +129,29 @@ export class CalenderController {
       title,
       attendees,
     );
+    return createResponse(updatedEvent, 'Event has been updated!');
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OauthInterceptor)
+  @Put('/event/response')
+  async updateEventResponse(
+    @_OAuth2Client() client: OAuth2Client,
+    @Req() req: _Request,
+    @Body('eventId') eventId: string,
+    @Body('response') response: string,
+  ): Promise<ApiResponse<EventUpdateResponse>> {
+    const userEmail = req.email;
+
+    if (!response) {
+      throw new BadRequestException('No response provided');
+    }
+
+    if (!eventId) {
+      throw new BadRequestException('No event id provided');
+    }
+
+    const updatedEvent = await this.calenderService.updateEventResponse(client, userEmail, eventId, response);
     return createResponse(updatedEvent, 'Event has been updated!');
   }
 
