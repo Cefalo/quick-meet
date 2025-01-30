@@ -3,6 +3,7 @@ import { secrets } from '@config/secrets';
 import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
 import { constants } from '@/config/constants';
 import { Box, Button, styled } from '@mui/material';
+import { useLocales } from '@/config/i18n';
 
 const SettingsButton = styled(Button)(({ theme: _ }) => ({
   boxShadow: 'none',
@@ -18,6 +19,8 @@ const SettingsButton = styled(Button)(({ theme: _ }) => ({
 }));
 
 export default function SupportView() {
+  const { locale } = useLocales();
+
   const onReportBugClick = () => {
     const url = constants.bugReportUrl;
     if (secrets.appEnvironment === 'chrome') {
@@ -76,7 +79,7 @@ export default function SupportView() {
             onClick={onReportBugClick}
             startIcon={<BugReportRoundedIcon sx={{ mr: 1 }} />}
           >
-            Report a bug
+            {locale.buttonText.reportBug}
           </SettingsButton>
 
           <SettingsButton
@@ -89,7 +92,7 @@ export default function SupportView() {
             onClick={onRequestFeatureClick}
             startIcon={<LightbulbRoundedIcon sx={{ mr: 1 }} />}
           >
-            Request a feature
+            {locale.buttonText.requestFeature}
           </SettingsButton>
         </Box>
       </Box>

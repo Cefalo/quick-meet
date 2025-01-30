@@ -8,7 +8,8 @@ import { PreferencesProvider } from './context/PreferencesContext';
 import { ApiProvider } from '@/context/ApiContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
+import { initI18n } from '@/config/i18n';
+initI18n();
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <StyledEngineProvider injectFirst>

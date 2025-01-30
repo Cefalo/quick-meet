@@ -2,6 +2,7 @@ import { Box, IconButton, styled, SxProps, Theme, ToggleButton, ToggleButtonGrou
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/config/routes';
+import { useLocales } from '@/config/i18n';
 
 const TopBar = styled(Box)(({ theme }) => ({
   paddingTop: theme.spacing(1.5),
@@ -55,6 +56,7 @@ interface TopNavigationBarProps {
 
 const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarProps) => {
   const navigate = useNavigate();
+  const { locale } = useLocales();
 
   const handleChange = (_: React.SyntheticEvent | null, newValue: number) => {
     if (newValue !== null) {
@@ -63,7 +65,7 @@ const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarPro
   };
 
   const onSettingClick = () => {
-    navigate(ROUTES.settings)
+    navigate(ROUTES.settings);
   };
 
   return (
@@ -83,12 +85,11 @@ const TopNavigationBar = ({ sx, tabIndex, handleTabChange }: TopNavigationBarPro
       >
         <StyledToggleButtonGroup value={tabIndex} exclusive onChange={handleChange} aria-label="event tabs" fullWidth={true}>
           <StyledToggleButton value={0} aria-label="new event" fullWidth={true}>
-            New Event
+            {locale.buttonText.newEvent}
           </StyledToggleButton>
           <StyledToggleButton value={1} aria-label="my events" fullWidth={true}>
-            My Events
+            {locale.buttonText.myEvents}
           </StyledToggleButton>
-
         </StyledToggleButtonGroup>
       </Box>
 

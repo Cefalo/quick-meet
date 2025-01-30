@@ -32,6 +32,7 @@ import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
 import { EventResponse, IConferenceRoom, IAvailableRooms, IPeopleInformation } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
+import { useLocales } from '@/config/i18n';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -70,6 +71,9 @@ interface EditEventsViewProps {
 export default function EditEventsView({ open, event, handleClose, currentRoom, onEditConfirmed, editLoading }: EditEventsViewProps) {
   // Context or global state
   const { preferences } = usePreferences();
+
+  // Locales
+  const { locale } = useLocales();
 
   // Dropdown options state
   const [timeOptions, setTimeOptions] = useState<DropdownOption[]>([]);
@@ -441,7 +445,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
               >
                 <Checkbox checked={formData.conference} value={formData.conference} onChange={(e) => handleInputChange('conference', e.target.checked)} />
                 <Typography variant="subtitle1" ml={0.5}>
-                  Create meet link
+                  {locale.info.createMeeting}
                 </Typography>
               </Box>
             </Box>
@@ -481,7 +485,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           ]}
         >
           <Typography variant="h6" fontWeight={700}>
-            Save changes
+            {locale.buttonText.saveChanges}
           </Typography>
         </LoadingButton>
 
@@ -505,7 +509,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           }}
         >
           <Typography variant="subtitle2" fontWeight={700}>
-            Cancel
+            {locale.buttonText.cancel}
           </Typography>
         </Button>
       </Box>
