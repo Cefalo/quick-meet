@@ -1,7 +1,7 @@
-import { Box, Button, Chip, Divider, Fade, List, ListItem, Paper, Popper } from '@mui/material';
-import { StaticDatePicker, PickersShortcutsItem, PickersShortcutsProps } from '@mui/x-date-pickers';
+import { Box, Chip, ClickAwayListener, Divider, Fade, List, ListItem, Popper } from '@mui/material';
+import { StaticDatePicker, PickersShortcutsItem, PickersShortcutsProps, type PickerChangeHandlerContext, type DateValidationError } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 // https://mui.com/x/react-date-pickers/shortcuts/
 const shortcutItems: PickersShortcutsItem<unknown>[] = [
@@ -71,20 +71,36 @@ interface DatePickerPopperProps {
   setCurrentDate: React.Dispatch<React.SetStateAction<dayjs.Dayjs>>;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  anchorEl: HTMLElement | null;
 }
 
-const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate }: DatePickerPopperProps) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl }: DatePickerPopperProps) => {
+  const hasMounted = useRef(false);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-    setOpen((prev) => !prev);
+  useEffect(() => {
+    if (!open) {
+      hasMounted.current = false;
+    }
+  }, [open]);
+
+  const handleClickAway = () => {
+    // on initial mount, this method gets called. to prevent that, the flag hasMounted has been used
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+    setOpen(false);
+  };
+
+  const onDateChange = (newDate: dayjs.Dayjs | null, _?: PickerChangeHandlerContext<DateValidationError>) => {
+    if (newDate) {
+      setCurrentDate(newDate);
+      setOpen(false);
+    }
   };
 
   return (
-    <Box>
-      <Button onClick={handleClick}>Open Date Picker</Button>
-
+    <ClickAwayListener onClickAway={handleClickAway}>
       <Popper sx={{ zIndex: 1200 }} open={open} anchorEl={anchorEl} placement="bottom" transition>
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={350}>
@@ -94,14 +110,9 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate }: DatePi
               }}
             >
               <StaticDatePicker
-                onChange={(newDate, context) => {
-                  if (!context?.shortcut) {
-                    if (newDate) {
-                      setCurrentDate(newDate);
-                      setOpen(false);
-                    }
-                  }
-                }}
+                onAccept={(value, context) => console.log(value, context)}
+                onError={(err, val) => console.log(err, val)}
+                onChange={onDateChange}
                 value={currentDate}
                 slots={{
                   shortcuts: DatePickerShortcuts,
@@ -130,7 +141,7 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate }: DatePi
           </Fade>
         )}
       </Popper>
-    </Box>
+    </ClickAwayListener>
   );
 };
 
