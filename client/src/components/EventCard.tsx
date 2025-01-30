@@ -118,10 +118,13 @@ export const createChips = (event: EventResponse) => {
 interface EventCardProps {
   sx?: SxProps<Theme>;
   event: EventResponse;
+  disabled?: boolean;
+  isEditable?: boolean;
+
   onDelete: (id?: string) => void;
   handleEditClick: (id: string) => void;
-  disabled?: boolean;
-  hideMenu?: boolean;
+  handleAcceptClick: (eventId: string) => void;
+  handleRejectClick: (eventId: string) => void;
 }
 
 interface ChipData {
@@ -137,7 +140,7 @@ interface ChipData {
   action?: () => void;
 }
 
-const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleRejectClick, handleAcceptClick }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -158,12 +161,24 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
     setChips(chips);
   }, [event]);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOptionsMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const onEditClick = () => {
     handleEditClick(event.eventId!);
+    setAnchorEl(null);
+  };
+
+  const onAcceptClick = () => {
+    console.log('hhj');
+
+    handleAcceptClick(event.eventId!);
+    setAnchorEl(null);
+  };
+
+  const onRejectClick = () => {
+    handleRejectClick(event.eventId!);
     setAnchorEl(null);
   };
 
@@ -192,23 +207,31 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
         >
           {event?.summary || 'No title'}
         </Typography>
-        {isOngoingEvent && <FiberManualRecordIcon fontSize="small" sx={{ pl: 1 }} color="success" />}
+        <Tooltip title={event.responseStatus === 'needsAction' ? 'Pending invitation' : 'Accepted'}>
+          <FiberManualRecordIcon fontSize="small" sx={{ pl: 1 }} color={event.responseStatus === 'needsAction' ? 'warning' : 'success'} />
+        </Tooltip>
         <Box flexGrow={1} />
 
         {/* Options menu */}
 
-        {!hideMenu && (
-          <IconButton
-            aria-label="more"
-            id="basic-button"
-            aria-controls={open ? 'basic-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-            onClick={handleClick}
-            sx={{ p: 0, mr: 1 }}
-          >
-            <MoreHorizIcon />
-          </IconButton>
+        {isOngoingEvent ? (
+          <Chip label="Ongoing" size="small" variant="outlined" deleteIcon={<MoreHorizIcon />} onDelete={handleOptionsMenuClick} />
+        ) : (
+          <>
+            {
+              <IconButton
+                aria-label="more"
+                id="basic-button"
+                aria-controls={open ? 'basic-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleOptionsMenuClick}
+                sx={{ p: 0, mr: 1 }}
+              >
+                <MoreHorizIcon />
+              </IconButton>
+            }
+          </>
         )}
 
         <Menu
@@ -235,8 +258,19 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
             },
           }}
         >
-          <MenuItem onClick={onEditClick}>Edit</MenuItem>
-          <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+          {isEditable && (
+            <>
+              <MenuItem onClick={onEditClick}>Edit</MenuItem>
+              <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+            </>
+          )}
+
+          {!isEditable && (
+            <>
+              <MenuItem onClick={onAcceptClick}>Accept</MenuItem>
+              <MenuItem onClick={onRejectClick}>Reject</MenuItem>
+            </>
+          )}
         </Menu>
       </Box>
 

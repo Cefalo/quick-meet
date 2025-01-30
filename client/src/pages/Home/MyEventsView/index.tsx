@@ -194,6 +194,14 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     }
   };
 
+  const handleAcceptClick = (eventId: string) => {
+    console.log(eventId);
+  };
+
+  const handleRejectClick = (eventId: string) => {
+    console.log(eventId);
+  };
+
   const handleEditEventViewClose = () => {
     setEditView(null);
   };
@@ -295,7 +303,9 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
                     handleEditClick={handleEditClick}
                     disabled={loading}
                     onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
-                    hideMenu={!event.isEditable}
+                    isEditable={event.isEditable}
+                    handleAcceptClick={handleAcceptClick}
+                    handleRejectClick={handleRejectClick}
                   />
                   {i !== events.length - 1 && <Divider />}
                 </React.Fragment>
