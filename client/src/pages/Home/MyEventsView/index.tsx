@@ -8,79 +8,17 @@ import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
 import { convertToRFC3339, getTimeZoneString, renderError } from '@helpers/utility';
-import { Box, Chip, Divider, List, ListItem, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Divider, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
 import { BookRoomDto, EventResponse, IConferenceRoom } from '@quickmeet/shared';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import EditEventsView from './EditEventsView';
-import { DatePicker, PickersShortcutsProps, PickersShortcutsItem } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
 
 interface MyEventsViewProps {
   redirectedDate?: string;
-}
-
-// https://mui.com/x/react-date-pickers/shortcuts/
-const shortcutItems: PickersShortcutsItem<unknown>[] = [
-  {
-    label: 'Reset',
-    getValue: () => {
-      return dayjs(new Date());
-    },
-  },
-];
-
-function DatePickerShortcuts(props: PickersShortcutsProps<dayjs.Dayjs | null>) {
-  const { items, onChange, isValid, changeImportance = 'accept' } = props;
-
-  if (items == null || items.length === 0) {
-    return null;
-  }
-
-  const resolvedItems = items.map((item) => {
-    const newValue = item.getValue({ isValid });
-
-    return {
-      label: item.label,
-      onClick: () => {
-        onChange(newValue, changeImportance, item);
-      },
-      disabled: !isValid(newValue),
-    };
-  });
-
-  return (
-    <Box
-      sx={{
-        gridRow: 1,
-        gridColumn: 2,
-      }}
-    >
-      <List
-        dense
-        sx={(theme) => ({
-          display: 'flex',
-          px: theme.spacing(1),
-          '& .MuiListItem-root': {
-            pl: 0,
-            pr: theme.spacing(1),
-            py: 0,
-          },
-        })}
-      >
-        {resolvedItems.map((item) => {
-          return (
-            <ListItem key={item.label}>
-              <Chip {...item} />
-            </ListItem>
-          );
-        })}
-      </List>
-      <Divider />
-    </Box>
-  );
 }
 
 export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
@@ -96,9 +34,11 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const { preferences } = usePreferences();
   const { locale } = useLocales();
 
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState<boolean>(false);
 
   const [currentDate, setCurrentDate] = useState<dayjs.Dayjs>(dayjs(redirectedDate) || dayjs());
+  const [datePickerAnchorEl, setDatePickerAnchorEl] = useState<null | HTMLElement>(null);
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -141,6 +81,13 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       }
     };
   }, []);
+
+  const handleDatePopperClick = (event: React.MouseEvent<HTMLElement>) => {
+    console.log(datePickerOpen);
+
+    setDatePickerAnchorEl(event.currentTarget);
+    setDatePickerOpen(true);
+  };
 
   const handleDeleteClick = (id: string) => {
     setDeleteEventId(id);
@@ -285,63 +232,29 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
       sx={{
         display: 'flex',
         overflow: 'hidden',
-        justifyContent: 'center',
         flexDirection: 'column',
         px: 2,
       }}
     >
-      <Box>
-        <DatePickerPopper currentDate={currentDate} setCurrentDate={setCurrentDate} open={datePickerOpen} setOpen={setDatePickerOpen} />
+      <Box
+        sx={{
+          display: 'flex',
+          mb: 1,
+        }}
+      >
         {/* Date Navigator */}
         <DateNavigator onPrevClick={handlePrevDate} onNextClick={handleNextDate}>
-          <DatePicker
-            format="MMMM DD, YYYY"
-            onChange={(newDate) => {
-              if (newDate) {
-                setCurrentDate(newDate);
-              }
-            }}
-            value={currentDate}
-            slots={{
-              shortcuts: DatePickerShortcuts,
-            }}
-            slotProps={{
-              inputAdornment: {
-                position: 'start',
-                sx: {
-                  input: {
-                    cursor: 'pointer',
-                  },
-                },
-              },
-              field: {
-                readOnly: true,
-              },
-              shortcuts: {
-                items: shortcutItems,
-                changeImportance: 'set',
-              },
-            }}
-            sx={{
-              '.MuiOutlinedInput-root': {
-                '& fieldset': {
-                  border: 'none',
-                },
-              },
-              '.MuiInputBase-input': {
-                color: (theme) => theme.palette.common.black,
-                fontFamily: 'inherit',
-                fontSize: '1.1rem',
-                fontWeight: 400,
-                cursor: 'default',
-                p: 0,
-              },
-              '.MuiSvgIcon-root': {
-                color: (theme) => theme.palette.grey[50],
-              },
-              '.MuiButtonBase-root': { cursor: 'pointer' },
-            }}
-          />
+          <Tooltip title={'Open up the calender'}>
+            <Typography
+              sx={{
+                cursor: 'pointer',
+              }}
+              onClick={handleDatePopperClick}
+              variant="subtitle1"
+            >
+              {currentDate.format('ddd MMM D, YYYY')}
+            </Typography>
+          </Tooltip>
         </DateNavigator>
       </Box>
 
@@ -394,6 +307,13 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
           )}
         </>
       )}
+      <DatePickerPopper
+        currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
+        open={datePickerOpen}
+        setOpen={setDatePickerOpen}
+        anchorEl={datePickerAnchorEl}
+      />
     </Box>
   );
 }
