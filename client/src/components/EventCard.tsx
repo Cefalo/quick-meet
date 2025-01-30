@@ -269,7 +269,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, hideMenu }: EventCard
                   }}
                   onClick={chip.action}
                   deleteIcon={chip.endIcon}
-                  onDelete={chip.endIconAction}
+                  onDelete={chip.endIcon && chip.endIconAction}
                 />
               </Tooltip>
             </ListItem>
