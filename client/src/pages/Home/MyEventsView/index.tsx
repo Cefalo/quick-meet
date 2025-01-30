@@ -82,8 +82,6 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   }, []);
 
   const handleDatePopperClick = (event: React.MouseEvent<HTMLElement>) => {
-    console.log(datePickerOpen);
-
     setDatePickerAnchorEl(event.currentTarget);
     setDatePickerOpen(true);
   };
@@ -194,12 +192,29 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     }
   };
 
-  const handleAcceptClick = (eventId: string) => {
-    console.log(eventId);
-  };
+  const handleEventResponse = async (eventId: string, response: string) => {
+    if (!eventId) {
+      toast.error('Room was not updated');
+      return;
+    }
 
-  const handleRejectClick = (eventId: string) => {
-    console.log(eventId);
+    setEditLoading(true);
+
+    const res = await api.updateEventResponse(eventId, response);
+    if (res?.status === 'error') {
+      res.message && toast.error(res.message);
+      setEditLoading(false);
+      return;
+    }
+
+    setEvents((prevEvents) =>
+      prevEvents
+        .map((event) => (event.eventId === eventId ? { ...event, ...res.data } : event))
+        .filter((event) => event.start.split('T')[0] === currentDate.toISOString().split('T')[0]),
+    );
+
+    toast.success('Event response has been updated');
+    setEditLoading(false);
   };
 
   const handleEditEventViewClose = () => {
@@ -304,8 +319,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
                     disabled={loading}
                     onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
                     isEditable={event.isEditable}
-                    handleAcceptClick={handleAcceptClick}
-                    handleRejectClick={handleRejectClick}
+                    handleEventResponse={handleEventResponse}
                   />
                   {i !== events.length - 1 && <Divider />}
                 </React.Fragment>

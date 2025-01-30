@@ -74,7 +74,7 @@ export default function DeleteConfirmationView({ event, open, handleNegativeClic
               borderRadius: 2,
             }}
           >
-            <EventCard event={event} />
+            <EventCard event={event} hideMenu={true} />
           </Box>
         )}
 

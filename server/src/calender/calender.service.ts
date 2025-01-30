@@ -86,7 +86,7 @@ export class CalenderService {
 
     const createdEvent = await this.googleApiService.createCalenderEvent(client, event);
 
-    console.log('Room has been booked', createdEvent);
+    this.logger.log('[CreateEvent] Room has been booked' + JSON.stringify(createdEvent));
 
     const data: EventResponse = {
       eventId: createdEvent.id,
@@ -241,12 +241,13 @@ export class CalenderService {
   async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
-    let responseStatus: string;
 
     const formattedEvents = [];
 
     for (const event of events) {
       let room: IConferenceRoom | null = null;
+      let responseStatus: string;
+
       const attendeeInformation: IPeopleInformation[] = event.extendedProperties?.private?.attendees
         ? JSON.parse(event.extendedProperties.private.attendees)
         : [];
@@ -255,17 +256,17 @@ export class CalenderService {
 
       if (event.attendees) {
         for (const attendee of event.attendees) {
-          if (!attendee.resource && attendee.responseStatus !== 'declined' && !attendee.organizer) {
+          // current user's response status
+          if (userEmail === attendee.email) {
+            responseStatus = attendee.responseStatus;
+          }
+
+          if (!attendee.resource && !attendee.organizer) {
             let person = attendeeInformation.find((person: IPeopleInformation) => person.email === attendee.email);
 
             if (!person) {
               const emailParts = attendee.email.split('@');
               person = { email: attendee.email, name: emailParts[0], photo: '' };
-            }
-
-            // current user's response status
-            if (userEmail === attendee.email) {
-              responseStatus = attendee.responseStatus;
             }
 
             attendees.push(person);
@@ -382,10 +383,6 @@ export class CalenderService {
         if (validateEmail(attendee.email)) {
           const existingAttendee = event.attendees?.find((a) => a.email === attendee.email);
           if (existingAttendee) {
-            if (userEmail === attendee.email && responseStatus) {
-              existingAttendee.responseStatus = responseStatus;
-            }
-
             filteredAttendees.push({ ...attendee, ...existingAttendee });
           } else {
             // if photo url length exceeds 1024, remove it since google silently truncates these in extendedProperties
@@ -473,6 +470,40 @@ export class CalenderService {
     };
 
     return data;
+  }
+
+  async updateEventResponse(client: OAuth2Client, userEmail: string, eventId: string, responseStatus: string): Promise<EventResponse> {
+    const event = await this.googleApiService.getCalenderEvent(client, eventId);
+
+    if (!event.attendees.some(({ email }) => email === userEmail)) {
+      throw new ForbiddenException('Not authorized to respond to this event');
+    }
+
+    for (const attendee of event.attendees) {
+      if (attendee.email === userEmail && !attendee.email.endsWith('resource.calendar.google.com') && attendee.email !== event.organizer.email) {
+        attendee.responseStatus = responseStatus;
+        break;
+      }
+    }
+
+    const eventPayload: calendar_v3.Schema$Event = {
+      ...event,
+      attendees: event.attendees,
+      colorId: '3',
+    };
+
+    const result = await this.googleApiService.updateCalenderEvent(client, eventId, eventPayload);
+    const updatedAttendees = result.attendees.filter(
+      (attendee) => !attendee.email.endsWith('resource.calendar.google.com') && attendee.email !== event.organizer.email,
+    );
+
+    const eventResponse: EventResponse = {
+      eventId: result.id,
+      attendees: updatedAttendees,
+      responseStatus,
+    };
+
+    return eventResponse;
   }
 
   async listFloors(client: OAuth2Client, domain: string): Promise<string[]> {

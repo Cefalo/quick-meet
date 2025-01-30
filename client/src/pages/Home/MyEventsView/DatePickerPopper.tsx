@@ -110,8 +110,6 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl
               }}
             >
               <StaticDatePicker
-                onAccept={(value, context) => console.log(value, context)}
-                onError={(err, val) => console.log(err, val)}
                 onChange={onDateChange}
                 value={currentDate}
                 slots={{
