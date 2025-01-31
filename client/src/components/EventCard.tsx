@@ -12,8 +12,9 @@ import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import PendingIcon from '@mui/icons-material/Pending';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import toast from 'react-hot-toast';
 
 const ListItem = styled('li')(({ theme }) => ({
@@ -149,6 +150,8 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
 
   const [menuItems, setMenuItems] = useState<JSX.Element[]>([]);
   const [responseIcon, setResponseIcon] = useState<JSX.Element>(<CheckCircleIcon fontSize="small" color="success" />);
+  const [responseTooltipLabel, setResponseTooltipLabel] = useState<string>('Acccepted');
+
   const open = Boolean(anchorEl);
 
   useEffect(() => {
@@ -176,32 +179,47 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
 
   const createResponseIcon = () => {
     if (event.responseStatus === 'accepted') {
-      setResponseIcon(
-        <CheckCircleIcon
-          color="success"
-          sx={{
-            fontSize: '16px',
-          }}
-        />,
-      );
+      if (event.isEditable) {
+        setResponseIcon(
+          <CheckCircleIcon
+            color="success"
+            sx={{
+              fontSize: '16px',
+            }}
+          />,
+        );
+        setResponseTooltipLabel('Organizer');
+      } else {
+        setResponseIcon(
+          <CheckCircleOutlineIcon
+            color="success"
+            sx={{
+              fontSize: '16px',
+            }}
+          />,
+        );
+        setResponseTooltipLabel('Accepted');
+      }
     } else if (event.responseStatus === 'declined') {
       setResponseIcon(
-        <CancelIcon
+        <CancelOutlinedIcon
           sx={{
             fontSize: '16px',
           }}
           color="error"
         />,
       );
+      setResponseTooltipLabel('Declined');
     } else {
       setResponseIcon(
-        <PendingIcon
+        <PendingOutlinedIcon
           sx={{
             fontSize: '16px',
           }}
           color="warning"
         />,
       );
+      setResponseTooltipLabel('Pending');
     }
   };
 
@@ -278,7 +296,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
         >
           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {event?.summary || 'No title'}
-            <Tooltip title={event.responseStatus === 'needsAction' ? 'Pending invitation' : event.responseStatus === 'accepted' ? 'Accepted' : 'Declined'}>
+            <Tooltip title={responseTooltipLabel}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>{responseIcon}</Box>
             </Tooltip>
           </Box>

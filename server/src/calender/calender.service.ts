@@ -327,7 +327,6 @@ export class CalenderService {
     createConference?: boolean,
     eventTitle?: string,
     attendees?: IPeopleInformation[],
-    responseStatus?: string,
   ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
     const rooms = await this.authService.getDirectoryResources(client, domain);
@@ -378,12 +377,17 @@ export class CalenderService {
     attendees.push({ email: event.organizer.email });
 
     const filteredAttendees: IPeopleInformation[] = [];
+    let responseStatus: string;
+
     if (attendees?.length) {
       for (const attendee of attendees) {
         if (validateEmail(attendee.email)) {
           const existingAttendee = event.attendees?.find((a) => a.email === attendee.email);
           if (existingAttendee) {
             filteredAttendees.push({ ...attendee, ...existingAttendee });
+            if (userEmail === existingAttendee.email) {
+              responseStatus = existingAttendee.responseStatus;
+            }
           } else {
             // if photo url length exceeds 1024, remove it since google silently truncates these in extendedProperties
             // https://developers.google.com/calendar/api/guides/extended-properties#limits
@@ -457,6 +461,7 @@ export class CalenderService {
       attendees: updatedAttendees,
       isEditable: true,
       floor: pickedRoom.floor,
+      responseStatus,
     };
 
     return eventResponse;

@@ -1,4 +1,4 @@
-import { Box, Chip, ClickAwayListener, Divider, Fade, List, ListItem, Popper } from '@mui/material';
+import { Box, Chip, ClickAwayListener, Divider, Fade, GlobalStyles, List, ListItem, Popper } from '@mui/material';
 import { StaticDatePicker, PickersShortcutsItem, PickersShortcutsProps, type PickerChangeHandlerContext, type DateValidationError } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useEffect, useRef } from 'react';
@@ -107,8 +107,17 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl
             <Box
               sx={{
                 boxShadow: (theme) => theme.shadows[8],
+                borderRadius: '15px',
               }}
             >
+              <GlobalStyles
+                styles={{
+                  '.MuiPickersLayout-root': {
+                    borderRadius: '15px !important',
+                  },
+                }}
+              />
+              {/* https://mui.com/x/react-date-pickers/date-picker/#customization */}
               <StaticDatePicker
                 onChange={onDateChange}
                 value={currentDate}
@@ -128,10 +137,6 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl
                   },
                   '.MuiPickersLayout-actionBar': {
                     display: 'none',
-                  },
-                  '.MuiDateCalendar-root': {
-                    borderBottomLeftRadius: 20,
-                    borderBottomRightRadius: 20,
                   },
                 }}
               />
