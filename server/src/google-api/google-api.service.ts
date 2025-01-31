@@ -216,21 +216,19 @@ export class GoogleApiService implements IGoogleApiService {
     }
   }
 
-  // https://developers.google.com/people/api/rest/v1/people/searchDirectoryPeople
-  async searchPeople(oauth2Client: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]> {
+  async listPeople(oauth2Client: OAuth2Client): Promise<people_v1.Schema$Person[]> {
     const peopleService = google.people({ version: 'v1', auth: oauth2Client });
 
     const [err, res]: [GaxiosError, GaxiosResponse<people_v1.Schema$SearchDirectoryPeopleResponse>] = await to(
-      peopleService.people.searchDirectoryPeople({
-        query,
+      peopleService.people.listDirectoryPeople({
         readMask: 'emailAddresses,photos,names',
-        pageSize: 10,
+        pageSize: 1000,
         sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
       }),
     );
 
     if (err) {
-      this.logger.error("Couldn't search directory people: ", err);
+      this.logger.error("Couldn't list directory people: ", err);
       return [];
     }
 

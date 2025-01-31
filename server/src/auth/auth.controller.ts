@@ -48,7 +48,7 @@ export class AuthController {
       this.logger.debug('revoking refresh token');
       res.clearCookie('refreshToken');
       res.clearCookie('refreshTokenIv');
-      
+
       const { accessToken, accessTokenIv } = req.cookies;
       if (accessToken && accessTokenIv) {
         const decryptedAccessToken = await this.encryptionService.decrypt(accessToken, accessTokenIv);

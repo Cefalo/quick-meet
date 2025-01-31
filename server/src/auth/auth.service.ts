@@ -1,4 +1,4 @@
-import { IConferenceRoom } from '@quickmeet/shared';
+import { IConferenceRoom, IPeopleInformation } from '@quickmeet/shared';
 import { BadRequestException, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import appConfig from '../config/env/app.config';
 import { ConfigType } from '@nestjs/config';
@@ -30,7 +30,8 @@ export class AuthService {
     const { tokens } = await this.googleApiService.getToken(client, code);
     const userInfo = await this.jwtService.decode(tokens.id_token);
 
-    const _ = await this.getDirectoryResources(client, userInfo.hd);
+    await this.getDirectoryResources(client, userInfo.hd);
+    await this.getPeopleResources(client);
 
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
 
@@ -43,7 +44,7 @@ export class AuthService {
       refreshToken: encryptedRefreshToken?.encryptedData,
       refreshTokenIv: encryptedRefreshToken?.iv,
       hd: userInfo.hd,
-      email: userInfo.email
+      email: userInfo.email,
     };
   }
 
@@ -113,10 +114,42 @@ export class AuthService {
       });
     }
 
-    await this.saveDirectoryResouces(rooms);
+    await this.saveToCache('conference_rooms', rooms);
     this.logger.log(`Conference rooms created successfully, Count: ${rooms.length}`);
 
     return rooms;
+  }
+
+  async createPeopleList(oauth2Client: OAuth2Client): Promise<IPeopleInformation[]> {
+    const items = await this.googleApiService.listPeople(oauth2Client);
+
+    const people: IPeopleInformation[] = items.map((item) => {
+      const email = item.emailAddresses.find((email) => email.metadata.primary && email.metadata.verified);
+      const photo = item.photos?.find((photo) => photo.metadata.primary);
+      const name = item.names?.find((name) => name.metadata.primary);
+      return {
+        email: email?.value,
+        name: name?.displayName,
+        photo: photo?.url,
+      };
+    });
+
+    await this.saveToCache('people', people, toMs('30d'));
+    this.logger.log(`People data created successfully, Count: ${people.length}`);
+
+    return people;
+  }
+
+  /**
+   * obtains the people resources from the in-memory cache, if not found, creates them
+   */
+  async getPeopleResources(client: OAuth2Client): Promise<IPeopleInformation[] | null> {
+    let people: IPeopleInformation[] = await this.cacheManager.get('people');
+    if (!people) {
+      people = await this.createPeopleList(client);
+    }
+
+    return people;
   }
 
   /**
@@ -135,8 +168,8 @@ export class AuthService {
   /**
    * saves the conference rooms in the cache
    */
-  async saveDirectoryResouces(resources: IConferenceRoom[], expiry = toMs('15d')): Promise<void> {
-    await this.cacheManager.set('conference_rooms', resources, expiry); // set TTL to 15 days
+  async saveToCache(key: string, value: unknown, expiry = toMs('15d')): Promise<void> {
+    await this.cacheManager.set(key, value, expiry); // set TTL to 15 days
   }
 
   getCookieOptions(age = toMs('30d')) {
