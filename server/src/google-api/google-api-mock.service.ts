@@ -19,10 +19,6 @@ export class GoogleApiMockService implements IGoogleApiService {
     this.db = new CalenderMockDb();
   }
 
-  async searchPeople(_: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]> {
-    return this.db.getDirectoryPeople(query);
-  }
-
   getOAuthClient(): OAuth2Client;
   getOAuthClient(redirectUrl?: string): OAuth2Client;
   getOAuthClient(_?: string): OAuth2Client {

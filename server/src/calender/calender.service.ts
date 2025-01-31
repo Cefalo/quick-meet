@@ -78,7 +78,6 @@ export class CalenderService {
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp
-          attendees: JSON.stringify(filteredAttendees),
         },
       },
       ...conference,
@@ -241,16 +240,13 @@ export class CalenderService {
   async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
     const rooms = await this.authService.getDirectoryResources(client, domain);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
+    const people = await this.authService.getPeopleResources(client);
 
     const formattedEvents = [];
 
     for (const event of events) {
       let room: IConferenceRoom | null = null;
       let responseStatus: string;
-
-      const attendeeInformation: IPeopleInformation[] = event.extendedProperties?.private?.attendees
-        ? JSON.parse(event.extendedProperties.private.attendees)
-        : [];
 
       const attendees: IPeopleInformation[] = [];
 
@@ -262,7 +258,7 @@ export class CalenderService {
           }
 
           if (!attendee.resource && !attendee.organizer) {
-            let person = attendeeInformation.find((person: IPeopleInformation) => person.email === attendee.email);
+            let person = people.find((person: IPeopleInformation) => person.email === attendee.email);
 
             if (!person) {
               const emailParts = attendee.email.split('@');
@@ -389,9 +385,7 @@ export class CalenderService {
               responseStatus = existingAttendee.responseStatus;
             }
           } else {
-            // if photo url length exceeds 1024, remove it since google silently truncates these in extendedProperties
-            // https://developers.google.com/calendar/api/guides/extended-properties#limits
-            filteredAttendees.push({ email: attendee.email, name: attendee.name, photo: attendee.photo.length > 1024 ? '' : attendee.photo });
+            filteredAttendees.push({ email: attendee.email });
           }
         } else {
           throw new BadRequestException('Invalid attendee email provided: ' + attendee);
@@ -433,18 +427,22 @@ export class CalenderService {
       extendedProperties: {
         private: {
           createdAt: new Date().toISOString(), // Adding custom createdAt timestamp to order events
-          attendees: JSON.stringify(filteredAttendees), // Adding attendee information (name, photos etc) to be used later
         },
       },
       ...conference,
     };
 
     const result = await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
+    const people = await this.authService.getPeopleResources(client);
 
-    let updatedAttendees: IPeopleInformation[] = result.extendedProperties.private.attendees ? JSON.parse(result.extendedProperties.private.attendees) : [];
-    updatedAttendees = updatedAttendees.filter(
-      (attendee) => !attendee.email.endsWith('resource.calendar.google.com') && attendee.email !== event.organizer.email,
-    );
+    let updatedAttendees: IPeopleInformation[] = [];
+
+    for (const attendee of result.attendees) {
+      if (!attendee.email.endsWith('resource.calendar.google.com') && attendee.email !== event.organizer.email) {
+        const person = people.find((person) => person.email === attendee.email);
+        updatedAttendees.push({ ...attendee, ...(person || {}) });
+      }
+    }
 
     this.logger.log('[UpdateEvent] Room has been updated' + JSON.stringify(result));
 
@@ -517,18 +515,9 @@ export class CalenderService {
   }
 
   async searchPeople(client: OAuth2Client, emailQuery: string): Promise<IPeopleInformation[]> {
-    const response = await this.googleApiService.searchPeople(client, emailQuery);
-    const peoples: IPeopleInformation[] = response.map((people) => {
-      const email = people.emailAddresses.find((email) => email.metadata.primary && email.metadata.verified);
-      const photo = people.photos?.find((photo) => photo.metadata.primary);
-      const name = people.names?.find((name) => name.metadata.primary);
-      return {
-        email: email?.value,
-        name: name?.displayName,
-        photo: photo?.url,
-      };
-    });
+    const people = await this.authService.getPeopleResources(client);
+    const searchedPeople = people.filter((person) => person.email?.toLowerCase().includes(emailQuery.toLowerCase()));
 
-    return peoples;
+    return searchedPeople;
   }
 }

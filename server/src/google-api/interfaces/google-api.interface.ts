@@ -13,5 +13,4 @@ export interface IGoogleApiService {
   getCalenderEvent(oauth2Client: OAuth2Client, id: string): Promise<calendar_v3.Schema$Event>;
   updateCalenderEvent(oauth2Client: OAuth2Client, id: string, event: calendar_v3.Schema$Event): Promise<calendar_v3.Schema$Event>;
   deleteEvent(oauth2Client: OAuth2Client, id: string): Promise<void>;
-  searchPeople(oauth2Client: OAuth2Client, query: string): Promise<people_v1.Schema$Person[]>;
 }
