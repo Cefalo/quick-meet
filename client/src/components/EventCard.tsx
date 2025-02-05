@@ -6,7 +6,7 @@ import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import StairsIcon from '@mui/icons-material/Stairs';
 import AccessTimeFilledRoundedIcon from '@mui/icons-material/AccessTimeFilledRounded';
 import EventSeatRoundedIcon from '@mui/icons-material/EventSeatRounded';
-import { convertToLocaleTime } from '@helpers/utility';
+import { convertToLocaleTime, isPastDate } from '@helpers/utility';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
@@ -227,7 +227,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
     const menuItems: JSX.Element[] = [];
     if (isEditable) {
       menuItems.push(
-        <MenuItem key="edit" onClick={onEditClick}>
+        <MenuItem key="edit" onClick={onEditClick} disabled={isPastDate(event.start) ? true : false}>
           Edit
         </MenuItem>,
       );

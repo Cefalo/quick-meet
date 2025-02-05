@@ -1,5 +1,5 @@
 import { Box, Chip, ClickAwayListener, Divider, Fade, GlobalStyles, List, ListItem, Popper } from '@mui/material';
-import { StaticDatePicker, PickersShortcutsItem, PickersShortcutsProps, type PickerChangeHandlerContext, type DateValidationError } from '@mui/x-date-pickers';
+import { StaticDatePicker, PickersShortcutsItem, PickersShortcutsProps, PickerChangeHandlerContext, DateValidationError } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useEffect, useRef } from 'react';
 
@@ -67,6 +67,7 @@ function DatePickerShortcuts(props: PickersShortcutsProps<dayjs.Dayjs | null>) {
 }
 
 interface DatePickerPopperProps {
+  disablePast?: boolean;
   currentDate: dayjs.Dayjs;
   setCurrentDate: React.Dispatch<React.SetStateAction<dayjs.Dayjs>>;
   open: boolean;
@@ -74,7 +75,7 @@ interface DatePickerPopperProps {
   anchorEl: HTMLElement | null;
 }
 
-const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl }: DatePickerPopperProps) => {
+const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl, disablePast }: DatePickerPopperProps) => {
   const hasMounted = useRef(false);
 
   useEffect(() => {
@@ -119,6 +120,7 @@ const DatePickerPopper = ({ open, setOpen, currentDate, setCurrentDate, anchorEl
               />
               {/* https://mui.com/x/react-date-pickers/date-picker/#customization */}
               <StaticDatePicker
+                disablePast={disablePast}
                 onChange={onDateChange}
                 value={currentDate}
                 slots={{

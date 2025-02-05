@@ -22,13 +22,14 @@ import HourglassBottomRoundedIcon from '@mui/icons-material/HourglassBottomRound
 import MeetingRoomRoundedIcon from '@mui/icons-material/MeetingRoomRounded';
 import TitleIcon from '@mui/icons-material/Title';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Box, Checkbox, Typography } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Box, Checkbox, IconButton, Typography } from '@mui/material';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -64,6 +65,8 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   });
 
   const [date, setDate] = useState(dayjs());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerAnchorEl, setDatePickerAnchorEl] = useState<null | HTMLElement>(null);
 
   // Utilities and hooks
   const navigate = useNavigate();
@@ -199,6 +202,11 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
     });
   }
 
+  const handleDatePopperClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDatePickerAnchorEl(event.currentTarget);
+    setDatePickerOpen(true);
+  };
+
   async function onBookClick() {
     setBookClickLoading(true);
     const { startTime, duration, seats, conference, attendees, title, room } = formData;
@@ -283,42 +291,28 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
             />
           </Box>
           <Box sx={{ flex: 1, display: 'flex' }}>
-            <DatePicker
-              disablePast
-              defaultValue={date}
-              onChange={(newDate) => {
-                if (newDate) {
-                  setDate(newDate);
-                }
-              }}
-              slotProps={{
-                inputAdornment: {
-                  position: 'start',
-                  sx: {
-                    input: {
-                      cursor: 'pointer',
-                    },
-                  },
-                },
-              }}
-              sx={{
-                '.MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    border: 'none',
-                  },
-                },
-                '.MuiInputBase-input': {
-                  color: (theme) => theme.palette.common.black,
-                  fontFamily: 'inherit',
-                  fontSize: '1.125rem',
-                  fontWeight: 400,
-                },
-                '.MuiSvgIcon-root': {
-                  color: (theme) => theme.palette.grey[50],
-                },
-                '.MuiButtonBase-root': { cursor: 'pointer' },
-              }}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <IconButton aria-label="calender" size="small" onClick={handleDatePopperClick}>
+                <CalendarMonthIcon
+                  sx={[
+                    (theme) => ({
+                      color: theme.palette.grey[50],
+                    }),
+                  ]}
+                  fontSize="medium"
+                />
+              </IconButton>
+              <Typography
+                sx={{
+                  cursor: 'pointer',
+                  ml: 2,
+                }}
+                variant="subtitle1"
+                onClick={handleDatePopperClick}
+              >
+                {date.format('DD/MM/YYYY')}
+              </Typography>
+            </Box>
           </Box>
         </Box>
         <Box>
@@ -456,6 +450,14 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
           </Typography>
         </LoadingButton>
       </Box>
+      <DatePickerPopper
+        disablePast={true}
+        currentDate={date}
+        setCurrentDate={setDate}
+        open={datePickerOpen}
+        setOpen={setDatePickerOpen}
+        anchorEl={datePickerAnchorEl}
+      />
     </Box>
   );
 }

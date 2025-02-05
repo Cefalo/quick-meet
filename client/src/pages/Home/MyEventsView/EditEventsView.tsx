@@ -26,12 +26,13 @@ import TitleIcon from '@mui/icons-material/Title';
 import { FormData, IAvailableRoomsDropdownOption } from '@helpers/types';
 import { LoadingButton } from '@mui/lab';
 import { AppBar, Box, Button, Checkbox, IconButton, Skeleton, Stack, Typography } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en-gb';
 import { useEffect, useRef, useState } from 'react';
 import { EventResponse, IConferenceRoom, IAvailableRooms, IPeopleInformation } from '@quickmeet/shared';
 import { useNavigate } from 'react-router-dom';
+import DatePickerPopper from '@/pages/Home/MyEventsView/DatePickerPopper';
 
 const createRoomDropdownOptions = (rooms: IConferenceRoom[]) => {
   return (rooms || []).map((room) => ({ value: room.email, text: room.name, seats: room.seats, floor: room.floor }) as RoomsDropdownOption);
@@ -85,6 +86,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   const [formData, setFormData] = useState<FormData>(initFormData(event));
 
   const [date, setDate] = useState(dayjs(event.start!));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerAnchorEl, setDatePickerAnchorEl] = useState<null | HTMLElement>(null);
 
   // Utilities and hooks
   const api = useApi();
@@ -185,6 +188,11 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
 
     setAvailableRoomOptions({ others: unPreferredRoomOptions, preferred: preferredRoomOptions });
   }
+
+  const handleDatePopperClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDatePickerAnchorEl(event.currentTarget);
+    setDatePickerOpen(true);
+  };
 
   async function setPreferences() {
     const eventTime = new Date(event.start!);
@@ -315,42 +323,28 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                 />
               </Box>
               <Box sx={{ flex: 1, display: 'flex' }}>
-                <DatePicker
-                  disablePast
-                  defaultValue={dayjs(event.start!)}
-                  onChange={(newDate) => {
-                    if (newDate) {
-                      setDate(newDate);
-                    }
-                  }}
-                  slotProps={{
-                    inputAdornment: {
-                      position: 'start',
-                      sx: {
-                        input: {
-                          cursor: 'pointer',
-                        },
-                      },
-                    },
-                  }}
-                  sx={{
-                    '.MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        border: 'none',
-                      },
-                    },
-                    '.MuiInputBase-input': {
-                      color: (theme) => theme.palette.common.black,
-                      fontFamily: 'inherit',
-                      fontSize: '1.125rem',
-                      fontWeight: 400,
-                    },
-                    '.MuiSvgIcon-root': {
-                      color: (theme) => theme.palette.grey[50],
-                    },
-                    '.MuiButtonBase-root': { cursor: 'pointer' },
-                  }}
-                />
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                  <IconButton aria-label="calender" size="small" onClick={handleDatePopperClick}>
+                    <CalendarMonthIcon
+                      sx={[
+                        (theme) => ({
+                          color: theme.palette.grey[50],
+                        }),
+                      ]}
+                      fontSize="medium"
+                    />
+                  </IconButton>
+                  <Typography
+                    sx={{
+                      cursor: 'pointer',
+                      ml: 2,
+                    }}
+                    variant="subtitle1"
+                    onClick={handleDatePopperClick}
+                  >
+                    {date.format('DD/MM/YYYY')}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 
@@ -509,6 +503,14 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
           </Typography>
         </Button>
       </Box>
+      <DatePickerPopper
+        disablePast={true}
+        currentDate={date}
+        setCurrentDate={setDate}
+        open={datePickerOpen}
+        setOpen={setDatePickerOpen}
+        anchorEl={datePickerAnchorEl}
+      />
     </Box>
   );
 }
