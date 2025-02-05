@@ -2,6 +2,7 @@ import Api from '@/api/api';
 import { ROUTES } from '@config/routes';
 import { secrets } from '@config/secrets';
 import { ApiResponse } from '@quickmeet/shared';
+import dayjs, { Dayjs } from 'dayjs';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
 
@@ -192,3 +193,14 @@ export const chromeBackground = {
 const params = new URLSearchParams(window.location.search);
 
 export const isChromeExt = Boolean(params.get('chrome')) || secrets.appEnvironment === 'chrome';
+
+export const isPastDate = (date: string | Dayjs | undefined): boolean => {
+  if (!date || !dayjs(date).isValid()) {
+    return false;
+  }
+
+  const selectedDate = dayjs(date).startOf('day');
+  const today = dayjs().startOf('day');
+
+  return selectedDate.isBefore(today);
+};
