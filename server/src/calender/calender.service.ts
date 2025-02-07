@@ -16,7 +16,6 @@ export class CalenderService {
 
   async createEvent(
     client: OAuth2Client,
-    domain: string,
     startTime: string,
     endTime: string,
     room: string,
@@ -25,7 +24,7 @@ export class CalenderService {
     eventTitle?: string,
     attendees?: IPeopleInformation[],
   ): Promise<EventResponse> {
-    const rooms = await this.authService.getDirectoryResources(client, domain);
+    const rooms = await this.authService.getDirectoryResources(client);
 
     const filteredAttendees: IPeopleInformation[] = [];
     if (attendees?.length) {
@@ -104,8 +103,8 @@ export class CalenderService {
     return data;
   }
 
-  async getHighestSeatCapacity(client: OAuth2Client, domain: string): Promise<number> {
-    const rooms = await this.authService.getDirectoryResources(client, domain);
+  async getHighestSeatCapacity(client: OAuth2Client): Promise<number> {
+    const rooms = await this.authService.getDirectoryResources(client);
     let max = -1;
     for (const room of rooms) {
       if (room.seats > max) {
@@ -118,7 +117,6 @@ export class CalenderService {
 
   async getAvailableRooms(
     client: OAuth2Client,
-    domain: string,
     start: string,
     end: string,
     timeZone: string,
@@ -130,7 +128,7 @@ export class CalenderService {
     const otherRoomEmails: string[] = [];
     const isPreferredRoom: Record<string, boolean> = {};
 
-    const rooms = await this.authService.getDirectoryResources(client, domain);
+    const rooms = await this.authService.getDirectoryResources(client);
     for (const room of rooms) {
       if (room.seats >= Number(minSeats)) {
         if (floor === undefined || floor === '' || room.floor === floor) {
@@ -237,8 +235,8 @@ export class CalenderService {
     return true;
   }
 
-  async getEvents(client: OAuth2Client, domain: string, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
-    const rooms = await this.authService.getDirectoryResources(client, domain);
+  async getEvents(client: OAuth2Client, startTime: string, endTime: string, timeZone: string, userEmail: string): Promise<EventResponse[]> {
+    const rooms = await this.authService.getDirectoryResources(client);
     const events = await this.googleApiService.getCalenderEvents(client, startTime, endTime, timeZone);
     const people = await this.authService.getPeopleResources(client);
 
@@ -314,7 +312,6 @@ export class CalenderService {
 
   async updateEvent(
     client: OAuth2Client,
-    domain: string,
     eventId: string,
     startTime: string,
     endTime: string,
@@ -325,7 +322,7 @@ export class CalenderService {
     attendees?: IPeopleInformation[],
   ): Promise<EventUpdateResponse> {
     const event = await this.googleApiService.getCalenderEvent(client, eventId);
-    const rooms = await this.authService.getDirectoryResources(client, domain);
+    const rooms = await this.authService.getDirectoryResources(client);
 
     if (event.organizer.email !== userEmail) {
       throw new ForbiddenException('Not allowed to update this event');
@@ -509,8 +506,8 @@ export class CalenderService {
     return eventResponse;
   }
 
-  async listFloors(client: OAuth2Client, domain: string): Promise<string[]> {
-    const floors = await this.authService.getFloors(client, domain);
+  async listFloors(client: OAuth2Client): Promise<string[]> {
+    const floors = await this.authService.getFloors(client);
     return floors;
   }
 

@@ -1,21 +1,35 @@
 import { admin_directory_v1, calendar_v3, oauth2_v2, people_v1 } from 'googleapis';
+import { toMs } from '../helpers/helper.util';
+import { Cache } from 'cache-manager';
 
 export class CalenderMockDb {
   events: calendar_v3.Schema$Event[];
   rooms: admin_directory_v1.Schema$CalendarResource[];
   users: oauth2_v2.Schema$Userinfo[];
 
-  constructor() {
+  constructor(private cacheManager: Cache) {
     this.events = [];
     this.rooms = [];
     this.users = [];
+
+    this.getFromCache('rooms').then((res) => {
+      console.log(res);
+    });
+
     this.seedRooms();
     this.seedUsers();
   }
 
-  seedRooms() {
-    // any changes would require a reset of the data from the database, since rooms are assigned first time a user with domain X signs in the app
-    this.rooms.push(
+  async saveToCache(key: string, value: unknown, expiry = toMs('15d')): Promise<void> {
+    await this.cacheManager.set(key, value, expiry);
+  }
+
+  async getFromCache(key: string): Promise<any> {
+    await this.cacheManager.get(key);
+  }
+
+  async seedRooms() {
+    const rooms = [
       {
         resourceId: 'room102',
         resourceName: 'Cedar',
@@ -80,7 +94,9 @@ export class CalenderMockDb {
         floorName: 'F4',
         capacity: 20,
       },
-    );
+    ];
+
+    await this.saveToCache('rooms', rooms);
   }
 
   seedUsers() {
@@ -103,7 +119,7 @@ export class CalenderMockDb {
     );
   }
 
-  getDirectoryPeople(query: string) {
+  listDirectoryPeople(query?: string) {
     const people: people_v1.Schema$Person[] = [
       {
         names: [
@@ -243,7 +259,11 @@ export class CalenderMockDb {
       },
     ];
 
-    return people.filter((person) => person.emailAddresses?.some((email) => email.value?.toLowerCase().includes(query.toLowerCase())));
+    if (query) {
+      return people.filter((person) => person.emailAddresses?.some((email) => email.value?.toLowerCase().includes(query.toLowerCase())));
+    }
+
+    return people;
   }
 
   getUser(index: number) {

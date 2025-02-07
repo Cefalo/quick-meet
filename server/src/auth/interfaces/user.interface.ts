@@ -6,7 +6,6 @@ export class IUser {
   auth: IAuth;
   email?: string;
   name?: string;
-  domain?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

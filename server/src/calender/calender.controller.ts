@@ -32,10 +32,9 @@ export class CalenderController {
     @Query() listRoomsQueryDto: ListRoomsQueryDto,
   ): Promise<ApiResponse<EventResponse[]>> {
     const { startTime, endTime, timeZone } = listRoomsQueryDto;
-    const domain = req.hd;
     const userEmail = req.email;
 
-    const events = await this.calenderService.getEvents(client, domain, startTime, endTime, timeZone, userEmail);
+    const events = await this.calenderService.getEvents(client, startTime, endTime, timeZone, userEmail);
     return createResponse(events);
   }
 
@@ -44,10 +43,8 @@ export class CalenderController {
   @Get('/rooms/available')
   async getAvailableRooms(
     @_OAuth2Client() client: OAuth2Client,
-    @Req() req: _Request,
     @Query() getAvailableRoomsQueryDto: GetAvailableRoomsQueryDto,
   ): Promise<ApiResponse<IAvailableRooms>> {
-    const domain = req.hd;
     const { startTime, duration, timeZone, seats, floor, eventId } = getAvailableRoomsQueryDto;
 
     if (!seats && eventId) {
@@ -58,17 +55,15 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + duration);
 
     const endTime = startDate.toISOString();
-    const rooms = await this.calenderService.getAvailableRooms(client, domain, startTime, endTime, timeZone, seats, floor, eventId);
+    const rooms = await this.calenderService.getAvailableRooms(client, startTime, endTime, timeZone, seats, floor, eventId);
     return createResponse(rooms);
   }
 
   @SkipThrottle()
   @UseGuards(AuthGuard)
   @Get('/rooms/highest-seat-count')
-  async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<number>> {
-    const domain = req.hd;
-
-    const count = await this.calenderService.getHighestSeatCapacity(client, domain);
+  async getMaxSeatCapacity(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<number>> {
+    const count = await this.calenderService.getHighestSeatCapacity(client);
     return createResponse(count);
   }
 
@@ -77,7 +72,6 @@ export class CalenderController {
   @Post('/event')
   async createEvent(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request, @Body() bookRoomDto: BookRoomDto): Promise<ApiResponse<EventResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
-    const domain = req.hd;
     const userEmail = req.email;
 
     // end time
@@ -85,7 +79,7 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const event = await this.calenderService.createEvent(client, domain, startTime, endTime, room, userEmail, createConference, title, attendees);
+    const event = await this.calenderService.createEvent(client, startTime, endTime, room, userEmail, createConference, title, attendees);
     return createResponse(event, 'Room has been booked');
   }
 
@@ -109,7 +103,6 @@ export class CalenderController {
     @Body() bookRoomDto: BookRoomDto,
   ): Promise<ApiResponse<EventUpdateResponse>> {
     const { startTime, duration, createConference, title, attendees, room } = bookRoomDto;
-    const domain = req.hd;
     const userEmail = req.email;
 
     // end time
@@ -117,18 +110,7 @@ export class CalenderController {
     startDate.setMinutes(startDate.getMinutes() + duration);
     const endTime = startDate.toISOString();
 
-    const updatedEvent = await this.calenderService.updateEvent(
-      client,
-      domain,
-      eventId,
-      startTime,
-      endTime,
-      userEmail,
-      room,
-      createConference,
-      title,
-      attendees,
-    );
+    const updatedEvent = await this.calenderService.updateEvent(client, eventId, startTime, endTime, userEmail, room, createConference, title, attendees);
     return createResponse(updatedEvent, 'Event has been updated!');
   }
 
@@ -167,10 +149,8 @@ export class CalenderController {
   @SkipThrottle()
   @UseGuards(AuthGuard)
   @Get('/floors')
-  async listFloors(@_OAuth2Client() client: OAuth2Client, @Req() req: _Request): Promise<ApiResponse<string[]>> {
-    const domain = req.hd;
-
-    const floors = await this.calenderService.listFloors(client, domain);
+  async listFloors(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<string[]>> {
+    const floors = await this.calenderService.listFloors(client);
     return createResponse(floors);
   }
 }

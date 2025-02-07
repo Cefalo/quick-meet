@@ -30,7 +30,7 @@ export class AuthService {
     const { tokens } = await this.googleApiService.getToken(client, code);
     const userInfo = await this.jwtService.decode(tokens.id_token);
 
-    await this.getDirectoryResources(client, userInfo.hd);
+    await this.getDirectoryResources(client);
     await this.getPeopleResources(client);
 
     this.logger.log(`User logged in: ${JSON.stringify(userInfo)}`);
@@ -81,9 +81,9 @@ export class AuthService {
     return true;
   }
 
-  async getFloors(client: OAuth2Client, domain: string): Promise<string[]> {
-    const conferenceRooms = (await this.getDirectoryResources(client, domain)) || [];
-    const floors = Array.from(new Set(conferenceRooms.filter((room) => room.domain === domain).map((room) => room.floor)));
+  async getFloors(client: OAuth2Client): Promise<string[]> {
+    const conferenceRooms = (await this.getDirectoryResources(client)) || [];
+    const floors = Array.from(new Set(conferenceRooms.map((room) => room.floor)));
 
     // assuming floor is a string in the format F1, F2 etc
     floors.sort((a, b) => {
@@ -98,7 +98,7 @@ export class AuthService {
   /**
    * gets the calender resources from google and save it in the cache
    */
-  async createDirectoryResources(oauth2Client: OAuth2Client, domain: string): Promise<IConferenceRoom[]> {
+  async createDirectoryResources(oauth2Client: OAuth2Client): Promise<IConferenceRoom[]> {
     const { items } = await this.googleApiService.getCalendarResources(oauth2Client);
 
     const rooms: IConferenceRoom[] = [];
@@ -107,7 +107,6 @@ export class AuthService {
         id: resource.resourceId,
         email: resource.resourceEmail,
         description: resource.userVisibleDescription,
-        domain: domain,
         floor: resource.floorName, // in the format of F3 or F1, whatever the organization assigns
         name: resource.resourceName,
         seats: resource.capacity,
@@ -155,14 +154,13 @@ export class AuthService {
   /**
    * obtains the directory resources from the in-memory cache (sorted by floor), if not found, creates them
    */
-  async getDirectoryResources(client: OAuth2Client, domain: string): Promise<IConferenceRoom[] | null> {
+  async getDirectoryResources(client: OAuth2Client): Promise<IConferenceRoom[] | null> {
     let rooms: IConferenceRoom[] = await this.cacheManager.get('conference_rooms');
     if (!rooms) {
-      rooms = await this.createDirectoryResources(client, domain);
+      rooms = await this.createDirectoryResources(client);
     }
 
-    const resources = rooms.filter((room: IConferenceRoom) => room.domain === domain).sort((a: IConferenceRoom, b: IConferenceRoom) => a.seats - b.seats);
-    return resources;
+    return rooms.sort((a: IConferenceRoom, b: IConferenceRoom) => a.seats - b.seats);
   }
 
   /**
