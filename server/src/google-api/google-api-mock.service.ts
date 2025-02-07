@@ -1,12 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IGoogleApiService } from './interfaces/google-api.interface';
 import { OAuth2Client } from 'google-auth-library';
-import { calendar_v3, admin_directory_v1, type people_v1 } from 'googleapis';
+import { calendar_v3, admin_directory_v1, people_v1 } from 'googleapis';
 import { OAuthTokenResponse } from '../auth/dto';
 import { CalenderMockDb } from './mock.database';
 import { JwtService } from '@nestjs/jwt';
-import appConfig from 'src/config/env/app.config';
-import { ConfigType } from '@nestjs/config';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class GoogleApiMockService implements IGoogleApiService {
@@ -14,9 +13,9 @@ export class GoogleApiMockService implements IGoogleApiService {
 
   constructor(
     private jwtService: JwtService,
-    @Inject(appConfig.KEY) private config: ConfigType<typeof appConfig>,
+    private cacheManager: Cache,
   ) {
-    this.db = new CalenderMockDb();
+    this.db = new CalenderMockDb(this.cacheManager);
   }
 
   getOAuthClient(): OAuth2Client;
@@ -149,5 +148,10 @@ export class GoogleApiMockService implements IGoogleApiService {
         resolve();
       }, 1000);
     });
+  }
+
+  async listPeople(_: OAuth2Client): Promise<people_v1.Schema$Person[]> {
+    console.log(`Mock listPeople called`);
+    return this.db.listDirectoryPeople();
   }
 }
