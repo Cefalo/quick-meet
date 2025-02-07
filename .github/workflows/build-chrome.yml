@@ -1,0 +1,59 @@
+name: Bundle chrome packages
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.json'
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies using npm workspaces
+        run: npm install
+
+      - name: Generate build number
+        run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+
+      - name: Create .env file for client
+        run: |
+          echo "VITE_APP_TITLE=${{ secrets.VITE_APP_TITLE }}" >> ./client/.env
+          echo "VITE_APP_SLOGAN=${{ secrets.VITE_APP_SLOGAN }}" >> ./client/.env
+          echo "VITE_BACKEND_ENDPOINT=${{ secrets.VITE_BACKEND_PROD_ENDPOINT }}" >> ./client/.env
+          echo "VITE_ENVIRONMENT=chrome" >> ./client/.env
+          echo "VITE_MOCK_CALENDER=false" >> ./client/.env
+          echo "VITE_BUILD_NUMBER=${BUILD_NUMBER}" >> ./client/.env
+
+      - name: Build all dependencies
+        run: npm run build
+
+      - name: Build chrome dependencies
+        run: npm run build:chrome
+
+      - name: Zip chrome build
+        run: |
+          cd client/build_chrome
+          zip -r ../../build_chrome.zip .
+          cd ../..
+        
+      - name: Upload chrome build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension
+          path: build_chrome.zip
+          retention-days: 7
