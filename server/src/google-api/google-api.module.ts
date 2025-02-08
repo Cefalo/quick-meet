@@ -6,18 +6,13 @@ import appConfig from 'src/config/env/app.config';
 import { GoogleApiMockService } from './google-api-mock.service';
 import { GoogleApiService } from './google-api.service';
 import { Cache } from 'cache-manager';
-import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
+import { Cache as CacheM, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [
-    CacheModule.register({
-      isGlobal: true,
-    }),
-  ],
   providers: [
     {
       provide: 'GoogleApiService',
-      inject: [REQUEST, JwtService, appConfig.KEY, CACHE_MANAGER],
+      inject: [REQUEST, JwtService, appConfig.KEY, CACHE_MANAGER, CacheM],
       scope: Scope.REQUEST,
       // service provider
       useFactory: (request: Request, jwtService: JwtService, config: ConfigType<typeof appConfig>, logger: Logger, cacheManager: Cache) => {
