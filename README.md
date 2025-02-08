@@ -2,9 +2,9 @@
     Quick Meet
     <br />
     <br />
-      <img src="https://github.com/user-attachments/assets/289cb6f8-03a5-4ab6-b77f-5b6d5cccd738" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/18ad5031-eae4-430e-982a-dafd83f180a2" alt="QuickMeet" width="30%">
-      <img src="https://github.com/user-attachments/assets/1a3fc60e-688b-4b3d-8e43-3740e306a264" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/89da5746-5754-4ee0-b634-8e4691ae337b" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/1bf0d7f1-a48c-44fe-8ca9-5a73aababf06" alt="QuickMeet" width="30%">
+      <img src="https://github.com/user-attachments/assets/879372b5-7d11-4b03-8896-641657b47a24" alt="QuickMeet" width="30%">
     </a>
   </h1>
 </div>
@@ -17,7 +17,7 @@
   <a href="#license"><img src="https://img.shields.io/github/license/sourcerer-io/hall-of-fame.svg?colorB=ff0000"></a>
 </p>
 
-Quick Meet enhances productivity by minimizing the time spent finding and securing meeting rooms in google calender, ensuring a smooth workflow for teams and managers alike.
+Quick Meet enhances productivity by minimizing the time spent finding and securing meeting rooms in Google calendar, ensuring a smooth workflow for teams and managers.
 
 ### Key Features:
 - **Quick Meeting Setup**: Book a room in seconds by selecting start time, seat requirements, and an optional floor preference.
@@ -25,7 +25,7 @@ Quick Meet enhances productivity by minimizing the time spent finding and securi
 - **Floor-Specific Bookings**: For managers or teams that prefer a specific floor, the tool allows you to specify your floor while booking.
 - **Efficient High-Demand Booking**: During peak periods, the tool automatically finds and books the best available room, avoiding manual searching.
 
-### Who this is for?
+### Who is this for?
 
 Quick Meet is specifically tailored for organizations that utilize unique meeting rooms within their **Google Workspace/Calendar**. This includes:
 
@@ -73,7 +73,7 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 #### CASE II: Overrunning Meeting
 
-> **Scenario**: A team/team member is running a meeting in a room X that exceeds the scheduled time, and they need to find another room to continue without interruptions.
+> **Scenario**: A team/team member is running a meeting in room X that exceeds the scheduled time, and they need to find another room to continue without interruptions.
 > 
 > **Action**: The team member opens the tool, and has the option to either increase the time of the current room (if no collisions exist) or quickly book another room with just a click.
 > 
@@ -91,14 +91,14 @@ During peak times, manually searching for a free room on Google Calendar is frus
 
 > **Scenario**: During a peak time, meeting rooms are in high demand. Manually searching for a room would take time.
 > 
-> **Action**: The user enters their seat requirements and start time. The tool searches and books the best available room.
+> **Action**: The user enters their seat requirements and the start time. The tool searches and books the best available room.
 > 
 > **Outcome**: A room is secured swiftly, even in high-demand periods, preventing frustration and delays.
 
 ## Hosting yourself
 
 1. [Fork](https://github.com/Cefalo/quick-meet/fork) the repository.
-2. Create a branch and integrate your own Github actions or webhooks to add a seamless CI/CD pipeline.
+2. Create a branch and integrate your own GitHub actions or webhooks to add a seamless CI/CD pipeline.
 3. Set up your environment. [Calender Quickstart](https://developers.google.com/calendar/api/quickstart/js#set_up_your_environment)
 4. Add the following scopes to the new credential (OAuth web client id): `./auth/userinfo.profile` and `./auth/calendar`
 5. Enable the [Admin SDK API](https://console.cloud.google.com/apis/api/admin.googleapis.com/overview). This is required to read the directory resources; refer to `getCalendarResources()`
