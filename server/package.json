@@ -24,7 +24,7 @@
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
-    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-express": "^11.0.13",
     "@nestjs/serve-static": "^4.0.2",
     "@nestjs/throttler": "^6.2.1",
     "@quickmeet/shared": "1.0.0",
