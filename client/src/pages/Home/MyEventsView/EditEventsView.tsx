@@ -413,7 +413,10 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                   placeholder={preferences.title}
                   id="title"
                   onChange={handleInputChange}
-                  sx={{ mx: 0.5 }}
+                  sx={{
+                    mx: 0.5,
+                    flexBasis: '100%',
+                  }}
                   startIcon={
                     <TitleIcon
                       sx={[
@@ -424,7 +427,9 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
                     />
                   }
                 />
-                <AttendeeInput id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
+                <Box sx={{ flexBasis: '100%' }}>
+                  <AttendeeInput id="attendees" onChange={handleInputChange} value={formData.attendees} type="email" />
+                </Box>
               </Box>
               <Box
                 sx={{
