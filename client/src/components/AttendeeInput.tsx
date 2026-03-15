@@ -1,3 +1,4 @@
+import { isChromeExt } from '@/helpers/utility';
 import { useApi } from '@/context/ApiContext';
 import { isEmailValid } from '@/helpers/utility';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
@@ -78,7 +79,10 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
           '&:focus-within': {
             border: 'none',
           },
-          maxHeight: '65px',
+          maxHeight: isChromeExt ? '85px' : '150px',
+          [theme.breakpoints.down('sm')]: {
+            maxHeight: '120px',
+          },
           overflowY: 'auto',
         }),
       ]}
@@ -174,6 +178,9 @@ export default function AttendeeInput({ id, onChange, value, type }: AttendeeInp
                   px: 1,
                   '& .MuiInputBase-input': {
                     fontSize: theme.typography.subtitle1,
+                    [theme.breakpoints.down('sm')]: {
+                      minWidth: (value && value.length > 0) ? '100% !important' : 'auto',
+                    },
                   },
                   '& .MuiInputBase-input::placeholder': {
                     color: theme.palette.primary.main,
