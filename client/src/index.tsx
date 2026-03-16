@@ -6,6 +6,7 @@ import { secrets } from './config/secrets';
 import './styles.css';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ApiProvider } from '@/context/ApiContext';
+import { ThemeModeProvider } from '@/context/ThemeModeContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -15,9 +16,11 @@ root.render(
     <BrowserRouter basename={secrets.appEnvironment === 'chrome' ? '/index.html' : ''}>
       <PreferencesProvider>
         <ApiProvider>
-          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
-            <App />
-          </LocalizationProvider>
+          <ThemeModeProvider>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+              <App />
+            </LocalizationProvider>
+          </ThemeModeProvider>
         </ApiProvider>
       </PreferencesProvider>
     </BrowserRouter>

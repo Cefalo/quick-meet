@@ -1,6 +1,6 @@
 import { secrets } from '@config/secrets';
 
-type CacheItems = 'accessToken' | 'preferences';
+type CacheItems = 'accessToken' | 'preferences' | 'themeMode';
 
 export interface CacheService {
   save(key: CacheItems, val: string): Promise<void>;
