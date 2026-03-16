@@ -2,8 +2,12 @@ import { DropdownOption } from '@/components/Dropdown';
 import Dropdown from '@/components/Dropdown';
 import StyledTextField from '@/components/StyledTextField';
 import { usePreferences } from '@/context/PreferencesContext';
+import { useThemeMode, type ThemePreference } from '@/context/ThemeModeContext';
 import { createDropdownOptions, isChromeExt, populateDurationOptions, populateRoomCapacity, renderError } from '@/helpers/utility';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
+import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import SettingsBrightnessRoundedIcon from '@mui/icons-material/SettingsBrightnessRounded';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +37,7 @@ export default function PreferenceView() {
 
   // Context or global state
   const { preferences, setPreferences } = usePreferences();
+  const { preference: themePreference, setPreference: setThemePreference } = useThemeMode();
 
   // Derived data
   const durations = populateDurationOptions();
@@ -102,10 +107,10 @@ export default function PreferenceView() {
     <Box
       mx={2}
       mt={1}
-      sx={{
-        background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : 'rgba(245, 245, 245, 0.5);',
+      sx={(theme) => ({
+        background: isChromeExt ? 'rgba(255, 255, 255, 0.4)' : theme.palette.background.default,
         borderRadius: 2,
-      }}
+      })}
     >
       <Box
         sx={{
@@ -115,7 +120,7 @@ export default function PreferenceView() {
       >
         <Box
           sx={{
-            bgcolor: 'white',
+            bgcolor: 'background.paper',
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
             borderBottomLeftRadius: 10,
@@ -123,6 +128,33 @@ export default function PreferenceView() {
             textAlign: 'left',
           }}
         >
+          {/* Appearance / Theme */}
+          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              Appearance
+            </Typography>
+            <ToggleButtonGroup
+              value={themePreference}
+              exclusive
+              onChange={(_e, value: ThemePreference | null) => value != null && setThemePreference(value)}
+              aria-label="theme mode"
+              size="small"
+              sx={{
+                '& .MuiToggleButtonGroup-grouped': { border: 1, borderColor: 'divider' },
+              }}
+            >
+              <ToggleButton value="light" aria-label="light">
+                <LightModeRoundedIcon sx={{ mr: 0.5 }} /> Light
+              </ToggleButton>
+              <ToggleButton value="dark" aria-label="dark">
+                <DarkModeRoundedIcon sx={{ mr: 0.5 }} /> Dark
+              </ToggleButton>
+              <ToggleButton value="system" aria-label="system">
+                <SettingsBrightnessRoundedIcon sx={{ mr: 0.5 }} /> System
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
           <Dropdown
             sx={{ borderTopLeftRadius: 10, borderTopRightRadius: 10, height: '60px' }}
             id="floor"
@@ -211,15 +243,13 @@ export default function PreferenceView() {
           fullWidth
           variant="contained"
           disableElevation
-          sx={[
-            (theme) => ({
-              py: 2,
-              backgroundColor: theme.palette.common.white,
-              borderRadius: 15,
-              textTransform: 'none',
-              color: theme.palette.common.black,
-            }),
-          ]}
+          sx={(theme) => ({
+            py: 2,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 15,
+            textTransform: 'none',
+            color: theme.palette.text.primary,
+          })}
         >
           <Typography variant="h6" fontWeight={700}>
             Save
