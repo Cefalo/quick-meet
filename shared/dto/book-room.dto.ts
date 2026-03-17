@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsOptional, IsString, IsNumber, IsArray, IsBoolean, IsObject } from 'class-validator';
-import type { IPeopleInformation } from 'interfaces';
+import type { IPeopleInformation } from '../interfaces';
 
 export class BookRoomDto {
   @IsString()

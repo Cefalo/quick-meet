@@ -14,6 +14,7 @@ import {
   EventUpdateResponse,
   IPeopleInformation,
   IAvailableRooms,
+  EndMeetingEarlyResponse,
 } from '@quickmeet/shared';
 import { createResponse } from 'src/helpers/payload.util';
 import { _Request } from 'src/auth/interfaces';
@@ -152,5 +153,23 @@ export class CalenderController {
   async listFloors(@_OAuth2Client() client: OAuth2Client): Promise<ApiResponse<string[]>> {
     const floors = await this.calenderService.listFloors(client);
     return createResponse(floors);
+  }
+
+  @UseGuards(AuthGuard)
+  @UseInterceptors(OauthInterceptor)
+  @Put('/event/end-early')
+  async endMeetingEarly(
+    @_OAuth2Client() client: OAuth2Client,
+    @Req() req: _Request,
+    @Body('eventId') eventId: string,
+  ): Promise<ApiResponse<EndMeetingEarlyResponse>> {
+    const userEmail = req.email;
+
+    if (!eventId) {
+      throw new BadRequestException('No event id provided');
+    }
+
+    const result = await this.calenderService.endMeetingEarly(client, eventId, userEmail);
+    return createResponse(result, 'Meeting ended successfully');
   }
 }

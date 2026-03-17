@@ -1,7 +1,7 @@
 import { ROUTES } from '@/config/routes';
 import { secrets } from '@config/secrets';
 import { CacheService, CacheServiceFactory } from '@helpers/cache';
-import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IAvailableRooms, StatusTypes } from '@quickmeet/shared';
+import { ApiResponse, BookRoomDto, DeleteResponse, EventResponse, GetAvailableRoomsQueryDto, IAvailableRooms, StatusTypes, EndMeetingEarlyResponse } from '@quickmeet/shared';
 import axios, { AxiosInstance } from 'axios';
 import { toast } from 'react-hot-toast';
 import { NavigateFunction } from 'react-router-dom';
@@ -193,6 +193,16 @@ export default class Api {
       const res = await this.client.delete(`/api/event?id=${eventId}`);
 
       return res.data as ApiResponse<DeleteResponse>;
+    } catch (error: any) {
+      return this.handleError(error);
+    }
+  }
+
+  async endMeetingEarly(eventId: string) {
+    try {
+      const res = await this.client.put('/api/event/end-early', { eventId });
+
+      return res.data as ApiResponse<EndMeetingEarlyResponse>;
     } catch (error: any) {
       return this.handleError(error);
     }

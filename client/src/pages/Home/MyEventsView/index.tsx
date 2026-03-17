@@ -2,6 +2,7 @@ import { useApi } from '@/context/ApiContext';
 import { usePreferences } from '@/context/PreferencesContext';
 import DateNavigator from '@/pages/Home/MyEventsView/DateNavigator';
 import DeleteConfirmationView from '@components/DeleteConfirmationView';
+import EndMeetingEarlyConfirmationView from '@components/EndMeetingEarlyConfirmationView';
 import EventCard from '@components/EventCard';
 import { ROUTES } from '@config/routes';
 import { FormData } from '@helpers/types';
@@ -26,6 +27,8 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
   const navigate = useNavigate();
   const [deleteEventViewOpen, setDeleteEventViewOpen] = useState(false);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+  const [endMeetingEarlyViewOpen, setEndMeetingEarlyViewOpen] = useState(false);
+  const [endMeetingEarlyEventId, setEndMeetingEarlyEventId] = useState<string | null>(null);
   const [editView, setEditView] = useState<EventResponse | null>(null);
   const [currentRoom, setCurrentRoom] = useState<IConferenceRoom | undefined>();
   const api = useApi();
@@ -217,6 +220,45 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     setEditLoading(false);
   };
 
+  const handleEndMeetingEarly = async (eventId: string) => {
+    if (!eventId) {
+      toast.error('Event not found');
+      return;
+    }
+
+    setEndMeetingEarlyEventId(eventId);
+    setEndMeetingEarlyViewOpen(true);
+  };
+
+  const handleEndMeetingEarlyClose = () => {
+    setEndMeetingEarlyViewOpen(false);
+    setEndMeetingEarlyEventId(null);
+  };
+
+  const handleConfirmEndMeetingEarly = async () => {
+    setEndMeetingEarlyViewOpen(false);
+    setLoading(true);
+
+    if (!endMeetingEarlyEventId) {
+      toast.error('Event not found');
+      return;
+    }
+
+    const res = await api.endMeetingEarly(endMeetingEarlyEventId);
+
+    setLoading(false);
+
+    if (res?.status === 'error') {
+      res.message && toast.error(res.message);
+      return;
+    }
+
+    if (res?.status === 'success') {
+      setEvents((prevEvents) => prevEvents.filter((event) => event.eventId !== endMeetingEarlyEventId));
+      toast.success('Meeting ended successfully. Room is now available.');
+    }
+  };
+
   const handleEditEventViewClose = () => {
     setEditView(null);
   };
@@ -233,6 +275,18 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     const event = events.find((e) => e.eventId === deleteEventId);
     return (
       <DeleteConfirmationView event={event} open={deleteEventViewOpen} handlePositiveClick={handleConfirmDelete} handleNegativeClick={handleDeleteEventClose} />
+    );
+  }
+
+  if (endMeetingEarlyViewOpen) {
+    const event = events.find((e) => e.eventId === endMeetingEarlyEventId);
+    return (
+      <EndMeetingEarlyConfirmationView
+        event={event}
+        open={endMeetingEarlyViewOpen}
+        handlePositiveClick={handleConfirmEndMeetingEarly}
+        handleNegativeClick={handleEndMeetingEarlyClose}
+      />
     );
   }
 
@@ -320,6 +374,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
                     onDelete={() => event.eventId && handleDeleteClick(event.eventId)}
                     isEditable={event.isEditable}
                     handleEventResponse={handleEventResponse}
+                    handleEndMeetingEarly={handleEndMeetingEarly}
                   />
                   {i !== events.length - 1 && <Divider />}
                 </React.Fragment>

@@ -1,4 +1,4 @@
-import type { IPeopleInformation } from 'interfaces';
+import type { IPeopleInformation } from '../interfaces';
 
 export interface EventResponse {
   eventId?: string;

@@ -7,3 +7,4 @@ export * from './get-available-rooms.dto';
 export * from './delete.response';
 export * from './event-update.response';
 export * from './event.response';
+export * from './end-meeting-early.response';

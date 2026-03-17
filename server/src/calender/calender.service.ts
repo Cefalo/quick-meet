@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { calendar_v3 } from 'googleapis';
 import { extractRoomByEmail, isRoomAvailable, validateEmail } from './util/calender.util';
-import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation, IAvailableRooms } from '@quickmeet/shared';
+import { DeleteResponse, EventResponse, EventUpdateResponse, IConferenceRoom, IPeopleInformation, IAvailableRooms, EndMeetingEarlyResponse } from '@quickmeet/shared';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleApiService } from 'src/google-api/google-api.service';
 import { AuthService } from '../auth/auth.service';
@@ -516,5 +516,48 @@ export class CalenderService {
     const searchedPeople = people.filter((person) => person.email?.toLowerCase().includes(emailQuery.toLowerCase()));
 
     return searchedPeople;
+  }
+
+  async endMeetingEarly(client: OAuth2Client, eventId: string, userEmail: string): Promise<EndMeetingEarlyResponse> {
+    const event = await this.googleApiService.getCalenderEvent(client, eventId);
+    const rooms = await this.authService.getDirectoryResources(client);
+
+    if (event.organizer.email !== userEmail) {
+      throw new ForbiddenException('Not allowed to end this event');
+    }
+
+    const currentTime = new Date();
+    const eventStart = new Date(event.start.dateTime);
+    const eventEnd = new Date(event.end.dateTime);
+
+    if (currentTime < eventStart) {
+      throw new BadRequestException('Cannot end a meeting that has not started yet');
+    }
+
+    if (currentTime >= eventEnd) {
+      throw new BadRequestException('Meeting has already ended');
+    }
+
+    const roomAttendee = event.attendees?.find((attendee) => attendee.resource);
+    const room = roomAttendee ? extractRoomByEmail(rooms, roomAttendee.email) : null;
+
+    const updatedEvent: calendar_v3.Schema$Event = {
+      ...event,
+      end: {
+        dateTime: currentTime.toISOString(),
+        timeZone: event.end.timeZone,
+      },
+    };
+
+    await this.googleApiService.updateCalenderEvent(client, eventId, updatedEvent);
+
+    this.logger.log(`[EndMeetingEarly] Meeting ended early: ${eventId}`);
+
+    return {
+      eventId: event.id,
+      originalEnd: event.end.dateTime,
+      newEnd: currentTime.toISOString(),
+      room: room?.name || 'Unknown',
+    };
   }
 }

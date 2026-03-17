@@ -8,6 +8,7 @@ export {
   EventUpdateResponse,
   ErrorResponse,
   StatusTypes,
+  EndMeetingEarlyResponse,
 } from './dto';
 
 export { IConferenceRoom, IPeopleInformation, IAvailableRooms } from './interfaces';

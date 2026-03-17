@@ -123,7 +123,8 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-    const currentDate = convertToLocaleDate(new Date(date.toISOString()).toISOString());
+    // Format date without timezone conversion
+    const currentDate = date.format('YYYY-MM-DD');
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
 
     setRoomLoading(true);

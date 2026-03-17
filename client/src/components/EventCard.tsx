@@ -128,6 +128,7 @@ interface EventCardProps {
   onDelete?: (id?: string) => void;
   handleEditClick?: (id: string) => void;
   handleEventResponse?: (eventId: string, response: string) => void;
+  handleEndMeetingEarly?: (eventId: string) => void;
 }
 
 interface ChipData {
@@ -143,7 +144,7 @@ interface ChipData {
   action?: () => void;
 }
 
-const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEventResponse, hideMenu }: EventCardProps) => {
+const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEventResponse, handleEndMeetingEarly, hideMenu }: EventCardProps) => {
   const [chips, setChips] = useState<ChipData[]>([]);
   const [isOngoingEvent, setIsOngoingEvent] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -160,10 +161,12 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
     const chips: ChipData[] = createChips(event);
     setChips(chips);
 
-    createMenuItems();
-
     createResponseIcon();
   }, [event]);
+
+  useEffect(() => {
+    createMenuItems();
+  }, [event, isOngoingEvent]);
 
   const setOngoingEvent = () => {
     const startInMs = new Date(event.start!).getTime();
@@ -226,6 +229,13 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
   const createMenuItems = () => {
     const menuItems: JSX.Element[] = [];
     if (isEditable) {
+      if (isOngoingEvent) {
+        menuItems.push(
+          <MenuItem key="end-early" onClick={handleEndMeetingEarlyClick}>
+            End Meeting Early
+          </MenuItem>,
+        );
+      }
       menuItems.push(
         <MenuItem key="edit" onClick={onEditClick} disabled={isPastDate(event.start) ? true : false}>
           Edit
@@ -271,6 +281,11 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
 
   const handleDeleteClick = () => {
     typeof onDelete === 'function' && onDelete(event.eventId);
+    setAnchorEl(null);
+  };
+
+  const handleEndMeetingEarlyClick = () => {
+    typeof handleEndMeetingEarly === 'function' && handleEndMeetingEarly(event.eventId!);
     setAnchorEl(null);
   };
 
@@ -349,7 +364,7 @@ const EventCard = ({ sx, event, onDelete, handleEditClick, isEditable, handleEve
           slotProps={{
             paper: {
               style: {
-                width: '15ch',
+                width: '20ch',
               },
             },
           }}

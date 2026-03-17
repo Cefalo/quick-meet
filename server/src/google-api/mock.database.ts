@@ -247,8 +247,11 @@ export class CalenderMockDb {
   async createEvent(event: calendar_v3.Schema$Event) {
     const randomId = `event-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    const emailPool = ['john.doe@example.com', 'jane.smith@example.com', 'alice.johnson@example.com', 'bob.williams@example.com', 'charlie.brown@example.com'];
-    event.organizer = { email: emailPool[Math.floor(Math.random() * emailPool.length)] };
+    // Use the organizer from the event (which comes from the backend with the actual user email)
+    // Don't override it with a random email
+    if (!event.organizer) {
+      event.organizer = { email: 'john.doe@example.com' };
+    }
 
     const events = await this.getFromCache('events', []);
     events.push({ ...event, id: randomId });

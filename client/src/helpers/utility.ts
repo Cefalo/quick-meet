@@ -97,18 +97,47 @@ export function getTimezoneOffset() {
 
 export function convertToRFC3339(dateString: string, timeString: string) {
   const timeZoneOffset = getTimezoneOffset();
-  const date = new Date(`${dateString} ${timeString}`);
+  
+  // Validate inputs
+  if (!dateString || !timeString) {
+    console.error('Invalid date or time string:', { dateString, timeString });
+    return '';
+  }
+  
+  // Parse the date and time components
+  const dateParts = dateString.split('-');
+  const timeParts = timeString.split(':');
+  
+  if (dateParts.length !== 3 || timeParts.length < 2) {
+    console.error('Invalid date or time format:', { dateString, timeString });
+    return '';
+  }
+  
+  const year = parseInt(dateParts[0]);
+  const month = parseInt(dateParts[1]);
+  const day = parseInt(dateParts[2]);
+  const hours = parseInt(timeParts[0]);
+  const minutes = parseInt(timeParts[1]);
+  
+  // Validate parsed values
+  if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hours) || isNaN(minutes)) {
+    console.error('Invalid date or time values:', { year, month, day, hours, minutes });
+    return '';
+  }
+  
+  // Create date in local timezone (month is 0-indexed in Date constructor)
+  const date = new Date(year, month - 1, day, hours, minutes, 0);
+  
+  // Get ISO string components
+  const year_str = date.getFullYear();
+  const month_str = String(date.getMonth() + 1).padStart(2, '0');
+  const day_str = String(date.getDate()).padStart(2, '0');
+  const hours_str = String(date.getHours()).padStart(2, '0');
+  const minutes_str = String(date.getMinutes()).padStart(2, '0');
+  const seconds_str = String(date.getSeconds()).padStart(2, '0');
 
-  const [offsetSign, offsetHours, offsetMinutes] = timeZoneOffset.match(/([+-])(\d{2}):(\d{2})/)!.slice(1);
-
-  const offsetInMinutes = (parseInt(offsetHours) * 60 + parseInt(offsetMinutes)) * (offsetSign === '+' ? 1 : -1);
-  date.setMinutes(date.getMinutes() + offsetInMinutes);
-
-  const isoString = date.toISOString();
-  const [isoDate, isoTime] = isoString.split('T');
-
-  // Return the formatted date and time in RFC 3339 format
-  return `${isoDate}T${isoTime.split('.')[0]}${timeZoneOffset}`;
+  // Return the formatted date and time in RFC 3339 format with timezone
+  return `${year_str}-${month_str}-${day_str}T${hours_str}:${minutes_str}:${seconds_str}${timeZoneOffset}`;
 }
 
 export function convertToLocaleTime(dateStr?: string) {
