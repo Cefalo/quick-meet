@@ -157,7 +157,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-    const currentDate = date.toISOString().split('T')[0];
+    const currentDate = date.format('YYYY-MM-DD');
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
 
     setRoomLoading(true);
@@ -214,7 +214,7 @@ export default function BookRoomView({ onRoomBooked }: BookRoomViewProps) {
       return;
     }
 
-    const formattedStartTime = convertToRFC3339(date.toISOString().split('T')[0], startTime);
+    const formattedStartTime = convertToRFC3339(date.format('YYYY-MM-DD'), startTime);
     const { floor, title: preferredTitle } = preferences;
 
     const payload: BookRoomDto = {

@@ -171,7 +171,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     setEvents((prevEvents) =>
       prevEvents
         .map((event) => (event.eventId === data.eventId ? res.data : event))
-        .filter((event) => event.start.split('T')[0] === currentDate.toISOString().split('T')[0]),
+        .filter((event) => event.start.split('T')[0] === currentDate.format('YYYY-MM-DD')),
     );
 
     toast.success('Room has been updated');
@@ -210,7 +210,7 @@ export default function MyEventsView({ redirectedDate }: MyEventsViewProps) {
     setEvents((prevEvents) =>
       prevEvents
         .map((event) => (event.eventId === eventId ? { ...event, ...res.data } : event))
-        .filter((event) => event.start.split('T')[0] === currentDate.toISOString().split('T')[0]),
+        .filter((event) => event.start.split('T')[0] === currentDate.format('YYYY-MM-DD')),
     );
 
     toast.success('Event response has been updated');

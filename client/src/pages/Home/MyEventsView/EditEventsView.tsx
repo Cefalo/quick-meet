@@ -6,7 +6,6 @@ import Dropdown, { DropdownOption } from '@components/Dropdown';
 import RoomsDropdown, { RoomsDropdownOption } from '@components/RoomsDropdown';
 import {
   chromeBackground,
-  convertToLocaleDate,
   convertToLocaleTime,
   convertToRFC3339,
   createDropdownOptions,
@@ -123,7 +122,7 @@ export default function EditEventsView({ open, event, handleClose, currentRoom, 
   async function setAvailableRooms() {
     const { startTime, duration, seats } = formData;
     const { floor } = preferences;
-    const currentDate = convertToLocaleDate(new Date(date.toISOString()).toISOString());
+    const currentDate = date.format('YYYY-MM-DD');
     const formattedStartTime = convertToRFC3339(currentDate, startTime);
 
     setRoomLoading(true);
