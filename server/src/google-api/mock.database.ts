@@ -314,9 +314,11 @@ export class CalenderMockDb {
     });
 
     for (const event of filteredEvents) {
-      for (const attendee of event.attendees) {
-        if (attendee.email.includes('resource.calendar.google.com')) {
-          attendee.resource = true;
+      if (event.attendees) {
+        for (const attendee of event.attendees) {
+          if (attendee.email.includes('resource.calendar.google.com')) {
+            attendee.resource = true;
+          }
         }
       }
     }
